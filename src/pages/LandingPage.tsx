@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target } from "lucide-react";
 import heroImg from "@/assets/hero-dashboard.png";
 
-const transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition } };
 

@@ -3,7 +3,7 @@ import { BarChart3, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 import { dashboardStats } from "@/lib/mock-data";
 
-const transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition } };
 

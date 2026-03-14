@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { analyzeProduct, type AnalyzerInput } from "@/lib/analyzer";
 
-const transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 const defaultInput: AnalyzerInput = {
   product_cost: 0,

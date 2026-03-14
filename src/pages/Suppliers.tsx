@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Search, Star } from "lucide-react";
 import { suppliers } from "@/lib/mock-data";
 
-const transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 export default function Suppliers() {
   const [query, setQuery] = useState("");

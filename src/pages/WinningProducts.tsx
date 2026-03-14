@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { trendingProducts } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
 
-const transition = { type: "spring", stiffness: 300, damping: 30 };
+const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const platforms = ["Tümü", "TikTok", "Amazon", "AliExpress"];
 
 export default function WinningProducts() {
