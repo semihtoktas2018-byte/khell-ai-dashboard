@@ -14,7 +14,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, 
 
 export default function AutoHunter() {
   const { toast } = useToast();
-  const { addProduct } = useSavedProducts();
+  const { saveProduct } = useSavedProducts();
   const [platformFilter, setPlatformFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"hunterScore" | "trendScore" | "estimatedMargin">("hunterScore");
 
