@@ -1,6 +1,9 @@
 import { fetchTikTokTrends } from "./services/tiktokTrends";
-import { fetchAmazonTrends } from "./services/amazonTrends";
+import { fetchAmazonTrends } from "./services/amazonTrends"
 import { fetchAliExpressTrends } from "./services/aliexpressTrends";
+
+const CACHE_KEY = "khell_hunter_cache";
+const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 saat
 
 export interface HunterCandidate {
   id: string;
@@ -14,31 +17,94 @@ export interface HunterCandidate {
   estimatedSellingPrice: number;
   estimatedCost: number;
   hunterScore: number;
+  decision: "SAT" | "TEST" | "KAÇIN";
+  confidence: number;
   image: string;
 }
 
-function competitionToScore(level: "Low" | "Medium" | "High"): number {
-  return level === "Low" ? 90 : level === "Medium" ? 55 : 20;
+function getCache(): HunterCandidate[] | null {
+  const raw = localStorage.getItem(CACHE_KEY);
+  if (!raw) return null;
+
+  const parsed = JSON.parse(raw);
+  if (Date.now() - parsed.time > CACHE_TTL) return null;
+
+  return parsed.data;
 }
 
-function generateEngagement(trendScore: number): number {
-  return Math.min(100, Math.round(trendScore * (0.8 + Math.random() * 0.4)));
+function setCache(data: HunterCandidate[]) {
+  localStorage.setItem(
+    CACHE_KEY,
+    JSON.stringify({
+      time: Date.now(),
+      data,
+    })
+  );
 }
 
-function calcHunterScore(trend: number, engagement: number, margin: number, compScore: number): number {
-  return Math.round(trend * 0.4 + engagement * 0.3 + margin * 0.2 + compScore * 0.1);
+function competitionScore(level: "Low" | "Medium" | "High") {
+  if (level === "Low") return 90;
+  if (level === "Medium") return 55;
+  return 20;
 }
 
-function processProducts(products: ReturnType<typeof fetchTikTokTrends>): HunterCandidate[] {
+function platformBoost(platform: string) {
+  if (platform === "TikTok") return 5;
+  if (platform === "Amazon") return 3;
+  if (platform === "AliExpress") return 2;
+  return 1;
+}
+
+function generateEngagement(trend: number) {
+  return Math.min(100, Math.round(trend * (0.8 + Math.random() * 0.3)));
+}
+
+function calcScore(
+  trend: number,
+  engagement: number,
+  marginScore: number,
+  compScore: number,
+  platform: string
+) {
+  return Math.round(
+    trend * 0.35 +
+      engagement * 0.25 +
+      marginScore * 0.25 +
+      compScore * 0.15 +
+      platformBoost(platform)
+  );
+}
+
+function decision(score: number): "SAT" | "TEST" | "KAÇIN" {
+  if (score > 80) return "SAT";
+  if (score > 60) return "TEST";
+  return "KAÇIN";
+}
+
+function process(products: any[]): HunterCandidate[] {
   return products.map((p) => {
-    const margin = ((p.estimatedSellingPrice - p.estimatedCost) / p.estimatedSellingPrice) * 100;
+    const adCost = p.estimatedSellingPrice * 0.25;
+    const shipping = 4;
+
+    const margin =
+      ((p.estimatedSellingPrice - (p.estimatedCost + adCost + shipping)) /
+        p.estimatedSellingPrice) *
+      100;
+
     const engagement = generateEngagement(p.trendScore);
-    const compScore = competitionToScore(p.competitionLevel);
+    const compScore = competitionScore(p.competitionLevel);
     const marginScore = Math.min(100, margin * 1.5);
-    const hunterScore = calcHunterScore(p.trendScore, engagement, marginScore, compScore);
+
+    const score = calcScore(
+      p.trendScore,
+      engagement,
+      marginScore,
+      compScore,
+      p.platform
+    );
 
     return {
-      id: `hunt-${p.id}`,
+      id: "hunt-" + p.id,
       name: p.name,
       category: p.category,
       platform: p.platform,
@@ -48,17 +114,29 @@ function processProducts(products: ReturnType<typeof fetchTikTokTrends>): Hunter
       estimatedMargin: Math.round(margin * 10) / 10,
       estimatedSellingPrice: p.estimatedSellingPrice,
       estimatedCost: p.estimatedCost,
-      hunterScore,
+      hunterScore: score,
+      decision: decision(score),
+      confidence: Math.min(100, Math.round(score * 1.1)),
       image: p.image,
     };
   });
 }
 
 export function scanAllProducts(): HunterCandidate[] {
-  const all = [
-    ...processProducts(fetchTikTokTrends()),
-    ...processProducts(fetchAmazonTrends()),
-    ...processProducts(fetchAliExpressTrends()),
+  const cache = getCache();
+  if (cache) return cache;
+
+  const products = [
+    ...fetchTikTokTrends(),
+    ...fetchAmazonTrends(),
+    ...fetchAliExpressTrends(),
   ];
-  return all.sort((a, b) => b.hunterScore - a.hunterScore).slice(0, 10);
+
+  const result = process(products)
+    .sort((a, b) => b.hunterScore - a.hunterScore)
+    .slice(0, 5);
+
+  setCache(result);
+
+  return result;
 }
