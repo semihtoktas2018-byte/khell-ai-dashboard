@@ -2,14 +2,16 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { label: "Ürün Analizi", path: "/dashboard/analyzer", icon: Calculator },
   { label: "Kazanan Ürünler", path: "/dashboard/winning", icon: TrendingUp },
   { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
+  { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
   { label: "Kaydedilenler", path: "/dashboard/saved", icon: Bookmark },
 ];
 
@@ -18,6 +20,12 @@ export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -86,9 +94,20 @@ export default function DashboardLayout() {
           })}
         </nav>
 
-        {/* Signature */}
+        {/* User & Logout */}
         {!collapsed && (
-          <div className="px-4 py-4 border-t border-border">
+          <div className="px-4 py-4 border-t border-border space-y-3">
+            {user && (
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{user.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                </div>
+                <button onClick={handleLogout} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               A BAMİR Online Store's Production
             </p>

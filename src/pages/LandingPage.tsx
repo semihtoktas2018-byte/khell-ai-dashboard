@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check } from "lucide-react";
 import heroImg from "@/assets/hero-dashboard.png";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -14,6 +14,39 @@ const features = [
   { icon: ShieldCheck, title: "Risk Analizi", desc: "Her ürünün risk seviyesini otomatik değerlendirin." },
   { icon: Zap, title: "Anlık Sonuçlar", desc: "Saniyeler içinde detaylı analiz sonuçları alın." },
   { icon: Target, title: "Karar Skoru", desc: "Kazanan ürünleri tek bakışta belirleyin." },
+];
+
+const steps = [
+  { num: "01", title: "Ürün Bilgilerini Girin", desc: "Maliyet, kargo, reklam ve satış fiyatını girin." },
+  { num: "02", title: "Analiz Edin", desc: "KHELL AI kârlılık, risk ve karar skorunu hesaplar." },
+  { num: "03", title: "Kazananı Seçin", desc: "En kârlı ürünü kaydedin ve satışa başlayın." },
+];
+
+const plans = [
+  {
+    name: "Starter",
+    price: "Ücretsiz",
+    period: "",
+    features: ["Günde 5 analiz", "Trend ürün keşfi", "Tedarikçi arama", "Temel risk analizi"],
+    cta: "Ücretsiz Başla",
+    popular: false,
+  },
+  {
+    name: "Pro",
+    price: "$29",
+    period: "/ay",
+    features: ["Sınırsız analiz", "Gelişmiş risk skoru", "Tedarikçi karşılaştırma", "Ürün kaydetme", "Öncelikli destek"],
+    cta: "Pro'ya Geç",
+    popular: true,
+  },
+  {
+    name: "Enterprise",
+    price: "$99",
+    period: "/ay",
+    features: ["Tüm Pro özellikleri", "API erişimi", "Takım yönetimi", "Özel entegrasyonlar", "7/24 destek"],
+    cta: "İletişime Geç",
+    popular: false,
+  },
 ];
 
 export default function LandingPage() {
@@ -31,10 +64,10 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-foreground tracking-tight">KHELL AI</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/dashboard")} className="btn-ghost text-sm py-2 px-4">
-              Demo Gör
+            <button onClick={() => navigate("/auth")} className="btn-ghost text-sm py-2 px-4">
+              Giriş Yap
             </button>
-            <button onClick={() => navigate("/dashboard")} className="btn-primary text-sm py-2 px-4">
+            <button onClick={() => navigate("/auth")} className="btn-primary text-sm py-2 px-4">
               Hemen Başla
             </button>
           </div>
@@ -43,18 +76,12 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6">
-        {/* Background glow */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
 
         <div className="container mx-auto relative z-10">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
-            className="text-center max-w-4xl mx-auto"
-          >
+          <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
             <motion.div variants={fadeUp} className="mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
@@ -73,18 +100,15 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mb-16">
-              <button onClick={() => navigate("/dashboard")} className="btn-primary text-base">
+              <button onClick={() => navigate("/auth")} className="btn-primary text-base">
                 Hemen Başla
               </button>
-              <button onClick={() => navigate("/dashboard")} className="btn-ghost text-base">
+              <button onClick={() => navigate("/auth")} className="btn-ghost text-base">
                 Demo Gör
               </button>
             </motion.div>
 
-            <motion.div
-              variants={fadeUp}
-              className="relative mx-auto max-w-5xl"
-            >
+            <motion.div variants={fadeUp} className="relative mx-auto max-w-5xl">
               <div className="relative rounded-xl overflow-hidden border border-border shadow-2xl">
                 <img
                   src={heroImg}
@@ -99,15 +123,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section className="py-20 px-6">
+        <div className="container mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">Nasıl Çalışır?</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">3 adımda kazanan ürünü bulun.</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {steps.map((s, i) => (
+              <motion.div key={s.num} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, ...transition }} className="text-center">
+                <div className="text-4xl font-bold font-mono text-primary/20 mb-3">{s.num}</div>
+                <h3 className="font-semibold text-foreground mb-2">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-20 px-6">
         <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
               Kâr Marjınızı Saniyeler İçinde Görün
             </h2>
@@ -135,6 +173,81 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-20 px-6">
+        <div className="container mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">Fiyatlandırma</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">İhtiyacınıza uygun planı seçin.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {plans.map((plan, i) => (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, ...transition }}
+                className={`card-glow rounded-xl p-8 relative ${plan.popular ? "ring-2 ring-primary" : ""}`}
+              >
+                {plan.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full">
+                    Popüler
+                  </span>
+                )}
+                <h3 className="text-lg font-bold text-foreground mb-2">{plan.name}</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold font-mono text-foreground">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-winning shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => navigate("/auth")}
+                  className={`w-full py-3 rounded-lg font-semibold text-sm transition-all ${
+                    plan.popular ? "btn-primary" : "btn-ghost"
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="card-glow rounded-2xl p-12 text-center max-w-3xl mx-auto"
+          >
+            <h2 className="text-3xl font-bold text-foreground mb-4">Kazanan Ürünleri Bulmaya Başlayın</h2>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              Binlerce e-ticaret girişimcisi KHELL AI ile kârlı ürünleri keşfediyor.
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <button onClick={() => navigate("/auth")} className="btn-primary text-base">
+                Ücretsiz Başla
+              </button>
+              <button onClick={() => navigate("/auth")} className="btn-ghost text-base">
+                Demo Gör
+              </button>
+            </div>
+          </motion.div>
         </div>
       </section>
 
