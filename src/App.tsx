@@ -14,6 +14,8 @@ import WinningProducts from "./pages/WinningProducts";
 import Suppliers from "./pages/Suppliers";
 import SavedProducts from "./pages/SavedProducts";
 import RiskAnalysis from "./pages/RiskAnalysis";
+import ViralDiscovery from "./pages/ViralDiscovery";
+import AutoHunter from "./pages/AutoHunter";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 
