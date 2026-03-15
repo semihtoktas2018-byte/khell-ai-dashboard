@@ -18,7 +18,7 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#f59e0b", "#10b981
 
 export default function ViralDiscovery() {
   const { toast } = useToast();
-  const { addProduct } = useSavedProducts();
+  const { saveProduct } = useSavedProducts();
   const [search, setSearch] = useState("");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [marginFilter, setMarginFilter] = useState("all");
