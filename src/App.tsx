@@ -42,6 +42,8 @@ const App = () => (
                 <Route index element={<DashboardHome />} />
                 <Route path="analyzer" element={<ProductAnalyzer />} />
                 <Route path="winning" element={<WinningProducts />} />
+                <Route path="discovery" element={<ViralDiscovery />} />
+                <Route path="hunter" element={<AutoHunter />} />
                 <Route path="suppliers" element={<Suppliers />} />
                 <Route path="saved" element={<SavedProducts />} />
                 <Route path="risk" element={<RiskAnalysis />} />

@@ -57,11 +57,12 @@ export default function ViralDiscovery() {
 
   const handleSave = (p: ScoredTrendProduct) => {
     const { winningScore, tier } = calculateWinningScore(p.trendScore, p.profitMargin, p.competitionLevel, 30);
-    addProduct({
+    saveProduct({
       name: p.name,
       profitMargin: p.profitMargin,
-      riskLevel: p.competitionLevel === "High" ? "Yüksek" : p.competitionLevel === "Medium" ? "Orta" : "Düşük",
+      riskLevel: p.competitionLevel === "High" ? "high" : p.competitionLevel === "Medium" ? "medium" : "low",
       decisionScore: winningScore,
+      monthlyProfit: Math.round((p.estimatedSellingPrice - p.estimatedCost) * 30),
     });
     toast({ title: "Kaydedildi", description: `${p.name} kaydedilen ürünlere eklendi (${tier})` });
   };

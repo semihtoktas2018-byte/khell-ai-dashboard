@@ -52,8 +52,8 @@ export default function AutoHunter() {
   }, [filtered]);
 
   const handleSave = (p: HunterCandidate) => {
-    const riskLevel = p.competitionLevel === "High" ? "Yüksek" : p.competitionLevel === "Medium" ? "Orta" : "Düşük";
-    addProduct({ name: p.name, profitMargin: p.estimatedMargin, riskLevel, decisionScore: p.hunterScore });
+    const riskLevel = p.competitionLevel === "High" ? "high" : p.competitionLevel === "Medium" ? "medium" : "low";
+    saveProduct({ name: p.name, profitMargin: p.estimatedMargin, riskLevel, decisionScore: p.hunterScore, monthlyProfit: Math.round((p.estimatedSellingPrice - p.estimatedCost) * 30) });
     toast({ title: "Kaydedildi", description: `${p.name} ürün listenize eklendi` });
   };
 
