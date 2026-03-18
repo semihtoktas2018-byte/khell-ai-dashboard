@@ -53,7 +53,8 @@ export function SavedProductsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isProductSaved = useCallback((name: string) => {
-    return products.some((p) => p.name === name);
+    const normalized = name.trim().toLowerCase();
+    return products.some((p) => p.name.trim().toLowerCase() === normalized);
   }, [products]);
 
   return (

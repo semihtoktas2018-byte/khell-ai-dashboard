@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -25,8 +25,16 @@ const fields: { key: keyof AnalyzerInput; label: string; suffix?: string; placeh
 ];
 
 const riskColorMap = { low: "text-winning", medium: "text-risky", high: "text-destructive" };
-const riskBgMap = { low: "verdict-winning", medium: "verdict-risky", high: "verdict-bad" };
 const riskLabelMap = { low: "Düşük Risk", medium: "Orta Risk", high: "Yüksek Risk" };
+
+function buildMonthlyProjection(baseProfit: number) {
+  const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz"];
+  const growthFactors = [0.7, 0.82, 0.94, 1.0, 1.08, 1.15];
+  return months.map((month, i) => ({
+    month,
+    profit: Math.round(baseProfit * growthFactors[i]),
+  }));
+}
 
 export default function ProductAnalyzer() {
   const [input, setInput] = useState<AnalyzerInput>(defaultInput);
@@ -51,25 +59,26 @@ export default function ProductAnalyzer() {
   };
 
   const handleSave = () => {
-    const name = productName || "Adsız Ürün";
-    if (isProductSaved(name)) {
+    const trimmed = productName.trim();
+    if (!trimmed) {
+      toast({ title: "Hata", description: "Kaydetmek için ürün adı giriniz", variant: "destructive" });
+      return;
+    }
+    if (isProductSaved(trimmed)) {
       toast({ title: "Bilgi", description: "Bu ürün zaten kayıtlı" });
       return;
     }
     saveProduct({
-      name,
+      name: trimmed,
       profitMargin: Math.round(result.profit_margin * 10) / 10,
       riskLevel: result.risk_level,
       decisionScore: result.decision_score,
       monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
     });
-    toast({ title: "Kaydedildi", description: `${name} başarıyla kaydedildi` });
+    toast({ title: "Kaydedildi", description: `${trimmed} başarıyla kaydedildi` });
   };
 
-  const monthlyData = Array.from({ length: 6 }, (_, i) => ({
-    month: ["Oca", "Şub", "Mar", "Nis", "May", "Haz"][i],
-    profit: Math.round(result.monthly_profit * (0.7 + Math.random() * 0.6)),
-  }));
+  const monthlyData = buildMonthlyProjection(result.monthly_profit);
 
   return (
     <div className="space-y-6">
@@ -79,7 +88,7 @@ export default function ProductAnalyzer() {
           type="text"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
-          placeholder="Ürün adı girin (opsiyonel)..."
+          placeholder="Ürün adı girin..."
           className="input-dark w-full max-w-md text-lg"
         />
       </motion.div>
@@ -129,9 +138,10 @@ export default function ProductAnalyzer() {
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-3 gap-3">
-                <StatCard label="Brüt Kâr" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
-                <StatCard label="Aylık Kâr" value={`$${result.monthly_profit.toFixed(0)}`} positive={result.monthly_profit > 0} />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Brüt Kâr" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
+                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Net Kâr / Sipariş" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
+                <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Aylık Kâr" value={`$${result.monthly_profit.toFixed(0)}`} positive={result.monthly_profit > 0} />
                 <StatCard label="Risk" value={riskLabelMap[result.risk_level]} className={riskColorMap[result.risk_level]} />
               </div>
             </motion.div>
@@ -165,7 +175,7 @@ export default function ProductAnalyzer() {
 
             {/* Bar Chart */}
             <div className="card-glow rounded-xl p-5">
-              <h4 className="text-sm font-semibold text-foreground mb-3">Tahmini Aylık Kâr</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Tahmini Aylık Kâr Projeksiyonu</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
@@ -209,11 +219,12 @@ export default function ProductAnalyzer() {
   );
 }
 
-function StatCard({ label, value, positive, className }: { label: string; value: string; positive?: boolean; className?: string }) {
+function StatCard({ label, value, positive, className, icon }: { label: string; value: string; positive?: boolean; className?: string; icon?: React.ReactNode }) {
   return (
     <div className="card-glow rounded-lg p-4 text-center">
-      <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-lg font-bold font-mono tabular-nums ${className ?? (positive ? "text-winning" : "text-destructive")}`}>{value}</p>
+      {icon && <div className="flex justify-center mb-1 text-muted-foreground">{icon}</div>}
+      <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+      <p className={`text-base font-bold font-mono tabular-nums ${className ?? (positive ? "text-winning" : "text-destructive")}`}>{value}</p>
     </div>
   );
 }
