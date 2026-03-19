@@ -13,8 +13,6 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, tra
 
 const tooltipStyle = { background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, color: "hsl(210 40% 98%)" };
 
-const MONTH_LABELS = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem"];
-const GROWTH_FACTORS = [1, 1.15, 1.35, 1.25, 1.55, 1.8, 1.7];
 
 export default function DashboardHome() {
   const { products: savedProducts } = useSavedProducts();
@@ -23,7 +21,7 @@ export default function DashboardHome() {
 
   const metrics = useMemo(() => {
     const total = savedProducts.length;
-    const winning = savedProducts.filter((p) => p.decisionScore >= 70 || p.riskLevel === "low").length;
+    const winning = savedProducts.filter((p) => p.decisionScore >= 70 && p.riskLevel === "low").length;
     const risky = savedProducts.filter((p) => p.riskLevel === "medium" || p.riskLevel === "high").length;
     const totalProfit = savedProducts.reduce((sum, p) => sum + (p.monthlyProfit ?? 0), 0);
     return {
@@ -60,17 +58,21 @@ export default function DashboardHome() {
   }, [savedProducts]);
 
   const profitData = useMemo(() => {
-    const base = metrics.profit > 0 ? metrics.profit : 1000;
-    return MONTH_LABELS.map((month, i) => ({
-      month,
-      profit: Math.round(base * GROWTH_FACTORS[i]),
-    }));
-  }, [metrics.profit]);
+    if (savedProducts.length === 0) return [];
+    // Sort by dateSaved and build cumulative profit trend from real data
+    const sorted = [...savedProducts].sort((a, b) => new Date(a.dateSaved).getTime() - new Date(b.dateSaved).getTime());
+    let cumulative = 0;
+    return sorted.map((p) => {
+      cumulative += (p.monthlyProfit ?? 0);
+      return {
+        month: new Date(p.dateSaved).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" }),
+        profit: Math.round(cumulative),
+      };
+    });
+  }, [savedProducts]);
 
   const scoreData = useMemo(() => {
-    if (savedProducts.length === 0) {
-      return trendingProducts.slice(0, 6).map((p) => ({ name: p.name.substring(0, 12), score: p.trendScore }));
-    }
+    if (savedProducts.length === 0) return [];
     return savedProducts.slice(0, 6).map((p) => ({ name: p.name.substring(0, 12), score: p.decisionScore }));
   }, [savedProducts]);
 
@@ -94,21 +96,25 @@ export default function DashboardHome() {
         {/* Profit Trend */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold text-foreground mb-4">Kâr Trendi</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={profitData}>
-              <defs>
-                <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(217 91% 60%)" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(217 91% 60%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} />
-              <Tooltip contentStyle={tooltipStyle} />
-              <Area type="monotone" dataKey="profit" stroke="hsl(217 91% 60%)" strokeWidth={2.5} fill="url(#profitGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {profitData.length === 0 ? (
+            <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">Henüz veri yok — ürün kaydedin.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={profitData}>
+                <defs>
+                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(217 91% 60%)" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="hsl(217 91% 60%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Area type="monotone" dataKey="profit" stroke="hsl(217 91% 60%)" strokeWidth={2.5} fill="url(#profitGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
 
         {/* Risk Distribution Pie */}
@@ -136,18 +142,20 @@ export default function DashboardHome() {
       {/* Score Chart & Trending Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">
-            {savedProducts.length > 0 ? "Karar Skorları" : "Trend Skorları"}
-          </h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={scoreData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} domain={[0, 100]} />
-              <Tooltip contentStyle={tooltipStyle} />
-              <Bar dataKey="score" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Karar Skorları</h3>
+          {scoreData.length === 0 ? (
+            <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">Henüz veri yok.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={scoreData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} domain={[0, 100]} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="score" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
 
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
