@@ -1,7 +1,8 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
-import { dashboardStats, trendingProducts } from "@/lib/mock-data";
+import { trendingProducts } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useNavigate } from "react-router-dom";
@@ -10,34 +11,68 @@ const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition } };
 
-const stats = [
-  { label: "Analiz Edilen", value: dashboardStats.analyzedProducts, icon: BarChart3, colorClass: "text-primary" },
-  { label: "Kazanan Ürünler", value: dashboardStats.winningProducts, icon: TrendingUp, colorClass: "text-winning pulse-glow" },
-  { label: "Riskli Ürünler", value: dashboardStats.riskyProducts, icon: AlertTriangle, colorClass: "text-risky" },
-  { label: "Tahmini Kâr", value: `$${dashboardStats.estimatedProfit.toLocaleString()}`, icon: DollarSign, colorClass: "text-winning" },
-];
-
-const pieData = [
-  { name: "Kazanan", value: 38, color: "hsl(142 71% 45%)" },
-  { name: "İyi", value: 57, color: "hsl(217 91% 60%)" },
-  { name: "Riskli", value: 84, color: "hsl(38 92% 50%)" },
-  { name: "Kötü", value: 68, color: "hsl(0 84% 60%)" },
-];
-
-const profitData = [
-  { month: "Oca", profit: 1200 }, { month: "Şub", profit: 1800 }, { month: "Mar", profit: 2400 },
-  { month: "Nis", profit: 2100 }, { month: "May", profit: 3200 }, { month: "Haz", profit: 4100 },
-  { month: "Tem", profit: 3800 },
-];
-
-const trendData = trendingProducts.slice(0, 6).map((p) => ({ name: p.name.substring(0, 12), score: p.trendScore }));
-
 const tooltipStyle = { background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, color: "hsl(210 40% 98%)" };
+
+const MONTH_LABELS = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem"];
+const GROWTH_FACTORS = [1, 1.15, 1.35, 1.25, 1.55, 1.8, 1.7];
 
 export default function DashboardHome() {
   const { products: savedProducts } = useSavedProducts();
   const navigate = useNavigate();
   const topTrending = trendingProducts.slice(0, 4);
+
+  const metrics = useMemo(() => {
+    const total = savedProducts.length;
+    const winning = savedProducts.filter((p) => p.decisionScore >= 70 || p.riskLevel === "low").length;
+    const risky = savedProducts.filter((p) => p.riskLevel === "medium" || p.riskLevel === "high").length;
+    const totalProfit = savedProducts.reduce((sum, p) => sum + (p.monthlyProfit ?? 0), 0);
+    return {
+      analyzed: total || 0,
+      winning: winning || 0,
+      risky: risky || 0,
+      profit: totalProfit || 0,
+    };
+  }, [savedProducts]);
+
+  const stats = [
+    { label: "Analiz Edilen", value: metrics.analyzed, icon: BarChart3, colorClass: "text-primary" },
+    { label: "Kazanan Ürünler", value: metrics.winning, icon: TrendingUp, colorClass: "text-winning pulse-glow" },
+    { label: "Riskli Ürünler", value: metrics.risky, icon: AlertTriangle, colorClass: "text-risky" },
+    { label: "Tahmini Kâr", value: `$${metrics.profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, icon: DollarSign, colorClass: "text-winning" },
+  ];
+
+  const pieData = useMemo(() => {
+    const low = savedProducts.filter((p) => p.riskLevel === "low").length;
+    const med = savedProducts.filter((p) => p.riskLevel === "medium").length;
+    const high = savedProducts.filter((p) => p.riskLevel === "high").length;
+    if (low + med + high === 0) {
+      return [
+        { name: "Düşük", value: 1, color: "hsl(142 71% 45%)" },
+        { name: "Orta", value: 1, color: "hsl(38 92% 50%)" },
+        { name: "Yüksek", value: 1, color: "hsl(0 84% 60%)" },
+      ];
+    }
+    return [
+      { name: "Düşük", value: low, color: "hsl(142 71% 45%)" },
+      { name: "Orta", value: med, color: "hsl(38 92% 50%)" },
+      { name: "Yüksek", value: high, color: "hsl(0 84% 60%)" },
+    ];
+  }, [savedProducts]);
+
+  const profitData = useMemo(() => {
+    const base = metrics.profit > 0 ? metrics.profit : 1000;
+    return MONTH_LABELS.map((month, i) => ({
+      month,
+      profit: Math.round(base * GROWTH_FACTORS[i]),
+    }));
+  }, [metrics.profit]);
+
+  const scoreData = useMemo(() => {
+    if (savedProducts.length === 0) {
+      return trendingProducts.slice(0, 6).map((p) => ({ name: p.name.substring(0, 12), score: p.trendScore }));
+    }
+    return savedProducts.slice(0, 6).map((p) => ({ name: p.name.substring(0, 12), score: p.decisionScore }));
+  }, [savedProducts]);
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
@@ -76,9 +111,9 @@ export default function DashboardHome() {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Distribution Pie */}
+        {/* Risk Distribution Pie */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Ürün Dağılımı</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Risk Dağılımı</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={0}>
@@ -98,13 +133,14 @@ export default function DashboardHome() {
         </motion.div>
       </div>
 
-      {/* Trend Scores & Trending Products */}
+      {/* Score Chart & Trending Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Trend Score Chart */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Trend Skorları</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            {savedProducts.length > 0 ? "Karar Skorları" : "Trend Skorları"}
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={trendData}>
+            <BarChart data={scoreData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} domain={[0, 100]} />
@@ -114,7 +150,6 @@ export default function DashboardHome() {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Trending Preview */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground">Trend Ürünler</h3>
