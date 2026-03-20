@@ -53,6 +53,7 @@ export default function ViralProducts() {
       riskLevel: p.riskLevel === "Düşük" ? "low" : p.riskLevel === "Yüksek" ? "high" : "medium",
       decisionScore: p.decisionScore,
       monthlyProfit: Math.round((p.sellingPrice - p.cost) * 100) / 100,
+      platform: "Viral Ürün Bulucu",
     });
     toast({ title: "Kaydedildi", description: `${p.name} kaydedildi` });
   };
