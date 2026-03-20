@@ -38,28 +38,22 @@ function buildMonthlyProjection(baseProfit: number) {
 }
 
 export default function ProductAnalyzer() {
-  const [searchParams] = useSearchParams();
-  const [input, setInput] = useState<AnalyzerInput>(defaultInput);
-  const [showResult, setShowResult] = useState(false);
-  const [productName, setProductName] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [input, setInput] = useState<AnalyzerInput>(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const sellingPrice = parseFloat(sp.get("selling_price") || "0") || 0;
+    const productCost = parseFloat(sp.get("product_cost") || "0") || 0;
+    return { ...defaultInput, selling_price: sellingPrice, product_cost: productCost };
+  });
+  const [showResult, setShowResult] = useState(() => {
+    const sp = new URLSearchParams(window.location.search);
+    return (parseFloat(sp.get("selling_price") || "0") || 0) > 0;
+  });
+  const [productName, setProductName] = useState(() => {
+    return new URLSearchParams(window.location.search).get("productName") || "";
+  });
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const name = searchParams.get("productName");
-    const sp = searchParams.get("selling_price");
-    const pc = searchParams.get("product_cost");
-    if (name) setProductName(name);
-    if (sp || pc) {
-      const newInput = {
-        ...defaultInput,
-        selling_price: sp ? parseFloat(sp) : 0,
-        product_cost: pc ? parseFloat(pc) : 0,
-      };
-      setInput(newInput);
-      if (newInput.selling_price > 0) setShowResult(true);
-    }
-  }, [searchParams]);
 
   const result = analyzeProduct(input);
   const risks = analyzeRisk(input);
