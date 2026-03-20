@@ -51,11 +51,13 @@ export default function ProductAnalyzer() {
     const pc = searchParams.get("product_cost");
     if (name) setProductName(name);
     if (sp || pc) {
-      setInput((prev) => ({
-        ...prev,
-        selling_price: sp ? parseFloat(sp) : prev.selling_price,
-        product_cost: pc ? parseFloat(pc) : prev.product_cost,
-      }));
+      const newInput = {
+        ...defaultInput,
+        selling_price: sp ? parseFloat(sp) : 0,
+        product_cost: pc ? parseFloat(pc) : 0,
+      };
+      setInput(newInput);
+      if (newInput.selling_price > 0) setShowResult(true);
     }
   }, [searchParams]);
 
