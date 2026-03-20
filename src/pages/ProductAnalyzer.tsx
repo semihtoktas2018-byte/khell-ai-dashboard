@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
@@ -38,22 +38,26 @@ function buildMonthlyProjection(baseProfit: number) {
 }
 
 export default function ProductAnalyzer() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [input, setInput] = useState<AnalyzerInput>(() => {
-    const sp = new URLSearchParams(window.location.search);
-    const sellingPrice = parseFloat(sp.get("selling_price") || "0") || 0;
-    const productCost = parseFloat(sp.get("product_cost") || "0") || 0;
-    return { ...defaultInput, selling_price: sellingPrice, product_cost: productCost };
-  });
-  const [showResult, setShowResult] = useState(() => {
-    const sp = new URLSearchParams(window.location.search);
-    return (parseFloat(sp.get("selling_price") || "0") || 0) > 0;
-  });
-  const [productName, setProductName] = useState(() => {
-    return new URLSearchParams(window.location.search).get("productName") || "";
-  });
+  const [searchParams] = useSearchParams();
+  const [input, setInput] = useState<AnalyzerInput>(defaultInput);
+  const [showResult, setShowResult] = useState(false);
+  const [productName, setProductName] = useState("");
+  const hasAutoAnalyzed = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (hasAutoAnalyzed.current) return;
+    const name = searchParams.get("productName");
+    const sp = parseFloat(searchParams.get("selling_price") || "0") || 0;
+    const pc = parseFloat(searchParams.get("product_cost") || "0") || 0;
+    if (sp > 0) {
+      hasAutoAnalyzed.current = true;
+      if (name) setProductName(name);
+      setInput({ ...defaultInput, selling_price: sp, product_cost: pc });
+      setShowResult(true);
+    }
+  }, [searchParams]);
 
   const result = analyzeProduct(input);
   const risks = analyzeRisk(input);
