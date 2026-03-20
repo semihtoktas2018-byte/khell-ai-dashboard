@@ -38,11 +38,26 @@ function buildMonthlyProjection(baseProfit: number) {
 }
 
 export default function ProductAnalyzer() {
+  const [searchParams] = useSearchParams();
   const [input, setInput] = useState<AnalyzerInput>(defaultInput);
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const name = searchParams.get("productName");
+    const sp = searchParams.get("selling_price");
+    const pc = searchParams.get("product_cost");
+    if (name) setProductName(name);
+    if (sp || pc) {
+      setInput((prev) => ({
+        ...prev,
+        selling_price: sp ? parseFloat(sp) : prev.selling_price,
+        product_cost: pc ? parseFloat(pc) : prev.product_cost,
+      }));
+    }
+  }, [searchParams]);
 
   const result = analyzeProduct(input);
   const risks = analyzeRisk(input);

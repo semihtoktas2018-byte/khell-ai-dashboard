@@ -45,6 +45,7 @@ const App = () => (
                 <Route path="winning" element={<WinningProducts />} />
                 <Route path="discovery" element={<ViralDiscovery />} />
                 <Route path="hunter" element={<AutoHunter />} />
+                <Route path="viral-products" element={<ViralProducts />} />
                 <Route path="suppliers" element={<Suppliers />} />
                 <Route path="saved" element={<SavedProducts />} />
                 <Route path="risk" element={<RiskAnalysis />} />

@@ -11,6 +11,7 @@ const navItems = [
   { label: "Ürün Analizi", path: "/dashboard/analyzer", icon: Calculator },
   { label: "Kazanan Ürünler", path: "/dashboard/winning", icon: TrendingUp },
   { label: "Viral Ürün Keşfi", path: "/dashboard/discovery", icon: Flame },
+  { label: "Viral Ürün Bulucu", path: "/dashboard/viral-products", icon: Crosshair },
   { label: "Auto Product Hunter", path: "/dashboard/hunter", icon: Crosshair },
   { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
   { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
