@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
