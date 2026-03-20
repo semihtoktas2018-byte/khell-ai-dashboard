@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -11,6 +11,7 @@ const navItems = [
   { label: "Ürün Analizi", path: "/dashboard/analyzer", icon: Calculator },
   { label: "Kazanan Ürünler", path: "/dashboard/winning", icon: TrendingUp },
   { label: "Viral Ürün Keşfi", path: "/dashboard/discovery", icon: Flame },
+  { label: "Viral Ürün Bulucu", path: "/dashboard/viral-products", icon: Search },
   { label: "Auto Product Hunter", path: "/dashboard/hunter", icon: Crosshair },
   { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
   { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
