@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, ArrowRight, Bookmark, Filter } from "lucide-react";
+import { Flame, TrendingUp, ArrowRight, Bookmark, Filter, FileText } from "lucide-react";
 import { getViralProducts, type ViralProduct } from "@/lib/viral-products-data";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +65,19 @@ export default function ViralProducts() {
       product_cost: String(p.cost),
     });
     navigate(`/dashboard/analyzer?${params.toString()}`);
+  };
+
+  const handleGeneratePage = (p: ViralProduct) => {
+    const params = new URLSearchParams({
+      name: p.name,
+      category: p.category,
+      sellingPrice: String(p.sellingPrice),
+      cost: String(p.cost),
+      margin: String(p.margin),
+      trendScore: String(p.trendScore),
+      riskLevel: p.riskLevel,
+    });
+    navigate(`/dashboard/product-page-generator?${params.toString()}`);
   };
 
   return (
@@ -147,24 +160,35 @@ export default function ViralProducts() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-auto pt-4">
+                <div className="flex flex-col gap-2 mt-auto pt-4">
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 text-xs"
+                      onClick={() => handleSave(p)}
+                      disabled={isProductSaved(p.name)}
+                    >
+                      <Bookmark className="h-3 w-3 mr-1" />
+                      {isProductSaved(p.name) ? "Kayıtlı" : "Kaydet"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 text-xs"
+                      onClick={() => handleAnalyze(p)}
+                    >
+                      Analize Gönder
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="flex-1 text-xs"
-                    onClick={() => handleSave(p)}
-                    disabled={isProductSaved(p.name)}
+                    variant="secondary"
+                    className="w-full text-xs"
+                    onClick={() => handleGeneratePage(p)}
                   >
-                    <Bookmark className="h-3 w-3 mr-1" />
-                    {isProductSaved(p.name) ? "Kayıtlı" : "Kaydet"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 text-xs"
-                    onClick={() => handleAnalyze(p)}
-                  >
-                    Analize Gönder
-                    <ArrowRight className="h-3 w-3 ml-1" />
+                    <FileText className="h-3 w-3 mr-1" />
+                    Sayfa Oluştur
                   </Button>
                 </div>
               </CardContent>

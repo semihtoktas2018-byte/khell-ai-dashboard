@@ -17,6 +17,7 @@ import RiskAnalysis from "./pages/RiskAnalysis";
 import ViralDiscovery from "./pages/ViralDiscovery";
 import AutoHunter from "./pages/AutoHunter";
 import ViralProducts from "./pages/ViralProducts";
+import ProductPageGenerator from "./pages/ProductPageGenerator";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="suppliers" element={<Suppliers />} />
                 <Route path="saved" element={<SavedProducts />} />
                 <Route path="risk" element={<RiskAnalysis />} />
+                <Route path="product-page-generator" element={<ProductPageGenerator />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
