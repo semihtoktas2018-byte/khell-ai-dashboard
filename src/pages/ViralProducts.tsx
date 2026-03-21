@@ -160,24 +160,35 @@ export default function ViralProducts() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-auto pt-4">
+                <div className="flex flex-col gap-2 mt-auto pt-4">
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 text-xs"
+                      onClick={() => handleSave(p)}
+                      disabled={isProductSaved(p.name)}
+                    >
+                      <Bookmark className="h-3 w-3 mr-1" />
+                      {isProductSaved(p.name) ? "Kayıtlı" : "Kaydet"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 text-xs"
+                      onClick={() => handleAnalyze(p)}
+                    >
+                      Analize Gönder
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="flex-1 text-xs"
-                    onClick={() => handleSave(p)}
-                    disabled={isProductSaved(p.name)}
+                    variant="secondary"
+                    className="w-full text-xs"
+                    onClick={() => handleGeneratePage(p)}
                   >
-                    <Bookmark className="h-3 w-3 mr-1" />
-                    {isProductSaved(p.name) ? "Kayıtlı" : "Kaydet"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 text-xs"
-                    onClick={() => handleAnalyze(p)}
-                  >
-                    Analize Gönder
-                    <ArrowRight className="h-3 w-3 ml-1" />
+                    <FileText className="h-3 w-3 mr-1" />
+                    Sayfa Oluştur
                   </Button>
                 </div>
               </CardContent>
