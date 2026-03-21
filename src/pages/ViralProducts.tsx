@@ -67,6 +67,19 @@ export default function ViralProducts() {
     navigate(`/dashboard/analyzer?${params.toString()}`);
   };
 
+  const handleGeneratePage = (p: ViralProduct) => {
+    const params = new URLSearchParams({
+      name: p.name,
+      category: p.category,
+      sellingPrice: String(p.sellingPrice),
+      cost: String(p.cost),
+      margin: String(p.margin),
+      trendScore: String(p.trendScore),
+      riskLevel: p.riskLevel,
+    });
+    navigate(`/dashboard/product-page-generator?${params.toString()}`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
