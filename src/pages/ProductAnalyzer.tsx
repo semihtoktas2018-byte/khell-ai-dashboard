@@ -43,9 +43,11 @@ export default function ProductAnalyzer() {
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
   const hasAutoAnalyzed = useRef(false);
+  const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
 
+  // Step 1: Populate input from URL params
   useEffect(() => {
     if (hasAutoAnalyzed.current) return;
     const name = searchParams.get("productName");
@@ -53,11 +55,19 @@ export default function ProductAnalyzer() {
     const pc = parseFloat(searchParams.get("product_cost") || "0") || 0;
     if (sp > 0) {
       hasAutoAnalyzed.current = true;
+      pendingAutoShow.current = true;
       if (name) setProductName(name);
       setInput({ ...defaultInput, selling_price: sp, product_cost: pc });
-      setShowResult(true);
     }
   }, [searchParams]);
+
+  // Step 2: After input state is updated, show results
+  useEffect(() => {
+    if (pendingAutoShow.current && input.selling_price > 0) {
+      pendingAutoShow.current = false;
+      setShowResult(true);
+    }
+  }, [input]);
 
   const result = analyzeProduct(input);
   const risks = analyzeRisk(input);
