@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, ArrowRight, Bookmark, Filter } from "lucide-react";
+import { Flame, TrendingUp, ArrowRight, Bookmark, Filter, FileText } from "lucide-react";
 import { getViralProducts, type ViralProduct } from "@/lib/viral-products-data";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
