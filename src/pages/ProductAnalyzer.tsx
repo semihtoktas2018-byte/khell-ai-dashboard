@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Share2, FileText, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -39,13 +40,20 @@ function buildMonthlyProjection(baseProfit: number) {
 
 export default function ProductAnalyzer() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [input, setInput] = useState<AnalyzerInput>(defaultInput);
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
+  const [showPaywall, setShowPaywall] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
+  const analysisCount = useRef(() => {
+    const c = sessionStorage.getItem("khell_analysis_count");
+    return c ? parseInt(c, 10) : 0;
+  });
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
+  const fromOnboarding = searchParams.get("onboarding") === "1";
 
   // Step 1: Populate input from URL params
   useEffect(() => {
@@ -81,7 +89,32 @@ export default function ProductAnalyzer() {
       toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" });
       return;
     }
+    const count = parseInt(sessionStorage.getItem("khell_analysis_count") || "0", 10);
+    if (count >= 3) {
+      setShowPaywall(true);
+      return;
+    }
+    sessionStorage.setItem("khell_analysis_count", String(count + 1));
     setShowResult(true);
+  };
+
+  const handleShare = () => {
+    const text = `Bu üründe aylık $${Math.round(result.monthly_profit)}+ kâr potansiyeli buldum 🔥\nKarar Skoru: ${result.decision_score}/100\nKHELL AI ile analiz edildi.`;
+    navigator.clipboard.writeText(text);
+    toast({ title: "Kopyalandı", description: "Sonuç panoya kopyalandı" });
+  };
+
+  const handleGoToPageGenerator = () => {
+    const params = new URLSearchParams({
+      name: productName || "Ürün",
+      sellingPrice: String(input.selling_price),
+      cost: String(input.product_cost),
+      margin: String(Math.round(result.profit_margin)),
+      trendScore: "85",
+      riskLevel: result.risk_level === "low" ? "Düşük" : result.risk_level === "medium" ? "Orta" : "Yüksek",
+      category: "Tech",
+    });
+    navigate(`/dashboard/product-page-generator?${params.toString()}`);
   };
 
   const handleSave = () => {
@@ -108,6 +141,13 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Step Indicator */}
+      {fromOnboarding && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="text-primary font-semibold">Adım 2/3</span>
+          <span>— Ürünü analiz edin, ardından satış sayfası oluşturun</span>
+        </motion.div>
+      )}
       {/* Product Name */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <input
@@ -169,6 +209,16 @@ export default function ProductAnalyzer() {
                 <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Net Kâr / Sipariş" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
                 <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Aylık Kâr" value={`$${result.monthly_profit.toFixed(0)}`} positive={result.monthly_profit > 0} />
                 <StatCard label="Risk" value={riskLabelMap[result.risk_level]} className={riskColorMap[result.risk_level]} />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={handleShare} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
+                  <Share2 className="h-3.5 w-3.5" /> Sonucu Paylaş
+                </button>
+                <button onClick={handleGoToPageGenerator} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors">
+                  <FileText className="h-3.5 w-3.5" /> {fromOnboarding ? "Adım 3/3: Sayfa Oluştur →" : "Sayfa Oluştur"}
+                </button>
               </div>
             </motion.div>
           )}
@@ -241,6 +291,31 @@ export default function ProductAnalyzer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Paywall Modal */}
+      <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" /> Limit Doldu — Pro'ya Geç
+            </DialogTitle>
+            <DialogDescription>
+              Ücretsiz planda oturum başına 3 analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="rounded-lg bg-accent/30 p-4 text-sm text-muted-foreground space-y-1">
+              <p>✓ Sınırsız ürün analizi</p>
+              <p>✓ Gelişmiş risk raporu</p>
+              <p>✓ Reklam hook oluşturucu</p>
+              <p>✓ Öncelikli destek</p>
+            </div>
+            <button onClick={() => { setShowPaywall(false); toast({ title: "Yakında", description: "Pro plan çok yakında aktif olacak!" }); }} className="btn-primary w-full">
+              Pro'ya Yükselt
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
