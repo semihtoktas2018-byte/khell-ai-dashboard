@@ -141,6 +141,13 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Step Indicator */}
+      {fromOnboarding && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="text-primary font-semibold">Adım 2/3</span>
+          <span>— Ürünü analiz edin, ardından satış sayfası oluşturun</span>
+        </motion.div>
+      )}
       {/* Product Name */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <input
