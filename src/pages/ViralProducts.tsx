@@ -83,6 +83,11 @@ export default function ViralProducts() {
 
   return (
     <div className="space-y-6">
+      {/* Onboarding hint */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="text-primary font-semibold">Adım 1/3</span>
+        <span>— Bir ürün seçin ve "Analize Gönder" butonuna tıklayın</span>
+      </motion.div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
