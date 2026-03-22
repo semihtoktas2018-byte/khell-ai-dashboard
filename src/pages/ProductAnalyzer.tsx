@@ -291,6 +291,31 @@ export default function ProductAnalyzer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Paywall Modal */}
+      <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" /> Limit Doldu — Pro'ya Geç
+            </DialogTitle>
+            <DialogDescription>
+              Ücretsiz planda oturum başına 3 analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="rounded-lg bg-accent/30 p-4 text-sm text-muted-foreground space-y-1">
+              <p>✓ Sınırsız ürün analizi</p>
+              <p>✓ Gelişmiş risk raporu</p>
+              <p>✓ Reklam hook oluşturucu</p>
+              <p>✓ Öncelikli destek</p>
+            </div>
+            <button onClick={() => { setShowPaywall(false); toast({ title: "Yakında", description: "Pro plan çok yakında aktif olacak!" }); }} className="btn-primary w-full">
+              Pro'ya Yükselt
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
