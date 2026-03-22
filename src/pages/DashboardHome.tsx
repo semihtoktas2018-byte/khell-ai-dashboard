@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
+import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Rocket, Star, Zap, ArrowRight } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { trendingProducts } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
@@ -13,11 +13,29 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, tra
 
 const tooltipStyle = { background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, color: "hsl(210 40% 98%)" };
 
+// Demo product — static, realistic
+const demoProduct = {
+  name: "Akıllı Duruş Düzeltici Pro",
+  decisionScore: 84,
+  monthlyProfit: 1240,
+  riskLevel: "low" as const,
+  profitMargin: 62,
+  category: "Sağlık & Fitness",
+};
 
 export default function DashboardHome() {
   const { products: savedProducts } = useSavedProducts();
   const navigate = useNavigate();
   const topTrending = trendingProducts.slice(0, 4);
+
+  // Onboarding: first-time users get redirected to viral products
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem("khell_onboarded");
+    if (!hasOnboarded) {
+      localStorage.setItem("khell_onboarded", "1");
+      navigate("/dashboard/viral-products", { replace: true });
+    }
+  }, [navigate]);
 
   const metrics = useMemo(() => {
     const total = savedProducts.length;
@@ -59,7 +77,6 @@ export default function DashboardHome() {
 
   const profitData = useMemo(() => {
     if (savedProducts.length === 0) return [];
-    // Sort by dateSaved and build cumulative profit trend from real data
     const sorted = [...savedProducts].sort((a, b) => new Date(a.dateSaved).getTime() - new Date(b.dateSaved).getTime());
     let cumulative = 0;
     return sorted.map((p) => {
@@ -78,6 +95,26 @@ export default function DashboardHome() {
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
+      {/* Hero CTA */}
+      <motion.div variants={fadeUp} className="card-glow rounded-xl p-6 md:p-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 pointer-events-none" />
+        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Rocket className="h-5 w-5 text-primary" />
+              <h2 className="text-lg md:text-xl font-bold text-foreground">1 Ürün Bul → Analiz Et → Satışa Çıkar</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">KHELL AI ile kazanan ürünleri saniyeler içinde bul.</p>
+          </div>
+          <button
+            onClick={() => navigate("/dashboard/viral-products")}
+            className="btn-primary flex items-center gap-2 shrink-0"
+          >
+            <Zap className="h-4 w-4" /> Ürün Bulmaya Başla <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </motion.div>
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
@@ -90,6 +127,33 @@ export default function DashboardHome() {
           </motion.div>
         ))}
       </div>
+
+      {/* Demo Product Card */}
+      <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" /> Örnek Kazanan Ürün
+          </h3>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Demo</span>
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg bg-accent/30 p-4">
+          <div className="space-y-1">
+            <p className="text-base font-semibold text-foreground">{demoProduct.name}</p>
+            <p className="text-xs text-muted-foreground">{demoProduct.category} · Marj: %{demoProduct.profitMargin}</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold font-mono text-primary tabular-nums">{demoProduct.decisionScore}</p>
+              <p className="text-[10px] text-muted-foreground">Karar Skoru</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold font-mono text-winning tabular-nums">${demoProduct.monthlyProfit}</p>
+              <p className="text-[10px] text-muted-foreground">Aylık Kâr</p>
+            </div>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-winning/10 text-winning">Düşük Risk</span>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -203,6 +267,26 @@ export default function DashboardHome() {
           </div>
         </motion.div>
       )}
+
+      {/* Trust Block */}
+      <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+          <div className="flex items-center gap-2">
+            <div className="flex">
+              {[1,2,3,4].map(i => <Star key={i} className="h-4 w-4 fill-primary text-primary" />)}
+              <Star className="h-4 w-4 fill-primary/40 text-primary/40" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">4.7 / 5</span>
+            <span className="text-xs text-muted-foreground">kullanıcı puanı</span>
+          </div>
+          <div className="h-4 w-px bg-border hidden sm:block" />
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground">10,000+</span>
+            <span className="text-xs text-muted-foreground">analiz yapıldı</span>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
