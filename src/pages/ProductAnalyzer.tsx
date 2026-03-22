@@ -210,6 +210,16 @@ export default function ProductAnalyzer() {
                 <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Aylık Kâr" value={`$${result.monthly_profit.toFixed(0)}`} positive={result.monthly_profit > 0} />
                 <StatCard label="Risk" value={riskLabelMap[result.risk_level]} className={riskColorMap[result.risk_level]} />
               </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={handleShare} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
+                  <Share2 className="h-3.5 w-3.5" /> Sonucu Paylaş
+                </button>
+                <button onClick={handleGoToPageGenerator} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors">
+                  <FileText className="h-3.5 w-3.5" /> {fromOnboarding ? "Adım 3/3: Sayfa Oluştur →" : "Sayfa Oluştur"}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
