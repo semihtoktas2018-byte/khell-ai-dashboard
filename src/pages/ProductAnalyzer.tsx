@@ -89,7 +89,32 @@ export default function ProductAnalyzer() {
       toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" });
       return;
     }
+    const count = parseInt(sessionStorage.getItem("khell_analysis_count") || "0", 10);
+    if (count >= 3) {
+      setShowPaywall(true);
+      return;
+    }
+    sessionStorage.setItem("khell_analysis_count", String(count + 1));
     setShowResult(true);
+  };
+
+  const handleShare = () => {
+    const text = `Bu üründe aylık $${Math.round(result.monthly_profit)}+ kâr potansiyeli buldum 🔥\nKarar Skoru: ${result.decision_score}/100\nKHELL AI ile analiz edildi.`;
+    navigator.clipboard.writeText(text);
+    toast({ title: "Kopyalandı", description: "Sonuç panoya kopyalandı" });
+  };
+
+  const handleGoToPageGenerator = () => {
+    const params = new URLSearchParams({
+      name: productName || "Ürün",
+      sellingPrice: String(input.selling_price),
+      cost: String(input.product_cost),
+      margin: String(Math.round(result.profit_margin)),
+      trendScore: "85",
+      riskLevel: result.risk_level === "low" ? "Düşük" : result.risk_level === "medium" ? "Orta" : "Yüksek",
+      category: "Tech",
+    });
+    navigate(`/dashboard/product-page-generator?${params.toString()}`);
   };
 
   const handleSave = () => {
