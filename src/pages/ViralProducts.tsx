@@ -63,6 +63,7 @@ export default function ViralProducts() {
       productName: p.name,
       selling_price: String(p.sellingPrice),
       product_cost: String(p.cost),
+      onboarding: "1",
     });
     navigate(`/dashboard/analyzer?${params.toString()}`);
   };
