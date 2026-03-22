@@ -40,13 +40,20 @@ function buildMonthlyProjection(baseProfit: number) {
 
 export default function ProductAnalyzer() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [input, setInput] = useState<AnalyzerInput>(defaultInput);
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
+  const [showPaywall, setShowPaywall] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
+  const analysisCount = useRef(() => {
+    const c = sessionStorage.getItem("khell_analysis_count");
+    return c ? parseInt(c, 10) : 0;
+  });
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
+  const fromOnboarding = searchParams.get("onboarding") === "1";
 
   // Step 1: Populate input from URL params
   useEffect(() => {
