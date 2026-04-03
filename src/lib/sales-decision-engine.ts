@@ -27,6 +27,7 @@ const MIDDLE_EAST = ["turkey","türkiye","tr","saudi arabia","sa","uae","ae","qa
 const HIGH_VISUAL_CATS = ["furniture","home decor","luxury decor","home design","fashion","jewelry","watches","bags","shoes","lighting","decoration","aksesuar","mobilya","dekorasyon"];
 const LUXURY_CATS = ["luxury decor","jewelry","watches","premium","luxury","furniture","mobilya"];
 const TREND_CATS = ["gadget","tech","electronics","phone accessories","tiktok","viral","fitness","beauty","kozmetik"];
+const SATURATED_KEYWORDS = ["powerbank","power bank","phone case","kılıf","cable","kablo","charger","şarj","şarj cihazı","earbuds","kulaklık","mouse pad","screen protector","cam filmi","usb","hdmi","adapter","adaptör","selfie stick","pop socket","ring holder"];
 
 function norm(v: number, min: number, max: number) {
   return Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
@@ -67,19 +68,48 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
   const isVisual = HIGH_VISUAL_CATS.some(c => cat.includes(c) || name.includes(c));
   const adPotential = Math.min(100, Math.round((isVisual ? 70 : 40) + (uniqueTriggers.includes("trend") ? 15 : 0) + (margin > 40 ? 10 : 0)));
 
-  // 6. PLATFORMS
+  // 6. SATURATION PENALTY
+  const isSaturated = SATURATED_KEYWORDS.some(k => name.includes(k) || cat.includes(k));
+  const saturationPenalty = isSaturated ? 30 : 0;
+
+  // 7. PLATFORMS
   const platforms: string[] = [];
   if (uniqueTriggers.includes("trend") || isVisual) platforms.push("tiktok", "instagram");
   if (product_price > 100 || uniqueTriggers.includes("luxury")) platforms.push("facebook");
   if (product_price > 300) platforms.push("google");
   if (platforms.length === 0) platforms.push("facebook", "instagram");
 
-  // 7. FINAL SCORE
-  const totalScore = Math.round(marginScore * 0.35 + marketFit * 0.25 + adPotential * 0.25 + compScore * 0.15);
+  // 8. FINAL SCORE
+  const rawScore = Math.round(marginScore * 0.35 + marketFit * 0.25 + adPotential * 0.25 + compScore * 0.15);
+  const totalScore = Math.max(0, rawScore - saturationPenalty);
   const confidence = Math.min(95, Math.max(15, totalScore + (triggerScore > 30 ? 5 : 0)));
 
-  const decision: "WINNER" | "LOSER" = totalScore > 60 ? "WINNER" : "LOSER";
-  const action: "LAUNCH" | "TEST" | "REJECT" = totalScore > 70 ? "LAUNCH" : totalScore > 50 ? "TEST" : "REJECT";
+  // 9. STRICT DECISION RULES
+  const canWin = margin > 35 && marketFit > 60 && competitionLevel !== "HIGH";
+  let decision: "WINNER" | "LOSER";
+  let action: "LAUNCH" | "TEST" | "REJECT";
+
+  if (totalScore > 60 && canWin) {
+    decision = "WINNER";
+    action = totalScore > 70 ? "LAUNCH" : "TEST";
+  } else if (totalScore > 50 && competitionLevel !== "HIGH") {
+    decision = "LOSER";
+    action = "TEST";
+  } else {
+    decision = "LOSER";
+    action = "REJECT";
+  }
+
+  // Force: market_fit < 50 → never WINNER
+  if (marketFit < 50) {
+    decision = "LOSER";
+    if (action === "LAUNCH") action = "TEST";
+  }
+
+  // Force: competition MEDIUM/HIGH + not unique → TEST or REJECT
+  if ((competitionLevel === "MEDIUM" || competitionLevel === "HIGH") && !isUnique) {
+    if (decision === "WINNER") { decision = "LOSER"; action = "TEST"; }
+  }
 
   // 8. AUDIENCE
   const ageRange = product_price > 300 ? "30-55" : "18-35";
