@@ -16,6 +16,7 @@ const navItems = [
   { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
   { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
   { label: "Ürün Sayfası Oluşturucu", path: "/dashboard/product-page-generator", icon: FileText },
+  { label: "Sales Decision Engine", path: "/dashboard/sales-decision", icon: Brain },
   { label: "Kaydedilenler", path: "/dashboard/saved", icon: Bookmark },
 ];
 
