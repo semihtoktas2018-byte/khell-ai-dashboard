@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Copy, Target, TrendingUp, ShieldAlert, Megaphone, Check } from "lucide-react";
+import { Zap, Copy, Target, TrendingUp, ShieldAlert, Megaphone, Check, MessageCircle, Bookmark } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { runDecisionEngine, type DecisionInput, type DecisionOutput } from "@/lib/sales-decision-engine";
+import { useSavedProducts } from "@/contexts/SavedProductsContext";
 
 const categories = [
   "Furniture", "Home Decor", "Luxury Decor", "Fashion", "Jewelry", "Watches",
@@ -15,6 +16,24 @@ const categories = [
 const countries = [
   "Turkey", "Saudi Arabia", "UAE", "Qatar", "Kuwait", "USA", "Germany", "France", "UK", "Other",
 ];
+
+function scoreColor(score: number) {
+  if (score >= 80) return "text-emerald-400";
+  if (score >= 60) return "text-amber-400";
+  return "text-red-400";
+}
+
+function scoreGlow(score: number) {
+  if (score >= 80) return "shadow-[0_0_40px_rgba(52,211,153,0.3)]";
+  if (score >= 60) return "shadow-[0_0_40px_rgba(251,191,36,0.3)]";
+  return "shadow-[0_0_40px_rgba(248,113,113,0.3)]";
+}
+
+function scoreBorder(score: number) {
+  if (score >= 80) return "border-emerald-500/40";
+  if (score >= 60) return "border-amber-500/40";
+  return "border-red-500/40";
+}
 
 export default function SalesDecisionEngine() {
   const [form, setForm] = useState<DecisionInput>({
@@ -28,6 +47,7 @@ export default function SalesDecisionEngine() {
   });
   const [result, setResult] = useState<DecisionOutput | null>(null);
   const [copied, setCopied] = useState(false);
+  const { saveProduct, isProductSaved } = useSavedProducts();
 
   const handleRun = () => {
     if (!form.product_name || form.product_price <= 0 || form.cost_price <= 0) {
@@ -43,6 +63,31 @@ export default function SalesDecisionEngine() {
     setCopied(true);
     toast.success("JSON kopyalandı!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsApp = () => {
+    if (!result) return;
+    const msg = encodeURIComponent(
+      `Hello, I want to order this product:\n\n${form.product_name}\n\nTarget country: ${form.target_country}\n\nLink: ${form.product_link || "N/A"}`
+    );
+    window.open(`https://wa.me/905446452430?text=${msg}`, "_blank");
+  };
+
+  const handleSave = () => {
+    if (!result) return;
+    if (isProductSaved(form.product_name)) {
+      toast.error("Bu ürün zaten kayıtlı.");
+      return;
+    }
+    saveProduct({
+      name: form.product_name,
+      profitMargin: result.estimated_margin_percent,
+      riskLevel: result.confidence_score >= 70 ? "low" : result.confidence_score >= 45 ? "medium" : "high",
+      decisionScore: result.confidence_score,
+      monthlyProfit: Math.round((form.product_price - form.cost_price) * 30),
+      platform: "Sales Decision Engine",
+    });
+    toast.success("Ürün kaydedildi!");
   };
 
   const decisionColor = (d: string) =>
@@ -69,6 +114,8 @@ export default function SalesDecisionEngine() {
       </div>
     </div>
   );
+
+  const alreadySaved = result ? isProductSaved(form.product_name) : false;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -148,6 +195,20 @@ export default function SalesDecisionEngine() {
         <div className="space-y-4">
           {result ? (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+              {/* BIG FINAL SCORE */}
+              <div className={`rounded-2xl border-2 ${scoreBorder(result.confidence_score)} bg-card p-8 text-center ${scoreGlow(result.confidence_score)}`}>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Final Score</p>
+                <motion.p
+                  className={`text-8xl font-black tracking-tighter leading-none ${scoreColor(result.confidence_score)}`}
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                >
+                  {result.confidence_score}
+                </motion.p>
+                <p className="text-xs text-muted-foreground mt-2">/ 100</p>
+              </div>
+
               {/* Decision badge */}
               <div className="rounded-xl border border-border bg-card p-5 text-center space-y-3">
                 <p className={`text-4xl font-black tracking-tight ${decisionColor(result.decision)}`}>
@@ -202,6 +263,22 @@ export default function SalesDecisionEngine() {
                   <span className="text-muted-foreground">Fiyatlandırma Stratejisi:</span>
                   <p className="text-foreground mt-0.5">{result.pricing_strategy}</p>
                 </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button onClick={handleWhatsApp} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <MessageCircle className="h-4 w-4" /> WhatsApp'a Gönder
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  variant={alreadySaved ? "secondary" : "outline"}
+                  disabled={alreadySaved}
+                  className="gap-2"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  {alreadySaved ? "Kayıtlı ✓" : "Ürünü Kaydet"}
+                </Button>
               </div>
 
               {/* JSON Copy */}
