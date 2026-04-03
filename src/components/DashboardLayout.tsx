@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
   { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
   { label: "Ürün Sayfası Oluşturucu", path: "/dashboard/product-page-generator", icon: FileText },
+  { label: "Sales Decision Engine", path: "/dashboard/sales-decision", icon: Brain },
   { label: "Kaydedilenler", path: "/dashboard/saved", icon: Bookmark },
 ];
 
