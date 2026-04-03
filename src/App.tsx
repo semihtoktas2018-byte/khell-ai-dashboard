@@ -18,6 +18,7 @@ import ViralDiscovery from "./pages/ViralDiscovery";
 import AutoHunter from "./pages/AutoHunter";
 import ViralProducts from "./pages/ViralProducts";
 import ProductPageGenerator from "./pages/ProductPageGenerator";
+import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 
