@@ -27,6 +27,7 @@ const MIDDLE_EAST = ["turkey","türkiye","tr","saudi arabia","sa","uae","ae","qa
 const HIGH_VISUAL_CATS = ["furniture","home decor","luxury decor","home design","fashion","jewelry","watches","bags","shoes","lighting","decoration","aksesuar","mobilya","dekorasyon"];
 const LUXURY_CATS = ["luxury decor","jewelry","watches","premium","luxury","furniture","mobilya"];
 const TREND_CATS = ["gadget","tech","electronics","phone accessories","tiktok","viral","fitness","beauty","kozmetik"];
+const SATURATED_KEYWORDS = ["powerbank","power bank","phone case","kılıf","cable","kablo","charger","şarj","şarj cihazı","earbuds","kulaklık","mouse pad","screen protector","cam filmi","usb","hdmi","adapter","adaptör","selfie stick","pop socket","ring holder"];
 
 function norm(v: number, min: number, max: number) {
   return Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
