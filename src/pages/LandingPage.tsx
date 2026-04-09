@@ -213,14 +213,23 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  onClick={() => navigate("/auth")}
-                  className={`w-full py-3 rounded-lg font-semibold text-sm transition-all ${
-                    plan.popular ? "btn-primary" : "btn-ghost"
-                  }`}
-                >
-                  {plan.cta}
-                </button>
+                {plan.href ? (
+                  <a
+                    href={plan.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-primary"
+                  >
+                    {plan.cta}
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className={`w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost`}
+                  >
+                    {plan.cta}
+                  </button>
+                )}
               </motion.div>
             ))}
           </div>
