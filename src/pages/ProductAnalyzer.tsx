@@ -190,7 +190,13 @@ export default function ProductAnalyzer() {
               </div>
             ))}
           </div>
-          <button onClick={handleAnalyze} className="btn-primary w-full mt-6">Analiz Et</button>
+          <div className="flex items-center justify-between">
+            <button onClick={handleAnalyze} className="btn-primary flex-1 mr-3">Analiz Et</button>
+            <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
+              <History className="h-3.5 w-3.5" /> Geçmiş ({history.length})
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1.5 text-right">Bugün: {todayCount}/{dailyLimit} analiz</p>
         </motion.div>
 
         {/* Result */}
