@@ -88,12 +88,23 @@ export default function ProductAnalyzer() {
       toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" });
       return;
     }
-    const count = parseInt(sessionStorage.getItem("khell_analysis_count") || "0", 10);
-    if (count >= 3) {
+    if (!canAnalyze) {
       setShowPaywall(true);
       return;
     }
-    sessionStorage.setItem("khell_analysis_count", String(count + 1));
+    // Save to analysis history
+    addAnalysis({
+      productName: productName || "İsimsiz Ürün",
+      sellingPrice: input.selling_price,
+      productCost: input.product_cost,
+      shippingCost: input.shipping_cost,
+      adsCost: input.ads_cost,
+      monthlyOrders: input.monthly_orders_estimate,
+      decisionScore: result.decision_score,
+      profitMargin: Math.round(result.profit_margin * 10) / 10,
+      riskLevel: result.risk_level,
+      monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
+    });
     setShowResult(true);
   };
 
