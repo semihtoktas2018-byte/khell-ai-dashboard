@@ -33,11 +33,12 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$29",
+    price: "99₺",
     period: "/ay",
     features: ["Sınırsız analiz", "Gelişmiş risk skoru", "Tedarikçi karşılaştırma", "Ürün kaydetme", "Öncelikli destek"],
-    cta: "Pro'ya Geç",
+    cta: "Premium Ol - Aylık 99₺",
     popular: true,
+    href: "https://shopier.com/bamironlinestore/46009500",
   },
   {
     name: "Enterprise",
