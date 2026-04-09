@@ -316,7 +316,7 @@ export default function ProductAnalyzer() {
               <Lock className="h-5 w-5 text-primary" /> Limit Doldu — Pro'ya Geç
             </DialogTitle>
             <DialogDescription>
-              Ücretsiz planda oturum başına 3 analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
+              Ücretsiz planda günde {dailyLimit} analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
@@ -332,6 +332,49 @@ export default function ProductAnalyzer() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Analysis History */}
+      {showHistory && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <History className="h-4 w-4 text-primary" /> Analiz Geçmişi
+            </h3>
+            {history.length > 0 && (
+              <button onClick={() => { clearHistory(); toast({ title: "Temizlendi", description: "Analiz geçmişi silindi" }); }} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                <Trash2 className="h-3 w-3" /> Temizle
+              </button>
+            )}
+          </div>
+          {history.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-6">Henüz analiz yapılmadı.</p>
+          ) : (
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {history.map((r) => {
+                const riskLabel = r.riskLevel === "low" ? "Düşük" : r.riskLevel === "medium" ? "Orta" : "Yüksek";
+                const riskClass = r.riskLevel === "low" ? "text-winning" : r.riskLevel === "medium" ? "text-risky" : "text-destructive";
+                return (
+                  <div key={r.id} className="flex items-center justify-between rounded-lg bg-accent/30 p-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{r.productName}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {new Date(r.createdAt).toLocaleDateString("tr-TR")} · Marj: %{r.profitMargin} · ${r.monthlyProfit}/ay
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-3 shrink-0">
+                      <div className="text-center">
+                        <p className="text-lg font-bold font-mono tabular-nums text-primary">{r.decisionScore}</p>
+                        <p className="text-[9px] text-muted-foreground">Skor</p>
+                      </div>
+                      <span className={`text-[10px] font-medium ${riskClass}`}>{riskLabel}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }
