@@ -102,6 +102,15 @@ export default function DashboardLayout() {
         {/* User & Logout */}
         {!collapsed && (
           <div className="px-4 py-4 border-t border-border space-y-3">
+            <a
+              href="https://shopier.com/bamironlinestore/46009500"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold text-xs py-2.5 px-3 transition-all shadow-lg shadow-amber-500/20"
+            >
+              <Zap className="h-3.5 w-3.5" />
+              Premium Ol - Aylık 99₺
+            </a>
             {user && (
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
