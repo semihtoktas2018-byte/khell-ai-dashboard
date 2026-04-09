@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Share2, FileText, Lock } from "lucide-react";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Share2, FileText, Lock, History, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -45,13 +46,11 @@ export default function ProductAnalyzer() {
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
-  const analysisCount = useRef(() => {
-    const c = sessionStorage.getItem("khell_analysis_count");
-    return c ? parseInt(c, 10) : 0;
-  });
   const { saveProduct, isProductSaved } = useSavedProducts();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory } = useAnalysisHistory();
   const { toast } = useToast();
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
@@ -89,12 +88,23 @@ export default function ProductAnalyzer() {
       toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" });
       return;
     }
-    const count = parseInt(sessionStorage.getItem("khell_analysis_count") || "0", 10);
-    if (count >= 3) {
+    if (!canAnalyze) {
       setShowPaywall(true);
       return;
     }
-    sessionStorage.setItem("khell_analysis_count", String(count + 1));
+    // Save to analysis history
+    addAnalysis({
+      productName: productName || "İsimsiz Ürün",
+      sellingPrice: input.selling_price,
+      productCost: input.product_cost,
+      shippingCost: input.shipping_cost,
+      adsCost: input.ads_cost,
+      monthlyOrders: input.monthly_orders_estimate,
+      decisionScore: result.decision_score,
+      profitMargin: Math.round(result.profit_margin * 10) / 10,
+      riskLevel: result.risk_level,
+      monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
+    });
     setShowResult(true);
   };
 
@@ -180,7 +190,13 @@ export default function ProductAnalyzer() {
               </div>
             ))}
           </div>
-          <button onClick={handleAnalyze} className="btn-primary w-full mt-6">Analiz Et</button>
+          <div className="flex items-center justify-between">
+            <button onClick={handleAnalyze} className="btn-primary flex-1 mr-3">Analiz Et</button>
+            <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
+              <History className="h-3.5 w-3.5" /> Geçmiş ({history.length})
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1.5 text-right">Bugün: {todayCount}/{dailyLimit} analiz</p>
         </motion.div>
 
         {/* Result */}
@@ -300,7 +316,7 @@ export default function ProductAnalyzer() {
               <Lock className="h-5 w-5 text-primary" /> Limit Doldu — Pro'ya Geç
             </DialogTitle>
             <DialogDescription>
-              Ücretsiz planda oturum başına 3 analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
+              Ücretsiz planda günde {dailyLimit} analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
@@ -316,6 +332,49 @@ export default function ProductAnalyzer() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Analysis History */}
+      {showHistory && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <History className="h-4 w-4 text-primary" /> Analiz Geçmişi
+            </h3>
+            {history.length > 0 && (
+              <button onClick={() => { clearHistory(); toast({ title: "Temizlendi", description: "Analiz geçmişi silindi" }); }} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                <Trash2 className="h-3 w-3" /> Temizle
+              </button>
+            )}
+          </div>
+          {history.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-6">Henüz analiz yapılmadı.</p>
+          ) : (
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {history.map((r) => {
+                const riskLabel = r.riskLevel === "low" ? "Düşük" : r.riskLevel === "medium" ? "Orta" : "Yüksek";
+                const riskClass = r.riskLevel === "low" ? "text-winning" : r.riskLevel === "medium" ? "text-risky" : "text-destructive";
+                return (
+                  <div key={r.id} className="flex items-center justify-between rounded-lg bg-accent/30 p-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{r.productName}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {new Date(r.createdAt).toLocaleDateString("tr-TR")} · Marj: %{r.profitMargin} · ${r.monthlyProfit}/ay
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 ml-3 shrink-0">
+                      <div className="text-center">
+                        <p className="text-lg font-bold font-mono tabular-nums text-primary">{r.decisionScore}</p>
+                        <p className="text-[9px] text-muted-foreground">Skor</p>
+                      </div>
+                      <span className={`text-[10px] font-medium ${riskClass}`}>{riskLabel}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }

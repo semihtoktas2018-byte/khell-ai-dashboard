@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis
 import { trendingProducts } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { useNavigate } from "react-router-dom";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -25,6 +26,7 @@ const demoProduct = {
 
 export default function DashboardHome() {
   const { products: savedProducts } = useSavedProducts();
+  const { history: analysisHistory } = useAnalysisHistory();
   const navigate = useNavigate();
   const topTrending = trendingProducts.slice(0, 4);
 
@@ -38,17 +40,19 @@ export default function DashboardHome() {
   }, [navigate]);
 
   const metrics = useMemo(() => {
-    const total = savedProducts.length;
+    // "Analiz Edilen" = total unique analyses performed (from history)
+    const totalAnalyzed = analysisHistory.length;
+    // Winning/risky from saved products
     const winning = savedProducts.filter((p) => p.decisionScore >= 70 && p.riskLevel === "low").length;
     const risky = savedProducts.filter((p) => p.riskLevel === "medium" || p.riskLevel === "high").length;
     const totalProfit = savedProducts.reduce((sum, p) => sum + (p.monthlyProfit ?? 0), 0);
     return {
-      analyzed: total || 0,
+      analyzed: totalAnalyzed || 0,
       winning: winning || 0,
       risky: risky || 0,
       profit: totalProfit || 0,
     };
-  }, [savedProducts]);
+  }, [savedProducts, analysisHistory]);
 
   const stats = [
     { label: "Analiz Edilen", value: metrics.analyzed, icon: BarChart3, colorClass: "text-primary" },

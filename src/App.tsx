@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
+import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
@@ -35,6 +36,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <SavedProductsProvider>
+          <AnalysisHistoryProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -57,6 +59,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          </AnalysisHistoryProvider>
         </SavedProductsProvider>
       </AuthProvider>
     </TooltipProvider>
