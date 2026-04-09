@@ -46,13 +46,11 @@ export default function ProductAnalyzer() {
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
-  const analysisCount = useRef(() => {
-    const c = sessionStorage.getItem("khell_analysis_count");
-    return c ? parseInt(c, 10) : 0;
-  });
   const { saveProduct, isProductSaved } = useSavedProducts();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory } = useAnalysisHistory();
   const { toast } = useToast();
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
