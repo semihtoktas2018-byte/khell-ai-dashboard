@@ -203,28 +203,39 @@ export default function ProductAnalyzer() {
         <AnimatePresence mode="wait">
           {showResult && input.selling_price > 0 && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={transition} className="space-y-4">
-              {/* Decision Score */}
-              <div className="card-glow rounded-xl p-6">
+              {/* Winning Product Header */}
+              <div className={`card-glow rounded-xl p-6 border-2 ${
+                result.decision_score >= 80 ? "border-winning/40" : result.decision_score >= 60 ? "border-risky/40" : "border-destructive/40"
+              }`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-foreground">Karar Skoru</h3>
+                  {result.decision_score >= 80 ? (
+                    <h3 className="text-base font-bold text-winning flex items-center gap-2">🔥 WINNING PRODUCT DETECTED</h3>
+                  ) : result.decision_score >= 60 ? (
+                    <h3 className="text-base font-bold text-risky flex items-center gap-2">⚠️ Needs Optimization</h3>
+                  ) : (
+                    <h3 className="text-base font-bold text-destructive flex items-center gap-2">❌ Not Recommended</h3>
+                  )}
                   <button onClick={handleSave} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
                     <Save className="h-3.5 w-3.5" /> Kaydet
                   </button>
                 </div>
-                <div className={`rounded-lg p-5 text-center ${result.verdict.class}`}>
-                  <div className="text-5xl font-bold font-mono tabular-nums mb-1">{result.decision_score}</div>
-                  <div className="text-xs uppercase tracking-widest opacity-70 mb-2">/ 100</div>
-                  <p className="text-lg font-semibold">{result.verdict.labelTr}</p>
-                  <p className="text-sm mt-1 opacity-80">Kâr Marjı: %{result.profit_margin.toFixed(1)}</p>
+                <div className="text-center mb-4">
+                  <div className={`text-6xl font-black font-mono tabular-nums mb-1 ${
+                    result.decision_score >= 80 ? "text-winning" : result.decision_score >= 60 ? "text-risky" : "text-destructive"
+                  }`}>{result.decision_score}</div>
+                  <div className="text-xs uppercase tracking-widest text-muted-foreground">Score / 100</div>
                 </div>
+                <p className="text-sm text-center font-medium text-muted-foreground">
+                  {result.decision_score >= 80 ? "This product can scale fast" : result.decision_score >= 60 ? "Needs optimization" : "Not recommended"}
+                </p>
               </div>
 
               {/* Stats Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Brüt Kâr" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
-                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Net Kâr / Sipariş" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
-                <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Aylık Kâr" value={`$${result.monthly_profit.toFixed(0)}`} positive={result.monthly_profit > 0} />
-                <StatCard label="Risk" value={riskLabelMap[result.risk_level]} className={riskColorMap[result.risk_level]} />
+                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Profit / Sale" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
+                <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Margin %" value={`${result.profit_margin.toFixed(1)}%`} positive={result.profit_margin > 0} />
+                <StatCard label="Demand" value={result.decision_score >= 70 ? "High" : result.decision_score >= 45 ? "Medium" : "Low"} className={result.decision_score >= 70 ? "text-winning" : result.decision_score >= 45 ? "text-risky" : "text-destructive"} />
+                <StatCard label="Competition" value={result.risk_level === "low" ? "Low" : result.risk_level === "medium" ? "Medium" : "High"} className={riskColorMap[result.risk_level]} />
               </div>
 
               {/* Action Buttons */}
@@ -310,24 +321,33 @@ export default function ProductAnalyzer() {
 
       {/* Paywall Modal */}
       <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-primary" /> Limit Doldu — Pro'ya Geç
+        <DialogContent className="sm:max-w-md text-center">
+          <DialogHeader className="items-center">
+            <div className="text-5xl mb-2">🔥</div>
+            <DialogTitle className="text-xl font-bold text-foreground">
+              You just found a winning product
             </DialogTitle>
-            <DialogDescription>
-              Ücretsiz planda günde {dailyLimit} analiz hakkınız var. Sınırsız analiz, reklam hook'ları ve daha fazlası için Pro'ya geçin.
+            <DialogDescription className="text-sm text-muted-foreground mt-2">
+              Unlock unlimited analysis and keep finding profitable products
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 pt-2">
-            <div className="rounded-lg bg-accent/30 p-4 text-sm text-muted-foreground space-y-1">
-              <p>✓ Sınırsız ürün analizi</p>
-              <p>✓ Gelişmiş risk raporu</p>
-              <p>✓ Reklam hook oluşturucu</p>
-              <p>✓ Öncelikli destek</p>
+          <div className="space-y-4 pt-4">
+            <div className="rounded-lg bg-accent/30 p-4 text-sm text-muted-foreground space-y-1.5 text-left">
+              <p>✓ Unlimited product analysis</p>
+              <p>✓ Advanced risk reports</p>
+              <p>✓ Ad hook generator</p>
+              <p>✓ Priority support</p>
             </div>
-            <button onClick={() => { setShowPaywall(false); toast({ title: "Yakında", description: "Pro plan çok yakında aktif olacak!" }); }} className="btn-primary w-full">
-              Pro'ya Yükselt
+            <a
+              href="https://www.shopier.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary w-full block text-center py-3 font-bold text-base"
+            >
+              GET PRO ACCESS
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline w-full">
+              Maybe later
             </button>
           </div>
         </DialogContent>

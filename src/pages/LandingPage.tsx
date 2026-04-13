@@ -100,12 +100,9 @@ export default function LandingPage() {
               Ürün Senden Analiz KHELL'den
             </motion.p>
 
-            <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mb-16">
-              <button onClick={() => navigate("/auth")} className="btn-primary text-base">
-                Hemen Başla
-              </button>
-              <button onClick={() => navigate("/auth")} className="btn-ghost text-base">
-                Demo Gör
+            <motion.div variants={fadeUp} className="flex items-center justify-center mb-16">
+              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
+                START FREE ANALYSIS
               </button>
             </motion.div>
 
@@ -249,12 +246,9 @@ export default function LandingPage() {
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               Binlerce e-ticaret girişimcisi KHELL AI ile kârlı ürünleri keşfediyor.
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <button onClick={() => navigate("/auth")} className="btn-primary text-base">
-                Ücretsiz Başla
-              </button>
-              <button onClick={() => navigate("/auth")} className="btn-ghost text-base">
-                Demo Gör
+            <div className="flex items-center justify-center">
+              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
+                START FREE ANALYSIS
               </button>
             </div>
           </motion.div>
