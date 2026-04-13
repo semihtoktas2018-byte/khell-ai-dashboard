@@ -5,9 +5,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Share2, FileText, Lock, History, Trash2 } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -28,7 +27,6 @@ const fields: { key: keyof AnalyzerInput; label: string; suffix?: string; placeh
 ];
 
 const riskColorMap = { low: "text-winning", medium: "text-risky", high: "text-destructive" };
-const riskLabelMap = { low: "Düşük Risk", medium: "Orta Risk", high: "Yüksek Risk" };
 
 function buildMonthlyProjection(baseProfit: number) {
   const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz"];
@@ -39,6 +37,33 @@ function buildMonthlyProjection(baseProfit: number) {
   }));
 }
 
+// Social proof messages for micro-conversion
+const socialProofMessages = [
+  "Ali just found a winning product 🔥",
+  "John upgraded to PRO 🚀",
+  "Sarah analyzed 12 products today ✅",
+  "Mehmet found a $2k/mo product 💰",
+  "Emma just unlocked PRO access 🔓",
+];
+
+function getDemandLevel(monthlyOrders: number) {
+  if (monthlyOrders >= 50) return "HIGH";
+  if (monthlyOrders >= 20) return "MEDIUM";
+  return "LOW";
+}
+
+function getCompetitionLevel(profitMargin: number) {
+  if (profitMargin >= 35) return "LOW";
+  if (profitMargin >= 20) return "MEDIUM";
+  return "HIGH";
+}
+
+function getScoreLabel(score: number) {
+  if (score >= 80) return { text: "Scaling Opportunity 🚀", color: "text-winning" };
+  if (score >= 60) return { text: "Testable Product ⚠️", color: "text-risky" };
+  return { text: "Not Recommended ❌", color: "text-destructive" };
+}
+
 export default function ProductAnalyzer() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -47,6 +72,8 @@ export default function ProductAnalyzer() {
   const [productName, setProductName] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [socialProofIndex, setSocialProofIndex] = useState(0);
+  const [showSocialProof, setShowSocialProof] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
@@ -54,7 +81,21 @@ export default function ProductAnalyzer() {
   const { toast } = useToast();
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
-  // Step 1: Populate input from URL params
+  // Social proof ticker
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSocialProofIndex((i) => (i + 1) % socialProofMessages.length);
+      setShowSocialProof(true);
+      setTimeout(() => setShowSocialProof(false), 3500);
+    }, 6000);
+    // Show first one after 2s
+    const initial = setTimeout(() => {
+      setShowSocialProof(true);
+      setTimeout(() => setShowSocialProof(false), 3500);
+    }, 2000);
+    return () => { clearInterval(interval); clearTimeout(initial); };
+  }, []);
+
   useEffect(() => {
     if (hasAutoAnalyzed.current) return;
     const name = searchParams.get("productName");
@@ -68,7 +109,6 @@ export default function ProductAnalyzer() {
     }
   }, [searchParams]);
 
-  // Step 2: After input state is updated, show results
   useEffect(() => {
     if (pendingAutoShow.current && input.selling_price > 0) {
       pendingAutoShow.current = false;
@@ -78,6 +118,7 @@ export default function ProductAnalyzer() {
 
   const result = analyzeProduct(input);
   const risks = analyzeRisk(input);
+  const remaining = dailyLimit - todayCount;
 
   const handleChange = (key: keyof AnalyzerInput, val: string) => {
     setInput((prev) => ({ ...prev, [key]: parseFloat(val) || 0 }));
@@ -92,7 +133,6 @@ export default function ProductAnalyzer() {
       setShowPaywall(true);
       return;
     }
-    // Save to analysis history
     addAnalysis({
       productName: productName || "İsimsiz Ürün",
       sellingPrice: input.selling_price,
@@ -106,25 +146,6 @@ export default function ProductAnalyzer() {
       monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
     });
     setShowResult(true);
-  };
-
-  const handleShare = () => {
-    const text = `Bu üründe aylık $${Math.round(result.monthly_profit)}+ kâr potansiyeli buldum 🔥\nKarar Skoru: ${result.decision_score}/100\nKHELL AI ile analiz edildi.`;
-    navigator.clipboard.writeText(text);
-    toast({ title: "Kopyalandı", description: "Sonuç panoya kopyalandı" });
-  };
-
-  const handleGoToPageGenerator = () => {
-    const params = new URLSearchParams({
-      name: productName || "Ürün",
-      sellingPrice: String(input.selling_price),
-      cost: String(input.product_cost),
-      margin: String(Math.round(result.profit_margin)),
-      trendScore: "85",
-      riskLevel: result.risk_level === "low" ? "Düşük" : result.risk_level === "medium" ? "Orta" : "Yüksek",
-      category: "Tech",
-    });
-    navigate(`/dashboard/product-page-generator?${params.toString()}`);
   };
 
   const handleSave = () => {
@@ -148,9 +169,12 @@ export default function ProductAnalyzer() {
   };
 
   const monthlyData = buildMonthlyProjection(result.monthly_profit);
+  const demand = getDemandLevel(input.monthly_orders_estimate);
+  const competition = getCompetitionLevel(result.profit_margin);
+  const scoreLabel = getScoreLabel(result.decision_score);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Onboarding Step Indicator */}
       {fromOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -158,6 +182,7 @@ export default function ProductAnalyzer() {
           <span>— Ürünü analiz edin, ardından satış sayfası oluşturun</span>
         </motion.div>
       )}
+
       {/* Product Name */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <input
@@ -190,31 +215,30 @@ export default function ProductAnalyzer() {
               </div>
             ))}
           </div>
+
           <div className="flex items-center justify-between">
             <button onClick={handleAnalyze} className="btn-primary flex-1 mr-3">Analiz Et</button>
             <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
               <History className="h-3.5 w-3.5" /> Geçmiş ({history.length})
             </button>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5 text-right">Bugün: {todayCount}/{dailyLimit} analiz</p>
+
+          {/* Remaining analyses indicator */}
+          <p className={`text-xs font-medium mt-2 text-center ${remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
+            {remaining > 0 ? `${remaining} free analyses remaining` : "⚠️ Limit reached"}
+          </p>
         </motion.div>
 
         {/* Result */}
         <AnimatePresence mode="wait">
           {showResult && input.selling_price > 0 && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={transition} className="space-y-4">
-              {/* Winning Product Header */}
+              {/* Score Card */}
               <div className={`card-glow rounded-xl p-6 border-2 ${
                 result.decision_score >= 80 ? "border-winning/40" : result.decision_score >= 60 ? "border-risky/40" : "border-destructive/40"
               }`}>
                 <div className="flex items-center justify-between mb-4">
-                  {result.decision_score >= 80 ? (
-                    <h3 className="text-base font-bold text-winning flex items-center gap-2">🔥 WINNING PRODUCT DETECTED</h3>
-                  ) : result.decision_score >= 60 ? (
-                    <h3 className="text-base font-bold text-risky flex items-center gap-2">⚠️ Needs Optimization</h3>
-                  ) : (
-                    <h3 className="text-base font-bold text-destructive flex items-center gap-2">❌ Not Recommended</h3>
-                  )}
+                  <h3 className={`text-base font-bold ${scoreLabel.color}`}>{scoreLabel.text}</h3>
                   <button onClick={handleSave} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
                     <Save className="h-3.5 w-3.5" /> Kaydet
                   </button>
@@ -230,21 +254,65 @@ export default function ProductAnalyzer() {
                 </p>
               </div>
 
+              {/* 🔥 WINNING PRODUCT ANALYSIS — Sales Block */}
+              <div className="rounded-xl p-5 border border-border bg-[hsl(var(--card))] shadow-lg">
+                <h4 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  🔥 WINNING PRODUCT ANALYSIS
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-accent/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Profit / Sale</p>
+                    <p className={`text-lg font-bold font-mono ${result.gross_profit > 0 ? "text-winning" : "text-destructive"}`}>
+                      ${result.gross_profit.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-accent/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Margin</p>
+                    <p className={`text-lg font-bold font-mono ${result.profit_margin >= 30 ? "text-winning" : result.profit_margin >= 15 ? "text-risky" : "text-destructive"}`}>
+                      {result.profit_margin.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-accent/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Demand</p>
+                    <p className={`text-lg font-bold ${demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"}`}>
+                      {demand}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-accent/40 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Competition</p>
+                    <p className={`text-lg font-bold ${competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"}`}>
+                      {competition}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 rounded-lg bg-accent/20 p-3 text-center">
+                  <p className="text-xs font-bold font-mono text-muted-foreground mb-1">SCORE</p>
+                  <p className={`text-2xl font-black font-mono ${scoreLabel.color}`}>{result.decision_score}/100</p>
+                </div>
+                <div className={`mt-3 text-center text-sm font-semibold ${scoreLabel.color}`}>
+                  {result.decision_score >= 80
+                    ? "✅ You can scale this product fast"
+                    : result.decision_score >= 60
+                    ? "⚠️ Test before scaling"
+                    : "❌ Not recommended"}
+                </div>
+              </div>
+
               {/* Stats Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Profit / Sale" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
                 <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Margin %" value={`${result.profit_margin.toFixed(1)}%`} positive={result.profit_margin > 0} />
-                <StatCard label="Demand" value={result.decision_score >= 70 ? "High" : result.decision_score >= 45 ? "Medium" : "Low"} className={result.decision_score >= 70 ? "text-winning" : result.decision_score >= 45 ? "text-risky" : "text-destructive"} />
-                <StatCard label="Competition" value={result.risk_level === "low" ? "Low" : result.risk_level === "medium" ? "Medium" : "High"} className={riskColorMap[result.risk_level]} />
+                <StatCard label="Demand" value={demand} className={demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"} />
+                <StatCard label="Competition" value={competition} className={competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"} />
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Button — Paywall trigger */}
               <div className="flex flex-wrap gap-2">
-                <button onClick={handleShare} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
-                  <Share2 className="h-3.5 w-3.5" /> Sonucu Paylaş
-                </button>
-                <button onClick={handleGoToPageGenerator} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors">
-                  <FileText className="h-3.5 w-3.5" /> {fromOnboarding ? "Adım 3/3: Sayfa Oluştur →" : "Sayfa Oluştur"}
+                <button
+                  onClick={() => setShowPaywall(true)}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white transition-all shadow-lg shadow-amber-500/20"
+                >
+                  <Lock className="h-3.5 w-3.5" /> Unlock More Winners 🔒
                 </button>
               </div>
             </motion.div>
@@ -319,39 +387,65 @@ export default function ProductAnalyzer() {
         )}
       </AnimatePresence>
 
-      {/* Paywall Modal */}
-      <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
-        <DialogContent className="sm:max-w-md text-center">
-          <DialogHeader className="items-center">
-            <div className="text-5xl mb-2">🔥</div>
-            <DialogTitle className="text-xl font-bold text-foreground">
-              You just found a winning product
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-2">
-              Unlock unlimited analysis and keep finding profitable products
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="rounded-lg bg-accent/30 p-4 text-sm text-muted-foreground space-y-1.5 text-left">
-              <p>✓ Unlimited product analysis</p>
-              <p>✓ Advanced risk reports</p>
-              <p>✓ Ad hook generator</p>
-              <p>✓ Priority support</p>
-            </div>
-            <a
-              href="https://www.shopier.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary w-full block text-center py-3 font-bold text-base"
+      {/* FULLSCREEN PAYWALL OVERLAY */}
+      <AnimatePresence>
+        {showPaywall && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md mx-4 rounded-2xl border border-border bg-[hsl(var(--card))] p-8 shadow-2xl text-center"
             >
-              GET PRO ACCESS
-            </a>
-            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline w-full">
-              Maybe later
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <div className="text-5xl mb-4">🔒</div>
+              <h2 className="text-2xl font-black text-foreground mb-2">Free limit reached</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                You just discovered a profitable product. Don't stop now.
+              </p>
+
+              <div className="text-left space-y-3 mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-winning text-base">✔</span>
+                  <span className="text-sm text-foreground">Unlimited product analysis</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-winning text-base">✔</span>
+                  <span className="text-sm text-foreground">Profit & competitor insights</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-winning text-base">✔</span>
+                  <span className="text-sm text-foreground">Find winning products faster</span>
+                </div>
+              </div>
+
+              <a
+                href="https://shopier.com/bamironlinestore/46009500"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25"
+              >
+                GET PRO ACCESS
+              </a>
+
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Limited early users price – will increase soon
+              </p>
+
+              <button
+                onClick={() => setShowPaywall(false)}
+                className="text-xs text-muted-foreground hover:underline mt-4"
+              >
+                Maybe later
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Analysis History */}
       {showHistory && (
@@ -395,6 +489,21 @@ export default function ProductAnalyzer() {
           )}
         </motion.div>
       )}
+
+      {/* Social Proof Floating Toast */}
+      <AnimatePresence>
+        {showSocialProof && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, x: 0 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-6 left-6 z-50 rounded-lg bg-[hsl(var(--card))] border border-border px-4 py-2.5 shadow-xl"
+          >
+            <p className="text-xs font-medium text-foreground">{socialProofMessages[socialProofIndex]}</p>
+            <p className="text-[10px] text-muted-foreground">just now</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

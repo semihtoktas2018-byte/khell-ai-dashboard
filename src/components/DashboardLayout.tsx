@@ -106,10 +106,12 @@ export default function DashboardLayout() {
               href="https://shopier.com/bamironlinestore/46009500"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold text-xs py-2.5 px-3 transition-all shadow-lg shadow-amber-500/20"
+              className="flex flex-col items-center w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white py-3 px-3 transition-all shadow-lg shadow-amber-500/20"
             >
-              <Zap className="h-3.5 w-3.5" />
-              Premium Ol - Aylık 99₺
+              <span className="text-xs font-bold flex items-center gap-1.5">🔥 PRO ACCESS</span>
+              <span className="text-[10px] opacity-90 mt-0.5">Unlimited Analysis</span>
+              <span className="text-[10px] opacity-90">Find Winning Products</span>
+              <span className="mt-2 text-xs font-bold bg-white/20 rounded-md px-3 py-1">Upgrade Now</span>
             </a>
             {user && (
               <div className="flex items-center justify-between">
