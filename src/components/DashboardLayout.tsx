@@ -2,22 +2,23 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
 
-const navItems = [
-  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Ürün Analizi", path: "/dashboard/analyzer", icon: Calculator },
-  { label: "Kazanan Ürünler", path: "/dashboard/winning", icon: TrendingUp },
-  { label: "Viral Ürün Keşfi", path: "/dashboard/discovery", icon: Flame },
-  { label: "Viral Ürün Bulucu", path: "/dashboard/viral-products", icon: Search },
-  { label: "Auto Product Hunter", path: "/dashboard/hunter", icon: Crosshair },
-  { label: "Tedarikçiler", path: "/dashboard/suppliers", icon: Truck },
-  { label: "Risk Analizi", path: "/dashboard/risk", icon: Shield },
-  { label: "Ürün Sayfası Oluşturucu", path: "/dashboard/product-page-generator", icon: FileText },
-  { label: "Sales Decision Engine", path: "/dashboard/sales-decision", icon: Brain },
-  { label: "Kaydedilenler", path: "/dashboard/saved", icon: Bookmark },
+const navKeys = [
+  { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator },
+  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp },
+  { labelKey: "nav.discovery", path: "/dashboard/discovery", icon: Flame },
+  { labelKey: "nav.viral", path: "/dashboard/viral-products", icon: Search },
+  { labelKey: "nav.hunter", path: "/dashboard/hunter", icon: Crosshair },
+  { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck },
+  { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield },
+  { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText },
+  { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain },
+  { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
 ];
 
 export default function DashboardLayout() {
@@ -26,6 +27,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t, locale, setLocale } = useLocale();
 
   const handleLogout = () => {
     logout();
@@ -77,7 +79,7 @@ export default function DashboardLayout() {
 
         {/* Nav */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {navKeys.map((item) => {
             const active = location.pathname === item.path;
             return (
               <button
@@ -93,7 +95,7 @@ export default function DashboardLayout() {
                 }`}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
+                {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
               </button>
             );
           })}
@@ -108,10 +110,10 @@ export default function DashboardLayout() {
               rel="noopener noreferrer"
               className="flex flex-col items-center w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white py-3 px-3 transition-all shadow-lg shadow-amber-500/20"
             >
-              <span className="text-xs font-bold flex items-center gap-1.5">🔥 PRO ACCESS</span>
-              <span className="text-[10px] opacity-90 mt-0.5">Unlimited Analysis</span>
-              <span className="text-[10px] opacity-90">Find Winning Products</span>
-              <span className="mt-2 text-xs font-bold bg-white/20 rounded-md px-3 py-1">Upgrade Now</span>
+              <span className="text-xs font-bold flex items-center gap-1.5">{t("nav.proAccess")}</span>
+              <span className="text-[10px] opacity-90 mt-0.5">{t("nav.unlimited")}</span>
+              <span className="text-[10px] opacity-90">{t("nav.findWinning")}</span>
+              <span className="mt-2 text-xs font-bold bg-white/20 rounded-md px-3 py-1">{t("nav.upgradeNow")}</span>
             </a>
             {user && (
               <div className="flex items-center justify-between">
@@ -125,7 +127,7 @@ export default function DashboardLayout() {
               </div>
             )}
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              A BAMİR Online Store's Production
+              {t("nav.production")}
             </p>
           </div>
         )}
@@ -140,9 +142,19 @@ export default function DashboardLayout() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h2 className="text-sm font-semibold text-foreground">
-            {navItems.find((n) => n.path === location.pathname)?.label ?? "Dashboard"}
+          <h2 className="text-sm font-semibold text-foreground flex-1">
+            {navKeys.find((n) => n.path === location.pathname)?.labelKey
+              ? t(navKeys.find((n) => n.path === location.pathname)!.labelKey)
+              : "Dashboard"}
           </h2>
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {locale === "tr" ? "TR" : "EN"}
+          </button>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
