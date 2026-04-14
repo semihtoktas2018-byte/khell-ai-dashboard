@@ -10,11 +10,13 @@ import { scanAllProducts, type HunterCandidate } from "@/lib/auto-hunter";
 import { calculateWinningScore, tierColor, tierBg } from "@/lib/winning-engine";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
+import { useLocale } from "@/contexts/LocaleContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from "recharts";
 
 export default function AutoHunter() {
   const { toast } = useToast();
   const { saveProduct } = useSavedProducts();
+  const { t } = useLocale();
   const [platformFilter, setPlatformFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"hunterScore" | "trendScore" | "estimatedMargin">("hunterScore");
 
@@ -36,116 +38,95 @@ export default function AutoHunter() {
   const radarData = useMemo(() => {
     if (!topProduct) return [];
     return [
-      { metric: "Trend", value: topProduct.trendScore },
-      { metric: "Etkileşim", value: topProduct.engagementScore },
-      { metric: "Marj", value: Math.min(100, topProduct.estimatedMargin * 1.5) },
-      { metric: "Rekabet", value: topProduct.competitionLevel === "Low" ? 90 : topProduct.competitionLevel === "Medium" ? 55 : 20 },
-      { metric: "Skor", value: topProduct.hunterScore },
+      { metric: t("hunter.trend"), value: topProduct.trendScore },
+      { metric: t("hunter.engagement"), value: topProduct.engagementScore },
+      { metric: t("hunter.margin"), value: Math.min(100, topProduct.estimatedMargin * 1.5) },
+      { metric: t("hunter.competition"), value: topProduct.competitionLevel === "Low" ? 90 : topProduct.competitionLevel === "Medium" ? 55 : 20 },
+      { metric: t("savedProd.score"), value: topProduct.hunterScore },
     ];
-  }, [topProduct]);
+  }, [topProduct, t]);
 
   const barData = useMemo(() => {
-    return filtered.slice(0, 7).map((p) => ({
-      name: p.name.length > 12 ? p.name.slice(0, 12) + "…" : p.name,
-      score: p.hunterScore,
-    }));
+    return filtered.slice(0, 7).map((p) => ({ name: p.name.length > 12 ? p.name.slice(0, 12) + "…" : p.name, score: p.hunterScore }));
   }, [filtered]);
 
   const handleSave = (p: HunterCandidate) => {
     const riskLevel = p.competitionLevel === "High" ? "high" : p.competitionLevel === "Medium" ? "medium" : "low";
     saveProduct({ name: p.name, profitMargin: p.estimatedMargin, riskLevel, decisionScore: p.hunterScore, monthlyProfit: Math.round((p.estimatedSellingPrice - p.estimatedCost) * 30) });
-    toast({ title: "Kaydedildi", description: `${p.name} ürün listenize eklendi` });
+    toast({ title: t("hunter.saved"), description: `${p.name} ${t("hunter.savedDesc")}` });
   };
+
+  const compLabel = (level: string) => level === "Low" ? t("viralDisc.lowLevel") : level === "Medium" ? t("viralDisc.medLevel") : t("viralDisc.highLevel");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Crosshair className="h-6 w-6 text-primary" /> Auto Product Hunter
+            <Crosshair className="h-6 w-6 text-primary" /> {t("hunter.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Yapay zeka ile en yüksek potansiyelli ürünleri keşfedin</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("hunter.desc")}</p>
         </div>
         <Badge className="bg-primary/10 text-primary border-primary/20">Top {filtered.length}</Badge>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Taranan Ürün", value: candidates.length, icon: Target },
-          { label: "Ortalama Skor", value: Math.round(candidates.reduce((s, p) => s + p.hunterScore, 0) / (candidates.length || 1)), icon: TrendingUp },
-          { label: "Yüksek Marj", value: candidates.filter((p) => p.estimatedMargin > 50).length, icon: Zap },
-          { label: "Düşük Rekabet", value: candidates.filter((p) => p.competitionLevel === "Low").length, icon: Trophy },
+          { label: t("hunter.scanned"), value: candidates.length, icon: Target },
+          { label: t("hunter.avgScore"), value: Math.round(candidates.reduce((s, p) => s + p.hunterScore, 0) / (candidates.length || 1)), icon: TrendingUp },
+          { label: t("hunter.highMargin"), value: candidates.filter((p) => p.estimatedMargin > 50).length, icon: Zap },
+          { label: t("hunter.lowComp"), value: candidates.filter((p) => p.competitionLevel === "Low").length, icon: Trophy },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-            <Card>
-              <CardContent className="pt-4 pb-4 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <Card><CardContent className="pt-4 pb-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center"><stat.icon className="h-4 w-4 text-primary" /></div>
+              <div><p className="text-xs text-muted-foreground">{stat.label}</p><p className="text-xl font-bold text-foreground">{stat.value}</p></div>
+            </CardContent></Card>
           </motion.div>
         ))}
       </div>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Hunter Skor Sıralaması</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">{t("hunter.scoreRanking")}</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={barData} layout="vertical">
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} />
-                <Tooltip />
-                <Bar dataKey="score" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-              </BarChart>
+              <BarChart data={barData} layout="vertical"><XAxis type="number" hide /><YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} /><Tooltip /><Bar dataKey="score" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} /></BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
         {topProduct && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">#1 Ürün Analizi: {topProduct.name}</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">{t("hunter.topAnalysis")}: {topProduct.name}</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10 }} />
-                  <Radar dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} />
-                </RadarChart>
+                <RadarChart data={radarData}><PolarGrid stroke="hsl(var(--border))" /><PolarAngleAxis dataKey="metric" tick={{ fontSize: 10 }} /><Radar dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} /></RadarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <Select value={platformFilter} onValueChange={setPlatformFilter}>
           <SelectTrigger className="w-[150px]"><SelectValue placeholder="Platform" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tüm Platformlar</SelectItem>
+            <SelectItem value="all">{t("hunter.allPlatforms")}</SelectItem>
             <SelectItem value="TikTok">TikTok</SelectItem>
             <SelectItem value="Amazon">Amazon</SelectItem>
             <SelectItem value="AliExpress">AliExpress</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Sırala" /></SelectTrigger>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder={t("savedProd.sortLabel")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="hunterScore">Hunter Skoru</SelectItem>
-            <SelectItem value="trendScore">Trend Skoru</SelectItem>
-            <SelectItem value="estimatedMargin">Kâr Marjı</SelectItem>
+            <SelectItem value="hunterScore">{t("hunter.hunterScore")}</SelectItem>
+            <SelectItem value="trendScore">{t("hunter.trendScore")}</SelectItem>
+            <SelectItem value="estimatedMargin">{t("hunter.profitMargin")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Product List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((p, i) => {
           const { tier } = calculateWinningScore(p.trendScore, p.estimatedMargin, p.competitionLevel, 30);
@@ -166,12 +147,12 @@ export default function AutoHunter() {
                         <Badge className={`text-[10px] border ${tierBg(tier)} ${tierColor(tier)}`}>{tier}</Badge>
                       </div>
                       <div className="grid grid-cols-4 gap-2 text-[11px]">
-                        <div><span className="text-muted-foreground">Trend</span><br /><span className="font-semibold">{p.trendScore}</span></div>
-                        <div><span className="text-muted-foreground">Etkileşim</span><br /><span className="font-semibold">{p.engagementScore}</span></div>
-                        <div><span className="text-muted-foreground">Marj</span><br /><span className="font-semibold">%{p.estimatedMargin}</span></div>
-                        <div><span className="text-muted-foreground">Rekabet</span><br /><span className="font-semibold">{p.competitionLevel === "Low" ? "Düşük" : p.competitionLevel === "Medium" ? "Orta" : "Yüksek"}</span></div>
+                        <div><span className="text-muted-foreground">{t("hunter.trend")}</span><br /><span className="font-semibold">{p.trendScore}</span></div>
+                        <div><span className="text-muted-foreground">{t("hunter.engagement")}</span><br /><span className="font-semibold">{p.engagementScore}</span></div>
+                        <div><span className="text-muted-foreground">{t("hunter.margin")}</span><br /><span className="font-semibold">%{p.estimatedMargin}</span></div>
+                        <div><span className="text-muted-foreground">{t("hunter.competition")}</span><br /><span className="font-semibold">{compLabel(p.competitionLevel)}</span></div>
                       </div>
-                      <Button size="sm" variant="outline" className="text-xs" onClick={() => handleSave(p)}>Kaydet</Button>
+                      <Button size="sm" variant="outline" className="text-xs" onClick={() => handleSave(p)}>{t("hunter.save")}</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -181,7 +162,7 @@ export default function AutoHunter() {
         })}
       </div>
 
-      <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest">A BAMİR Online Store's Production</p>
+      <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest">{t("nav.production")}</p>
     </div>
   );
 }
