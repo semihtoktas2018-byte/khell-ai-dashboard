@@ -424,7 +424,7 @@ export default function ProductAnalyzer() {
               </div>
 
               <a
-                href="https://www.shopier.com/XXXXXX"
+                href="https://www.shopier.com/bamironlinestore/46009500"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25"
