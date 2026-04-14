@@ -103,7 +103,7 @@ export default function DashboardLayout() {
         {!collapsed && (
           <div className="px-4 py-4 border-t border-border space-y-3">
             <a
-              href="https://shopier.com/bamironlinestore/46009500"
+              href="https://www.shopier.com/XXXXXX"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white py-3 px-3 transition-all shadow-lg shadow-amber-500/20"

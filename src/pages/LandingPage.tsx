@@ -38,7 +38,7 @@ const plans = [
     features: ["Sınırsız analiz", "Gelişmiş risk skoru", "Tedarikçi karşılaştırma", "Ürün kaydetme", "Öncelikli destek"],
     cta: "Premium Ol - Aylık 99₺",
     popular: true,
-    href: "https://shopier.com/bamironlinestore/46009500",
+    href: "https://www.shopier.com/XXXXXX",
   },
   {
     name: "Enterprise",
@@ -65,10 +65,10 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-foreground tracking-tight">KHELL AI</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/auth")} className="btn-ghost text-sm py-2 px-4">
+            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-ghost text-sm py-2 px-4">
               Giriş Yap
             </button>
-            <button onClick={() => navigate("/auth")} className="btn-primary text-sm py-2 px-4">
+            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-sm py-2 px-4">
               Hemen Başla
             </button>
           </div>
@@ -101,7 +101,7 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex items-center justify-center mb-16">
-              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
+              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
                 START FREE ANALYSIS
               </button>
             </motion.div>
@@ -221,7 +221,7 @@ export default function LandingPage() {
                   </a>
                 ) : (
                   <button
-                    onClick={() => navigate("/auth")}
+                    onClick={() => navigate("/dashboard/analyzer")}
                     className={`w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost`}
                   >
                     {plan.cta}
@@ -247,7 +247,7 @@ export default function LandingPage() {
               Binlerce e-ticaret girişimcisi KHELL AI ile kârlı ürünleri keşfediyor.
             </p>
             <div className="flex items-center justify-center">
-              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
+              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
                 START FREE ANALYSIS
               </button>
             </div>
