@@ -403,23 +403,29 @@ export default function ProductAnalyzer() {
               className="w-full max-w-md mx-4 rounded-2xl border border-border bg-[hsl(var(--card))] p-8 shadow-2xl text-center"
             >
               <div className="text-5xl mb-4">🔒</div>
-              <h2 className="text-2xl font-black text-foreground mb-2">Free limit reached</h2>
+              <h2 className="text-2xl font-black text-foreground mb-2">You just avoided a bad product.</h2>
+              <p className="text-sm text-muted-foreground mb-2">
+                Most beginners lose money by picking the wrong product.
+              </p>
               <p className="text-sm text-muted-foreground mb-6">
-                You just discovered a profitable product. Don't stop now.
+                KHELL saved you from that.
               </p>
 
-              <div className="text-left space-y-3 mb-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-winning text-base">✔</span>
-                  <span className="text-sm text-foreground">Unlimited product analysis</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-winning text-base">✔</span>
-                  <span className="text-sm text-foreground">Profit & competitor insights</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-winning text-base">✔</span>
-                  <span className="text-sm text-foreground">Find winning products faster</span>
+              <div className="text-left mb-6">
+                <p className="text-xs font-semibold text-foreground mb-3">If you want real winning products:</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-winning text-base">✔</span>
+                    <span className="text-sm text-foreground">Higher profit</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-winning text-base">✔</span>
+                    <span className="text-sm text-foreground">Lower risk</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-winning text-base">✔</span>
+                    <span className="text-sm text-foreground">Verified demand</span>
+                  </div>
                 </div>
               </div>
 
@@ -429,11 +435,11 @@ export default function ProductAnalyzer() {
                 rel="noopener noreferrer"
                 className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25"
               >
-                GET PRO ACCESS
+                Unlock Winning Products
               </a>
 
               <p className="text-[11px] text-muted-foreground mt-3">
-                Limited early users price – will increase soon
+                Limited early access price: 99 TL
               </p>
 
               <button
