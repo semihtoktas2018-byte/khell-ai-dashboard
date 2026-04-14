@@ -38,7 +38,7 @@ const plans = [
     features: ["Sınırsız analiz", "Gelişmiş risk skoru", "Tedarikçi karşılaştırma", "Ürün kaydetme", "Öncelikli destek"],
     cta: "Premium Ol - Aylık 99₺",
     popular: true,
-    href: "https://www.shopier.com/XXXXXX",
+    href: "https://www.shopier.com/bamironlinestore/46009500",
   },
   {
     name: "Enterprise",
