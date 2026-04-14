@@ -7,6 +7,7 @@ import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { useNavigate } from "react-router-dom";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -14,23 +15,22 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, tra
 
 const tooltipStyle = { background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, color: "hsl(210 40% 98%)" };
 
-// Demo product — static, realistic
-const demoProduct = {
-  name: "Akıllı Duruş Düzeltici Pro",
-  decisionScore: 84,
-  monthlyProfit: 1240,
-  riskLevel: "low" as const,
-  profitMargin: 62,
-  category: "Sağlık & Fitness",
-};
-
 export default function DashboardHome() {
   const { products: savedProducts } = useSavedProducts();
   const { history: analysisHistory } = useAnalysisHistory();
   const navigate = useNavigate();
+  const { t, currency, locale } = useLocale();
   const topTrending = trendingProducts.slice(0, 4);
 
-  // Onboarding: first-time users get redirected to viral products
+  const demoProduct = {
+    name: t("dash.productName"),
+    decisionScore: 84,
+    monthlyProfit: 1240,
+    riskLevel: "low" as const,
+    profitMargin: 62,
+    category: t("dash.category"),
+  };
+
   useEffect(() => {
     const hasOnboarded = localStorage.getItem("khell_onboarded");
     if (!hasOnboarded) {
@@ -40,25 +40,18 @@ export default function DashboardHome() {
   }, [navigate]);
 
   const metrics = useMemo(() => {
-    // "Analiz Edilen" = total unique analyses performed (from history)
     const totalAnalyzed = analysisHistory.length;
-    // Winning/risky from saved products
     const winning = savedProducts.filter((p) => p.decisionScore >= 70 && p.riskLevel === "low").length;
     const risky = savedProducts.filter((p) => p.riskLevel === "medium" || p.riskLevel === "high").length;
     const totalProfit = savedProducts.reduce((sum, p) => sum + (p.monthlyProfit ?? 0), 0);
-    return {
-      analyzed: totalAnalyzed || 0,
-      winning: winning || 0,
-      risky: risky || 0,
-      profit: totalProfit || 0,
-    };
+    return { analyzed: totalAnalyzed || 0, winning: winning || 0, risky: risky || 0, profit: totalProfit || 0 };
   }, [savedProducts, analysisHistory]);
 
   const stats = [
-    { label: "Analiz Edilen", value: metrics.analyzed, icon: BarChart3, colorClass: "text-primary" },
-    { label: "Kazanan Ürünler", value: metrics.winning, icon: TrendingUp, colorClass: "text-winning pulse-glow" },
-    { label: "Riskli Ürünler", value: metrics.risky, icon: AlertTriangle, colorClass: "text-risky" },
-    { label: "Tahmini Kâr", value: `$${metrics.profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, icon: DollarSign, colorClass: "text-winning" },
+    { label: t("dash.analyzed"), value: metrics.analyzed, icon: BarChart3, colorClass: "text-primary" },
+    { label: t("dash.winningProducts"), value: metrics.winning, icon: TrendingUp, colorClass: "text-winning pulse-glow" },
+    { label: t("dash.riskyProducts"), value: metrics.risky, icon: AlertTriangle, colorClass: "text-risky" },
+    { label: t("dash.estimatedProfit"), value: currency(metrics.profit), icon: DollarSign, colorClass: "text-winning" },
   ];
 
   const pieData = useMemo(() => {
@@ -67,17 +60,17 @@ export default function DashboardHome() {
     const high = savedProducts.filter((p) => p.riskLevel === "high").length;
     if (low + med + high === 0) {
       return [
-        { name: "Düşük", value: 1, color: "hsl(142 71% 45%)" },
-        { name: "Orta", value: 1, color: "hsl(38 92% 50%)" },
-        { name: "Yüksek", value: 1, color: "hsl(0 84% 60%)" },
+        { name: t("dash.low"), value: 1, color: "hsl(142 71% 45%)" },
+        { name: t("dash.medium"), value: 1, color: "hsl(38 92% 50%)" },
+        { name: t("dash.high"), value: 1, color: "hsl(0 84% 60%)" },
       ];
     }
     return [
-      { name: "Düşük", value: low, color: "hsl(142 71% 45%)" },
-      { name: "Orta", value: med, color: "hsl(38 92% 50%)" },
-      { name: "Yüksek", value: high, color: "hsl(0 84% 60%)" },
+      { name: t("dash.low"), value: low, color: "hsl(142 71% 45%)" },
+      { name: t("dash.medium"), value: med, color: "hsl(38 92% 50%)" },
+      { name: t("dash.high"), value: high, color: "hsl(0 84% 60%)" },
     ];
-  }, [savedProducts]);
+  }, [savedProducts, t]);
 
   const profitData = useMemo(() => {
     if (savedProducts.length === 0) return [];
@@ -86,11 +79,11 @@ export default function DashboardHome() {
     return sorted.map((p) => {
       cumulative += (p.monthlyProfit ?? 0);
       return {
-        month: new Date(p.dateSaved).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" }),
+        month: new Date(p.dateSaved).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", { day: "2-digit", month: "short" }),
         profit: Math.round(cumulative),
       };
     });
-  }, [savedProducts]);
+  }, [savedProducts, locale]);
 
   const scoreData = useMemo(() => {
     if (savedProducts.length === 0) return [];
@@ -106,15 +99,12 @@ export default function DashboardHome() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Rocket className="h-5 w-5 text-primary" />
-              <h2 className="text-lg md:text-xl font-bold text-foreground">1 Ürün Bul → Analiz Et → Satışa Çıkar</h2>
+              <h2 className="text-lg md:text-xl font-bold text-foreground">{t("dash.heroCta")}</h2>
             </div>
-            <p className="text-sm text-muted-foreground">KHELL AI ile kazanan ürünleri saniyeler içinde bul.</p>
+            <p className="text-sm text-muted-foreground">{t("dash.heroDesc")}</p>
           </div>
-          <button
-            onClick={() => navigate("/dashboard/viral-products")}
-            className="btn-primary flex items-center gap-2 shrink-0"
-          >
-            <Zap className="h-4 w-4" /> Ürün Bulmaya Başla <ArrowRight className="h-4 w-4" />
+          <button onClick={() => navigate("/dashboard/viral-products")} className="btn-primary flex items-center gap-2 shrink-0">
+            <Zap className="h-4 w-4" /> {t("dash.startFinding")} <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </motion.div>
@@ -136,36 +126,35 @@ export default function DashboardHome() {
       <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary" /> Örnek Kazanan Ürün
+            <Zap className="h-4 w-4 text-primary" /> {t("dash.sampleWinning")}
           </h3>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Demo</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("dash.demo")}</span>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg bg-accent/30 p-4">
           <div className="space-y-1">
             <p className="text-base font-semibold text-foreground">{demoProduct.name}</p>
-            <p className="text-xs text-muted-foreground">{demoProduct.category} · Marj: %{demoProduct.profitMargin}</p>
+            <p className="text-xs text-muted-foreground">{demoProduct.category} · {t("dash.margin")}: %{demoProduct.profitMargin}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold font-mono text-primary tabular-nums">{demoProduct.decisionScore}</p>
-              <p className="text-[10px] text-muted-foreground">Karar Skoru</p>
+              <p className="text-[10px] text-muted-foreground">{t("dash.decisionScore")}</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold font-mono text-winning tabular-nums">${demoProduct.monthlyProfit}</p>
-              <p className="text-[10px] text-muted-foreground">Aylık Kâr</p>
+              <p className="text-lg font-bold font-mono text-winning tabular-nums">{currency(demoProduct.monthlyProfit)}</p>
+              <p className="text-[10px] text-muted-foreground">{t("dash.monthlyProfitLabel")}</p>
             </div>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-winning/10 text-winning">Düşük Risk</span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-winning/10 text-winning">{t("dash.lowRisk")}</span>
           </div>
         </div>
       </motion.div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Profit Trend */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Kâr Trendi</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.profitTrend")}</h3>
           {profitData.length === 0 ? (
-            <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">Henüz veri yok — ürün kaydedin.</div>
+            <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">{t("dash.noDataYet")}</div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={profitData}>
@@ -185,9 +174,8 @@ export default function DashboardHome() {
           )}
         </motion.div>
 
-        {/* Risk Distribution Pie */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Risk Dağılımı</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.riskDist")}</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={0}>
@@ -210,9 +198,9 @@ export default function DashboardHome() {
       {/* Score Chart & Trending Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Karar Skorları</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.decisionScores")}</h3>
           {scoreData.length === 0 ? (
-            <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">Henüz veri yok.</div>
+            <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">{t("dash.noData")}</div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={scoreData}>
@@ -228,8 +216,8 @@ export default function DashboardHome() {
 
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground">Trend Ürünler</h3>
-            <button onClick={() => navigate("/dashboard/winning")} className="text-xs text-primary hover:underline">Tümünü Gör</button>
+            <h3 className="text-sm font-semibold text-foreground">{t("dash.trendProducts")}</h3>
+            <button onClick={() => navigate("/dashboard/winning")} className="text-xs text-primary hover:underline">{t("dash.seeAll")}</button>
           </div>
           <div className="space-y-3">
             {topTrending.map((p) => {
@@ -255,8 +243,8 @@ export default function DashboardHome() {
       {savedProducts.length > 0 && (
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground">Kaydedilen Ürünler</h3>
-            <button onClick={() => navigate("/dashboard/saved")} className="text-xs text-primary hover:underline">Tümünü Gör</button>
+            <h3 className="text-sm font-semibold text-foreground">{t("dash.savedProducts")}</h3>
+            <button onClick={() => navigate("/dashboard/saved")} className="text-xs text-primary hover:underline">{t("dash.seeAll")}</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {savedProducts.slice(0, 4).map((p) => (
@@ -265,7 +253,7 @@ export default function DashboardHome() {
                   <span className="text-sm font-medium text-foreground truncate">{p.name}</span>
                   <span className="font-mono text-xs font-bold tabular-nums text-primary">{p.decisionScore}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Marj: %{p.profitMargin} · ${p.monthlyProfit.toFixed(0)}/ay</p>
+                <p className="text-xs text-muted-foreground">{t("dash.margin")}: %{p.profitMargin} · {currency(p.monthlyProfit)}/{locale === "tr" ? "ay" : "mo"}</p>
               </div>
             ))}
           </div>
@@ -281,13 +269,13 @@ export default function DashboardHome() {
               <Star className="h-4 w-4 fill-primary/40 text-primary/40" />
             </div>
             <span className="text-sm font-semibold text-foreground">4.7 / 5</span>
-            <span className="text-xs text-muted-foreground">kullanıcı puanı</span>
+            <span className="text-xs text-muted-foreground">{t("dash.userRating")}</span>
           </div>
           <div className="h-4 w-px bg-border hidden sm:block" />
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold text-foreground">10,000+</span>
-            <span className="text-xs text-muted-foreground">analiz yapıldı</span>
+            <span className="text-xs text-muted-foreground">{t("dash.analysisDone")}</span>
           </div>
         </div>
       </motion.div>
