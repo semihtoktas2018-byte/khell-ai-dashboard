@@ -7,6 +7,7 @@ import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -18,26 +19,8 @@ const defaultInput: AnalyzerInput = {
   monthly_orders_estimate: 0,
 };
 
-const fields: { key: keyof AnalyzerInput; label: string; suffix?: string; placeholder: string }[] = [
-  { key: "selling_price", label: "Satış Fiyatı", suffix: "$", placeholder: "29.99" },
-  { key: "product_cost", label: "Ürün Maliyeti", suffix: "$", placeholder: "8.50" },
-  { key: "shipping_cost", label: "Kargo Maliyeti", suffix: "$", placeholder: "3.00" },
-  { key: "ads_cost", label: "Reklam Maliyeti / Satış", suffix: "$", placeholder: "5.00" },
-  { key: "monthly_orders_estimate", label: "Tahmini Aylık Sipariş", placeholder: "100" },
-];
-
 const riskColorMap = { low: "text-winning", medium: "text-risky", high: "text-destructive" };
 
-function buildMonthlyProjection(baseProfit: number) {
-  const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz"];
-  const growthFactors = [0.7, 0.82, 0.94, 1.0, 1.08, 1.15];
-  return months.map((month, i) => ({
-    month,
-    profit: Math.round(baseProfit * growthFactors[i]),
-  }));
-}
-
-// Social proof messages for micro-conversion
 const socialProofMessages = [
   "Ali just found a winning product 🔥",
   "John upgraded to PRO 🚀",
@@ -58,12 +41,6 @@ function getCompetitionLevel(profitMargin: number) {
   return "HIGH";
 }
 
-function getScoreLabel(score: number) {
-  if (score >= 80) return { text: "Scaling Opportunity 🚀", color: "text-winning" };
-  if (score >= 60) return { text: "Testable Product ⚠️", color: "text-risky" };
-  return { text: "Not Recommended ❌", color: "text-destructive" };
-}
-
 export default function ProductAnalyzer() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -79,7 +56,31 @@ export default function ProductAnalyzer() {
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory } = useAnalysisHistory();
   const { toast } = useToast();
+  const { t, currency, currencySymbol } = useLocale();
   const fromOnboarding = searchParams.get("onboarding") === "1";
+
+  const fields: { key: keyof AnalyzerInput; labelKey: string; suffix?: boolean; placeholder: string }[] = [
+    { key: "selling_price", labelKey: "analyzer.sellingPrice", suffix: true, placeholder: "29.99" },
+    { key: "product_cost", labelKey: "analyzer.productCost", suffix: true, placeholder: "8.50" },
+    { key: "shipping_cost", labelKey: "analyzer.shippingCost", suffix: true, placeholder: "3.00" },
+    { key: "ads_cost", labelKey: "analyzer.adsCost", suffix: true, placeholder: "5.00" },
+    { key: "monthly_orders_estimate", labelKey: "analyzer.monthlyOrders", placeholder: "100" },
+  ];
+
+  function getScoreLabel(score: number) {
+    if (score >= 80) return { text: "Scaling Opportunity 🚀", color: "text-winning" };
+    if (score >= 60) return { text: "Testable Product ⚠️", color: "text-risky" };
+    return { text: t("analyzer.notRec") + " ❌", color: "text-destructive" };
+  }
+
+  function buildMonthlyProjection(baseProfit: number) {
+    const months = [t("month.jan"), t("month.feb"), t("month.mar"), t("month.apr"), t("month.may"), t("month.jun")];
+    const growthFactors = [0.7, 0.82, 0.94, 1.0, 1.08, 1.15];
+    return months.map((month, i) => ({
+      month,
+      profit: Math.round(baseProfit * growthFactors[i]),
+    }));
+  }
 
   // Social proof ticker
   useEffect(() => {
@@ -88,7 +89,6 @@ export default function ProductAnalyzer() {
       setShowSocialProof(true);
       setTimeout(() => setShowSocialProof(false), 3500);
     }, 6000);
-    // Show first one after 2s
     const initial = setTimeout(() => {
       setShowSocialProof(true);
       setTimeout(() => setShowSocialProof(false), 3500);
@@ -126,7 +126,7 @@ export default function ProductAnalyzer() {
 
   const handleAnalyze = () => {
     if (input.selling_price <= 0) {
-      toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" });
+      toast({ title: t("analyzer.error"), description: t("analyzer.errorPrice"), variant: "destructive" });
       return;
     }
     if (!canAnalyze) {
@@ -134,7 +134,7 @@ export default function ProductAnalyzer() {
       return;
     }
     addAnalysis({
-      productName: productName || "İsimsiz Ürün",
+      productName: productName || t("analyzer.unnamedProduct"),
       sellingPrice: input.selling_price,
       productCost: input.product_cost,
       shippingCost: input.shipping_cost,
@@ -151,11 +151,11 @@ export default function ProductAnalyzer() {
   const handleSave = () => {
     const trimmed = productName.trim();
     if (!trimmed) {
-      toast({ title: "Hata", description: "Kaydetmek için ürün adı giriniz", variant: "destructive" });
+      toast({ title: t("analyzer.error"), description: t("analyzer.errorName"), variant: "destructive" });
       return;
     }
     if (isProductSaved(trimmed)) {
-      toast({ title: "Bilgi", description: "Bu ürün zaten kayıtlı" });
+      toast({ title: t("viralProd.info"), description: t("analyzer.alreadySaved") });
       return;
     }
     saveProduct({
@@ -165,7 +165,7 @@ export default function ProductAnalyzer() {
       decisionScore: result.decision_score,
       monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
     });
-    toast({ title: "Kaydedildi", description: `${trimmed} başarıyla kaydedildi` });
+    toast({ title: t("analyzer.saved"), description: `${trimmed} ${t("analyzer.savedDesc")}` });
   };
 
   const monthlyData = buildMonthlyProjection(result.monthly_profit);
@@ -178,8 +178,8 @@ export default function ProductAnalyzer() {
       {/* Onboarding Step Indicator */}
       {fromOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="text-primary font-semibold">Adım 2/3</span>
-          <span>— Ürünü analiz edin, ardından satış sayfası oluşturun</span>
+          <span className="text-primary font-semibold">{t("analyzer.step")}</span>
+          <span>{t("analyzer.stepDesc")}</span>
         </motion.div>
       )}
 
@@ -189,7 +189,7 @@ export default function ProductAnalyzer() {
           type="text"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
-          placeholder="Ürün adı girin..."
+          placeholder={t("analyzer.productName")}
           className="input-dark w-full max-w-md text-lg"
         />
       </motion.div>
@@ -197,11 +197,11 @@ export default function ProductAnalyzer() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="card-glow rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-6">Maliyet Girişi</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-6">{t("analyzer.costEntry")}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {fields.map((f) => (
               <div key={f.key}>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{f.label}</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t(f.labelKey)}</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -210,22 +210,22 @@ export default function ProductAnalyzer() {
                     placeholder={f.placeholder}
                     className="input-dark w-full pr-8"
                   />
-                  {f.suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{f.suffix}</span>}
+                  {f.suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{currencySymbol}</span>}
                 </div>
               </div>
             ))}
           </div>
 
           <div className="flex items-center justify-between">
-            <button onClick={handleAnalyze} className="btn-primary flex-1 mr-3">Analiz Et</button>
+            <button onClick={handleAnalyze} className="btn-primary flex-1 mr-3">{t("analyzer.analyze")}</button>
             <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-accent hover:bg-accent/80 text-foreground transition-colors">
-              <History className="h-3.5 w-3.5" /> Geçmiş ({history.length})
+              <History className="h-3.5 w-3.5" /> {t("analyzer.history")} ({history.length})
             </button>
           </div>
 
           {/* Remaining analyses indicator */}
           <p className={`text-xs font-medium mt-2 text-center ${remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
-            {remaining > 0 ? `${remaining} free analyses remaining` : "⚠️ Limit reached"}
+            {remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
           </p>
         </motion.div>
 
@@ -240,17 +240,17 @@ export default function ProductAnalyzer() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className={`text-base font-bold ${scoreLabel.color}`}>{scoreLabel.text}</h3>
                   <button onClick={handleSave} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                    <Save className="h-3.5 w-3.5" /> Kaydet
+                    <Save className="h-3.5 w-3.5" /> {t("analyzer.save")}
                   </button>
                 </div>
                 <div className="text-center mb-4">
                   <div className={`text-6xl font-black font-mono tabular-nums mb-1 ${
                     result.decision_score >= 80 ? "text-winning" : result.decision_score >= 60 ? "text-risky" : "text-destructive"
                   }`}>{result.decision_score}</div>
-                  <div className="text-xs uppercase tracking-widest text-muted-foreground">Score / 100</div>
+                  <div className="text-xs uppercase tracking-widest text-muted-foreground">{t("analyzer.score")} / 100</div>
                 </div>
                 <p className="text-sm text-center font-medium text-muted-foreground">
-                  {result.decision_score >= 80 ? "This product can scale fast" : result.decision_score >= 60 ? "Needs optimization" : "Not recommended"}
+                  {result.decision_score >= 80 ? t("analyzer.canScale") : result.decision_score >= 60 ? t("analyzer.needsOpt") : t("analyzer.notRec")}
                 </p>
               </div>
 
@@ -263,7 +263,7 @@ export default function ProductAnalyzer() {
                   <div className="rounded-lg bg-accent/40 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Profit / Sale</p>
                     <p className={`text-lg font-bold font-mono ${result.gross_profit > 0 ? "text-winning" : "text-destructive"}`}>
-                      ${result.gross_profit.toFixed(2)}
+                      {currency(result.gross_profit)}
                     </p>
                   </div>
                   <div className="rounded-lg bg-accent/40 p-3">
@@ -291,16 +291,16 @@ export default function ProductAnalyzer() {
                 </div>
                 <div className={`mt-3 text-center text-sm font-semibold ${scoreLabel.color}`}>
                   {result.decision_score >= 80
-                    ? "✅ You can scale this product fast"
+                    ? t("analyzer.scaleThis")
                     : result.decision_score >= 60
-                    ? "⚠️ Test before scaling"
-                    : "❌ Not recommended"}
+                    ? t("analyzer.testBefore")
+                    : t("analyzer.notRecommended")}
                 </div>
               </div>
 
               {/* Stats Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Profit / Sale" value={`$${result.gross_profit.toFixed(2)}`} positive={result.gross_profit > 0} />
+                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Profit / Sale" value={currency(result.gross_profit)} positive={result.gross_profit > 0} />
                 <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Margin %" value={`${result.profit_margin.toFixed(1)}%`} positive={result.profit_margin > 0} />
                 <StatCard label="Demand" value={demand} className={demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"} />
                 <StatCard label="Competition" value={competition} className={competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"} />
@@ -312,7 +312,7 @@ export default function ProductAnalyzer() {
                   onClick={() => setShowPaywall(true)}
                   className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white transition-all shadow-lg shadow-amber-500/20"
                 >
-                  <Lock className="h-3.5 w-3.5" /> Unlock More Winners 🔒
+                  <Lock className="h-3.5 w-3.5" /> {t("analyzer.unlockMore")}
                 </button>
               </div>
             </motion.div>
@@ -326,7 +326,7 @@ export default function ProductAnalyzer() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={transition} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Pie */}
             <div className="card-glow rounded-xl p-5">
-              <h4 className="text-sm font-semibold text-foreground mb-3">Maliyet Dağılımı</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3">{t("analyzer.costDist")}</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={result.cost_breakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={0}>
@@ -346,7 +346,7 @@ export default function ProductAnalyzer() {
 
             {/* Bar Chart */}
             <div className="card-glow rounded-xl p-5">
-              <h4 className="text-sm font-semibold text-foreground mb-3">Tahmini Aylık Kâr Projeksiyonu</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3">{t("analyzer.monthlyProfit")}</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
@@ -361,7 +361,7 @@ export default function ProductAnalyzer() {
             {/* Risk Analysis */}
             <div className="card-glow rounded-xl p-5">
               <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" /> Risk Analizi
+                <Shield className="h-4 w-4 text-primary" /> {t("analyzer.riskAnalysis")}
               </h4>
               <div className="space-y-4">
                 {risks.map((risk) => (
@@ -403,28 +403,24 @@ export default function ProductAnalyzer() {
               className="w-full max-w-md mx-4 rounded-2xl border border-border bg-[hsl(var(--card))] p-8 shadow-2xl text-center"
             >
               <div className="text-5xl mb-4">🔒</div>
-              <h2 className="text-2xl font-black text-foreground mb-2">You just avoided a bad product.</h2>
-              <p className="text-sm text-muted-foreground mb-2">
-                Most beginners lose money by picking the wrong product.
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                KHELL saved you from that.
-              </p>
+              <h2 className="text-2xl font-black text-foreground mb-2">{t("paywall.title")}</h2>
+              <p className="text-sm text-muted-foreground mb-2">{t("paywall.subtitle1")}</p>
+              <p className="text-sm text-muted-foreground mb-6">{t("paywall.subtitle2")}</p>
 
               <div className="text-left mb-6">
-                <p className="text-xs font-semibold text-foreground mb-3">If you want real winning products:</p>
+                <p className="text-xs font-semibold text-foreground mb-3">{t("paywall.realWinning")}</p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">Higher profit</span>
+                    <span className="text-sm text-foreground">{t("paywall.higherProfit")}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">Lower risk</span>
+                    <span className="text-sm text-foreground">{t("paywall.lowerRisk")}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">Verified demand</span>
+                    <span className="text-sm text-foreground">{t("paywall.verifiedDemand")}</span>
                   </div>
                 </div>
               </div>
@@ -435,18 +431,16 @@ export default function ProductAnalyzer() {
                 rel="noopener noreferrer"
                 className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25"
               >
-                Unlock Winning Products
+                {t("paywall.cta")}
               </a>
 
-              <p className="text-[11px] text-muted-foreground mt-3">
-                Limited early access price: 99 TL
-              </p>
+              <p className="text-[11px] text-muted-foreground mt-3">{t("paywall.price")}</p>
 
               <button
                 onClick={() => setShowPaywall(false)}
                 className="text-xs text-muted-foreground hover:underline mt-4"
               >
-                Maybe later
+                {t("paywall.later")}
               </button>
             </motion.div>
           </motion.div>
@@ -458,33 +452,33 @@ export default function ProductAnalyzer() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <History className="h-4 w-4 text-primary" /> Analiz Geçmişi
+              <History className="h-4 w-4 text-primary" /> {t("analyzer.analysisHistory")}
             </h3>
             {history.length > 0 && (
-              <button onClick={() => { clearHistory(); toast({ title: "Temizlendi", description: "Analiz geçmişi silindi" }); }} className="text-xs text-destructive hover:underline flex items-center gap-1">
-                <Trash2 className="h-3 w-3" /> Temizle
+              <button onClick={() => { clearHistory(); toast({ title: t("analyzer.cleared"), description: t("analyzer.clearedDesc") }); }} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                <Trash2 className="h-3 w-3" /> {t("analyzer.clearHistory")}
               </button>
             )}
           </div>
           {history.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-6">Henüz analiz yapılmadı.</p>
+            <p className="text-xs text-muted-foreground text-center py-6">{t("analyzer.noAnalysis")}</p>
           ) : (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {history.map((r) => {
-                const riskLabel = r.riskLevel === "low" ? "Düşük" : r.riskLevel === "medium" ? "Orta" : "Yüksek";
+                const riskLabel = r.riskLevel === "low" ? t("risk.low") : r.riskLevel === "medium" ? t("risk.medium") : t("risk.high");
                 const riskClass = r.riskLevel === "low" ? "text-winning" : r.riskLevel === "medium" ? "text-risky" : "text-destructive";
                 return (
                   <div key={r.id} className="flex items-center justify-between rounded-lg bg-accent/30 p-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{r.productName}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {new Date(r.createdAt).toLocaleDateString("tr-TR")} · Marj: %{r.profitMargin} · ${r.monthlyProfit}/ay
+                        {new Date(r.createdAt).toLocaleDateString()} · {t("dash.margin")}: %{r.profitMargin} · {currency(r.monthlyProfit)}/{t("month.jan")}
                       </p>
                     </div>
                     <div className="flex items-center gap-3 ml-3 shrink-0">
                       <div className="text-center">
                         <p className="text-lg font-bold font-mono tabular-nums text-primary">{r.decisionScore}</p>
-                        <p className="text-[9px] text-muted-foreground">Skor</p>
+                        <p className="text-[9px] text-muted-foreground">{t("analyzer.score")}</p>
                       </div>
                       <span className={`text-[10px] font-medium ${riskClass}`}>{riskLabel}</span>
                     </div>

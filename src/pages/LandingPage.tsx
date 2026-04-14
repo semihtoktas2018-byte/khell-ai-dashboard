@@ -1,57 +1,61 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 import heroImg from "@/assets/hero-dashboard.png";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition } };
 
-const features = [
-  { icon: BarChart3, title: "Kâr Analizi", desc: "Tüm maliyetleri hesaplayarak net kâr marjınızı görün." },
-  { icon: TrendingUp, title: "Trend Ürünler", desc: "TikTok, Amazon ve AliExpress'ten trend ürünleri keşfedin." },
-  { icon: Search, title: "Tedarikçi Bul", desc: "En iyi fiyatlı tedarikçileri anında karşılaştırın." },
-  { icon: ShieldCheck, title: "Risk Analizi", desc: "Her ürünün risk seviyesini otomatik değerlendirin." },
-  { icon: Zap, title: "Anlık Sonuçlar", desc: "Saniyeler içinde detaylı analiz sonuçları alın." },
-  { icon: Target, title: "Karar Skoru", desc: "Kazanan ürünleri tek bakışta belirleyin." },
-];
-
-const steps = [
-  { num: "01", title: "Ürün Bilgilerini Girin", desc: "Maliyet, kargo, reklam ve satış fiyatını girin." },
-  { num: "02", title: "Analiz Edin", desc: "KHELL AI kârlılık, risk ve karar skorunu hesaplar." },
-  { num: "03", title: "Kazananı Seçin", desc: "En kârlı ürünü kaydedin ve satışa başlayın." },
-];
-
-const plans = [
-  {
-    name: "Starter",
-    price: "Ücretsiz",
-    period: "",
-    features: ["Günde 5 analiz", "Trend ürün keşfi", "Tedarikçi arama", "Temel risk analizi"],
-    cta: "Ücretsiz Başla",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "99₺",
-    period: "/ay",
-    features: ["Sınırsız analiz", "Gelişmiş risk skoru", "Tedarikçi karşılaştırma", "Ürün kaydetme", "Öncelikli destek"],
-    cta: "Premium Ol - Aylık 99₺",
-    popular: true,
-    href: "https://www.shopier.com/bamironlinestore/46009500",
-  },
-  {
-    name: "Enterprise",
-    price: "$99",
-    period: "/ay",
-    features: ["Tüm Pro özellikleri", "API erişimi", "Takım yönetimi", "Özel entegrasyonlar", "7/24 destek"],
-    cta: "İletişime Geç",
-    popular: false,
-  },
-];
+const featureIcons = [BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target];
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { t, locale, setLocale } = useLocale();
+
+  const features = [
+    { icon: featureIcons[0], title: t("landing.feat1"), desc: t("landing.feat1Desc") },
+    { icon: featureIcons[1], title: t("landing.feat2"), desc: t("landing.feat2Desc") },
+    { icon: featureIcons[2], title: t("landing.feat3"), desc: t("landing.feat3Desc") },
+    { icon: featureIcons[3], title: t("landing.feat4"), desc: t("landing.feat4Desc") },
+    { icon: featureIcons[4], title: t("landing.feat5"), desc: t("landing.feat5Desc") },
+    { icon: featureIcons[5], title: t("landing.feat6"), desc: t("landing.feat6Desc") },
+  ];
+
+  const steps = [
+    { num: "01", title: t("landing.step1"), desc: t("landing.step1Desc") },
+    { num: "02", title: t("landing.step2"), desc: t("landing.step2Desc") },
+    { num: "03", title: t("landing.step3"), desc: t("landing.step3Desc") },
+  ];
+
+  const plans = [
+    {
+      name: t("landing.starter"),
+      price: t("landing.free"),
+      period: "",
+      features: [t("landing.starterF1"), t("landing.starterF2"), t("landing.starterF3"), t("landing.starterF4")],
+      cta: t("landing.starterCta"),
+      popular: false,
+    },
+    {
+      name: "Pro",
+      price: locale === "tr" ? "99₺" : "$9.99",
+      period: locale === "tr" ? "/ay" : "/mo",
+      features: [t("landing.proF1"), t("landing.proF2"), t("landing.proF3"), t("landing.proF4"), t("landing.proF5")],
+      cta: t("landing.proCta"),
+      popular: true,
+      href: "https://www.shopier.com/bamironlinestore/46009500",
+    },
+    {
+      name: "Enterprise",
+      price: "$99",
+      period: locale === "tr" ? "/ay" : "/mo",
+      features: [t("landing.entF1"), t("landing.entF2"), t("landing.entF3"), t("landing.entF4"), t("landing.entF5")],
+      cta: t("landing.entCta"),
+      popular: false,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -65,11 +69,18 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-foreground tracking-tight">KHELL AI</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {locale === "tr" ? "TR" : "EN"}
+            </button>
             <button onClick={() => navigate("/dashboard/analyzer")} className="btn-ghost text-sm py-2 px-4">
-              Giriş Yap
+              {t("landing.login")}
             </button>
             <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-sm py-2 px-4">
-              Hemen Başla
+              {t("landing.start")}
             </button>
           </div>
         </div>
@@ -86,7 +97,7 @@ export default function LandingPage() {
             <motion.div variants={fadeUp} className="mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
-                E-Ticaret Kârlılık Platformu
+                {t("landing.badge")}
               </span>
             </motion.div>
 
@@ -97,12 +108,12 @@ export default function LandingPage() {
             </motion.h1>
 
             <motion.p variants={fadeUp} className="text-xl md:text-2xl text-muted-foreground mb-8 tracking-tight">
-              Ürün Senden Analiz KHELL'den
+              {t("landing.subtitle")}
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex items-center justify-center mb-16">
               <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
-                START FREE ANALYSIS
+                {t("landing.cta")}
               </button>
             </motion.div>
 
@@ -125,8 +136,8 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">Nasıl Çalışır?</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">3 adımda kazanan ürünü bulun.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.howItWorks")}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.howItWorksDesc")}</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {steps.map((s, i) => (
@@ -144,12 +155,8 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
-              Kâr Marjınızı Saniyeler İçinde Görün
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Ürün maliyetlerini girin, anında kârlılık analizi ve karar skoru alın.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.featuresTitle")}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.featuresDesc")}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -178,8 +185,8 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">Fiyatlandırma</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">İhtiyacınıza uygun planı seçin.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.pricing")}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.pricingDesc")}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -194,7 +201,7 @@ export default function LandingPage() {
               >
                 {plan.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full">
-                    Popüler
+                    {t("landing.popular")}
                   </span>
                 )}
                 <h3 className="text-lg font-bold text-foreground mb-2">{plan.name}</h3>
@@ -242,13 +249,11 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="card-glow rounded-2xl p-12 text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl font-bold text-foreground mb-4">Kazanan Ürünleri Bulmaya Başlayın</h2>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              Binlerce e-ticaret girişimcisi KHELL AI ile kârlı ürünleri keşfediyor.
-            </p>
+            <h2 className="text-3xl font-bold text-foreground mb-4">{t("landing.ctaTitle")}</h2>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t("landing.ctaDesc")}</p>
             <div className="flex items-center justify-center">
               <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
-                START FREE ANALYSIS
+                {t("landing.cta")}
               </button>
             </div>
           </motion.div>
@@ -259,7 +264,7 @@ export default function LandingPage() {
       <footer className="border-t border-border py-8 px-6">
         <div className="container mx-auto flex items-center justify-between">
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            A BAMİR Online Store's Production
+            {t("nav.production")}
           </p>
           <p className="text-xs text-muted-foreground">© 2026 KHELL AI</p>
         </div>
