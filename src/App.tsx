@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
@@ -32,6 +33,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <LocaleProvider>
       <AuthProvider>
         <SavedProductsProvider>
           <AnalysisHistoryProvider>
@@ -60,6 +62,7 @@ const App = () => (
           </AnalysisHistoryProvider>
         </SavedProductsProvider>
       </AuthProvider>
+      </LocaleProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
