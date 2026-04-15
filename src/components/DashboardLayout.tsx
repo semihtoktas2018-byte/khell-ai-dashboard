@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -18,6 +18,7 @@ const navKeys = [
   { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield },
   { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText },
   { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain },
+  { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video },
   { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
 ];
 
