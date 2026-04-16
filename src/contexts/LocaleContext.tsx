@@ -141,7 +141,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "paywall.lowerRisk": "Daha düşük risk",
     "paywall.verifiedDemand": "Doğrulanmış talep",
     "paywall.cta": "Kazanan Ürünlerin Kilidini Aç",
-    "paywall.price": "Sınırlı erken erişim fiyatı: 99 TL",
+    "paywall.price": "Sınırlı erken erişim fiyatı: $9/ay",
     "paywall.later": "Belki sonra",
 
     // Dashboard
@@ -552,7 +552,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "paywall.lowerRisk": "Lower risk",
     "paywall.verifiedDemand": "Verified demand",
     "paywall.cta": "Unlock Winning Products",
-    "paywall.price": "Limited early access price: $9.99",
+    "paywall.price": "Limited early access price: $9/mo",
     "paywall.later": "Maybe later",
 
     // Dashboard
