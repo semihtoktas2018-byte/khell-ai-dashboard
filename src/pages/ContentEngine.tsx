@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Video, Upload, Copy, Hash, Sparkles, RefreshCw, CheckCircle,
-  Target, DollarSign, Zap, Film, MessageSquare, Anchor,
+  Target, DollarSign, Zap, Film, MessageSquare, Anchor, Play,
+  FileText, Mic, MousePointerClick,
 } from "lucide-react";
 import { generateContent, type ContentEngineOutput } from "@/lib/content-engine";
 
@@ -19,6 +20,7 @@ export default function ContentEngine() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [productName, setProductName] = useState("");
+  const [niche, setNiche] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [style, setStyle] = useState<"dark" | "luxury" | "minimal">("dark");
@@ -49,7 +51,7 @@ export default function ContentEngine() {
     setResult(null);
 
     try {
-      const output = await generateContent({ productName: productName.trim(), imageFile, style });
+      const output = await generateContent({ productName: productName.trim(), imageFile, style, niche: niche.trim() || undefined });
       setResult(output);
     } catch (err) {
       console.error("Content generation failed:", err);
@@ -87,13 +89,21 @@ export default function ContentEngine() {
           <CardTitle className="text-base">{t("ce.inputTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>{t("ce.productName")}</Label>
               <Input
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder={t("ce.productNamePlaceholder")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("ce.niche")}</Label>
+              <Input
+                value={niche}
+                onChange={(e) => setNiche(e.target.value)}
+                placeholder={t("ce.nichePlaceholder")}
               />
             </div>
             <div className="space-y-2">
@@ -140,12 +150,11 @@ export default function ContentEngine() {
             ) : (
               <span className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
-                {t("ce.generate")}
+                {t("ce.generateVideo")}
               </span>
             )}
           </Button>
 
-          {/* Loading animation */}
           {loading && (
             <div className="flex flex-col items-center gap-3 py-6">
               <div className="flex gap-1.5">
@@ -153,10 +162,7 @@ export default function ContentEngine() {
                   <div
                     key={i}
                     className="w-2 h-2 rounded-full bg-amber-500"
-                    style={{
-                      animation: "pulse 1.2s ease-in-out infinite",
-                      animationDelay: `${i * 0.15}s`,
-                    }}
+                    style={{ animation: "pulse 1.2s ease-in-out infinite", animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
               </div>
@@ -176,13 +182,53 @@ export default function ContentEngine() {
         </CardContent>
       </Card>
 
-      {/* Results with Tabs */}
+      {/* Results */}
       {result && (
         <div className="space-y-6">
-          <Tabs defaultValue="captions" className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="videos" className="gap-1.5 text-xs">
-                <Film className="h-3.5 w-3.5" /> {t("ce.tabVideos")}
+          {/* Fake Video Preview */}
+          <Card className="border-border bg-card overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Film className="h-4 w-4 text-amber-500" />
+                {t("ce.videoPreview")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {result.videoPlaceholders.map((v, i) => (
+                  <div key={i} className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gradient-to-b from-black/90 to-black group cursor-pointer">
+                    {imagePreview && (
+                      <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+                    {/* Hook text overlay */}
+                    <div className="absolute top-6 left-0 right-0 text-center px-4">
+                      <p className="text-white font-bold text-lg drop-shadow-lg animate-pulse">
+                        {result.hooks[i] || result.hooks[0]}
+                      </p>
+                    </div>
+                    {/* Play button */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-colors">
+                        <Play className="h-7 w-7 text-white ml-1" />
+                      </div>
+                    </div>
+                    {/* Label */}
+                    <div className="absolute bottom-4 left-0 right-0 text-center">
+                      <span className="text-xs font-semibold text-white/90">{v.label}</span>
+                      <p className="text-[10px] text-white/60 mt-1 px-4">{v.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tabs */}
+          <Tabs defaultValue="script" className="w-full">
+            <TabsList className="grid grid-cols-5 w-full">
+              <TabsTrigger value="script" className="gap-1.5 text-xs">
+                <FileText className="h-3.5 w-3.5" /> {t("ce.tabScript")}
               </TabsTrigger>
               <TabsTrigger value="captions" className="gap-1.5 text-xs">
                 <MessageSquare className="h-3.5 w-3.5" /> {t("ce.tabCaptions")}
@@ -193,23 +239,39 @@ export default function ContentEngine() {
               <TabsTrigger value="hashtags" className="gap-1.5 text-xs">
                 <Hash className="h-3.5 w-3.5" /> {t("ce.tabHashtags")}
               </TabsTrigger>
+              <TabsTrigger value="voiceover" className="gap-1.5 text-xs">
+                <Mic className="h-3.5 w-3.5" /> {t("ce.tabVoiceover")}
+              </TabsTrigger>
             </TabsList>
 
-            {/* Videos Tab (placeholder) */}
-            <TabsContent value="videos" className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {result.videoPlaceholders.map((v, i) => (
-                  <Card key={i} className="border-border bg-card overflow-hidden">
-                    <div className="aspect-[9/16] bg-gradient-to-b from-background to-muted/30 rounded-t-lg flex flex-col items-center justify-center gap-3 p-4">
-                      <Film className="h-10 w-10 text-amber-500/40" />
-                      <span className="text-xs font-semibold text-foreground">{v.label}</span>
-                      <span className="text-[10px] text-muted-foreground text-center px-4">{v.description}</span>
-                      <span className="mt-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-medium border border-amber-500/20">
-                        {t("ce.comingSoon")}
-                      </span>
-                    </div>
-                  </Card>
-                ))}
+            {/* Script Tab */}
+            <TabsContent value="script" className="mt-4 space-y-3">
+              {result.videoScript.scenes.map((scene, i) => (
+                <div key={i} className="flex gap-4 p-4 rounded-lg bg-accent/30 border border-border">
+                  <div className="shrink-0 w-16 text-center">
+                    <span className="text-xs font-bold text-amber-500 bg-amber-500/10 rounded-full px-2 py-1">{scene.second}</span>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-xs text-muted-foreground">{scene.visual}</p>
+                    <p className="text-sm font-semibold text-foreground">"{scene.text}"</p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 hover:text-amber-500" onClick={() => handleCopy(scene.text)}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+              {/* CTA */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-3">
+                  <MousePointerClick className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <span className="text-xs text-muted-foreground">{t("ce.ctaLabel")}</span>
+                    <p className="text-sm font-bold text-foreground">{result.videoScript.cta}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-amber-500" onClick={() => handleCopy(result.videoScript.cta)}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </TabsContent>
 
@@ -223,12 +285,7 @@ export default function ContentEngine() {
                         <span className="text-xs font-semibold text-muted-foreground">{group.label}</span>
                         <p className="text-sm text-foreground leading-relaxed">{group.caption}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0 h-8 w-8 hover:text-amber-500"
-                        onClick={() => handleCopy(group.caption)}
-                      >
+                      <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 hover:text-amber-500" onClick={() => handleCopy(group.caption)}>
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -248,12 +305,7 @@ export default function ContentEngine() {
                     <span className="text-lg font-bold text-amber-500">#{i + 1}</span>
                     <p className="text-sm font-semibold text-foreground">{hook}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 h-8 w-8 hover:text-amber-500"
-                    onClick={() => handleCopy(hook)}
-                  >
+                  <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 hover:text-amber-500" onClick={() => handleCopy(hook)}>
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -267,12 +319,7 @@ export default function ContentEngine() {
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold text-muted-foreground">{group.label}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs gap-1.5 hover:text-amber-500"
-                        onClick={() => handleCopy(group.tags.join(" "))}
-                      >
+                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 hover:text-amber-500" onClick={() => handleCopy(group.tags.join(" "))}>
                         <Copy className="h-3 w-3" />
                         {t("ce.copyAll")}
                       </Button>
@@ -292,6 +339,39 @@ export default function ContentEngine() {
                 </Card>
               ))}
             </TabsContent>
+
+            {/* Voiceover Tab */}
+            <TabsContent value="voiceover" className="mt-4 space-y-4">
+              <Card className="border-border bg-card">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Mic className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <span className="text-xs font-semibold text-muted-foreground">{t("ce.voiceoverScript")}</span>
+                      <p className="text-sm text-foreground leading-relaxed italic">"{result.videoScript.voiceover}"</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 hover:text-amber-500" onClick={() => handleCopy(result.videoScript.voiceover)}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border bg-card">
+                <CardContent className="p-5 space-y-3">
+                  <span className="text-xs font-semibold text-muted-foreground">{t("ce.onScreenTexts")}</span>
+                  <div className="space-y-2">
+                    {result.videoScript.onScreenTexts.map((text, i) => (
+                      <div key={i} className="flex items-center justify-between gap-3 py-2 border-b border-border last:border-0">
+                        <p className="text-sm text-foreground">"{text}"</p>
+                        <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7 hover:text-amber-500" onClick={() => handleCopy(text)}>
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
 
           {/* Product Positioning Block */}
@@ -304,7 +384,6 @@ export default function ContentEngine() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Target Audience */}
                 <div className="p-4 rounded-lg bg-accent/30 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <Target className="h-3.5 w-3.5" />
@@ -312,8 +391,6 @@ export default function ContentEngine() {
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">{result.positioning.targetAudience}</p>
                 </div>
-
-                {/* Price Suggestion */}
                 <div className="p-4 rounded-lg bg-accent/30 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <DollarSign className="h-3.5 w-3.5" />
@@ -324,8 +401,6 @@ export default function ContentEngine() {
                   </p>
                   <p className="text-xs text-muted-foreground">{result.positioning.priceLabel}</p>
                 </div>
-
-                {/* Sales Angle */}
                 <div className="p-4 rounded-lg bg-accent/30 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <Zap className="h-3.5 w-3.5" />
@@ -337,7 +412,6 @@ export default function ContentEngine() {
             </CardContent>
           </Card>
 
-          {/* Success */}
           <div className="flex items-center justify-center gap-2 text-sm text-emerald-500 py-2">
             <CheckCircle className="h-4 w-4" />
             {t("ce.ready")}
