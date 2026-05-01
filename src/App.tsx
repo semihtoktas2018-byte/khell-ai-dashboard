@@ -8,6 +8,8 @@ import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import LandingPage from "./pages/LandingPage";
+import ModuleSelect from "./pages/ModuleSelect";
+import FleetAnalysis from "./pages/FleetAnalysis";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -42,7 +44,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<ModuleSelect />} />
+              <Route path="/products" element={<LandingPage />} />
+              <Route path="/fleet" element={<FleetAnalysis />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route index element={<DashboardHome />} />
