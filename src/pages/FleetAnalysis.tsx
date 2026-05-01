@@ -7,6 +7,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 interface FleetResult {
   netProfit: number;
   margin: number;
+  fuelRatio: number;
   status: "loss" | "marginal" | "profitable";
   risk: "low" | "medium" | "high";
   totalCost: number;
@@ -16,16 +17,17 @@ function analyze(revenue: number, fuel: number, driver: number, other: number): 
   const totalCost = fuel + driver + other;
   const netProfit = revenue - totalCost;
   const margin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+  const fuelRatio = revenue > 0 ? (fuel / revenue) * 100 : 0;
 
   let status: FleetResult["status"] = "profitable";
   if (netProfit < 0) status = "loss";
   else if (margin < 15) status = "marginal";
 
   let risk: FleetResult["risk"] = "low";
-  if (margin < 10 || netProfit < 0) risk = "high";
-  else if (margin < 25) risk = "medium";
+  if (netProfit < 0 || fuelRatio > 60) risk = "high";
+  else if (fuelRatio >= 45) risk = "medium";
 
-  return { netProfit, margin, status, risk, totalCost };
+  return { netProfit, margin, fuelRatio, status, risk, totalCost };
 }
 
 export default function FleetAnalysis() {
@@ -146,6 +148,9 @@ export default function FleetAnalysis() {
               </div>
             ) : (
               <div className="space-y-4">
+                <div className={`text-center py-3 rounded-lg border border-border bg-card ${statusColor(result.status)}`}>
+                  <div className="text-3xl font-bold tracking-tight">{statusLabel(result.status)}</div>
+                </div>
                 {plate && (
                   <div className="text-xs text-muted-foreground uppercase tracking-wider">
                     {isTr ? "Plaka" : "Plate"}: <span className="text-foreground font-mono font-semibold">{plate}</span>
@@ -186,7 +191,14 @@ export default function FleetAnalysis() {
                     <span>{isTr ? "Toplam Gider" : "Total Cost"}</span>
                     <span className="font-mono text-foreground">{currency(result.totalCost)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>{isTr ? "Yakıt Oranı" : "Fuel Ratio"}</span>
+                    <span className="font-mono text-foreground">{result.fuelRatio.toFixed(1)}%</span>
+                  </div>
                 </div>
+                <p className="text-center text-[11px] text-muted-foreground pt-2">
+                  {isTr ? "1 araç ücretsiz analiz" : "1 vehicle free analysis"}
+                </p>
               </div>
             )}
           </motion.div>
