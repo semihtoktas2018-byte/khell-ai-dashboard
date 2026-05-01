@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe } from "lucide-react";
+import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
 interface FleetResult {
@@ -147,59 +147,15 @@ export default function FleetAnalysis() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className={`text-center py-3 rounded-lg border border-border bg-card ${statusColor(result.status)}`}>
-                  <div className="text-3xl font-bold tracking-tight">{statusLabel(result.status)}</div>
-                </div>
-                {plate && (
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider">
-                    {isTr ? "Plaka" : "Plate"}: <span className="text-foreground font-mono font-semibold">{plate}</span>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-3">
-                  <Stat
-                    label={isTr ? "Net Kâr" : "Net Profit"}
-                    value={currency(result.netProfit)}
-                    icon={result.netProfit >= 0 ? TrendingUp : TrendingDown}
-                    color={result.netProfit >= 0 ? "text-winning" : "text-destructive"}
-                  />
-                  <Stat
-                    label={isTr ? "Kâr Oranı" : "Margin"}
-                    value={`${result.margin.toFixed(1)}%`}
-                    icon={TrendingUp}
-                    color={result.margin >= 15 ? "text-winning" : result.margin >= 0 ? "text-risky" : "text-destructive"}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                      {isTr ? "Durum" : "Status"}
-                    </div>
-                    <div className={`text-lg font-bold ${statusColor(result.status)}`}>{statusLabel(result.status)}</div>
-                  </div>
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" /> {isTr ? "Risk" : "Risk"}
-                    </div>
-                    <div className={`text-lg font-bold ${riskColor(result.risk)}`}>{riskLabel(result.risk)}</div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-border text-xs text-muted-foreground space-y-1">
-                  <div className="flex justify-between">
-                    <span>{isTr ? "Toplam Gider" : "Total Cost"}</span>
-                    <span className="font-mono text-foreground">{currency(result.totalCost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{isTr ? "Yakıt Oranı" : "Fuel Ratio"}</span>
-                    <span className="font-mono text-foreground">{result.fuelRatio.toFixed(1)}%</span>
-                  </div>
-                </div>
-                <p className="text-center text-[11px] text-muted-foreground pt-2">
-                  {isTr ? "1 araç ücretsiz analiz" : "1 vehicle free analysis"}
-                </p>
-              </div>
+              <ResultPanel
+                result={result}
+                plate={plate}
+                revenue={parseFloat(revenue) || 0}
+                isTr={isTr}
+                currency={currency}
+                statusLabel={statusLabel}
+                riskLabel={riskLabel}
+              />
             )}
           </motion.div>
         </div>
@@ -234,6 +190,156 @@ function Stat({
         <Icon className="h-3 w-3" /> {label}
       </div>
       <div className={`text-lg font-bold font-mono ${color}`}>{value}</div>
+    </div>
+  );
+}
+
+function ResultPanel({
+  result, plate, revenue, isTr, currency, statusLabel, riskLabel,
+}: {
+  result: FleetResult;
+  plate: string;
+  revenue: number;
+  isTr: boolean;
+  currency: (v: number) => string;
+  statusLabel: (s: FleetResult["status"]) => string;
+  riskLabel: (r: FleetResult["risk"]) => string;
+}) {
+  const statusTheme = {
+    profitable: {
+      ring: "ring-winning/40",
+      bg: "bg-winning/10",
+      text: "text-winning",
+      glow: "shadow-[0_0_40px_-10px_hsl(var(--winning)/0.5)]",
+    },
+    marginal: {
+      ring: "ring-risky/40",
+      bg: "bg-risky/10",
+      text: "text-risky",
+      glow: "shadow-[0_0_40px_-10px_hsl(var(--risky)/0.5)]",
+    },
+    loss: {
+      ring: "ring-destructive/40",
+      bg: "bg-destructive/10",
+      text: "text-destructive",
+      glow: "shadow-[0_0_40px_-10px_hsl(var(--destructive)/0.5)]",
+    },
+  }[result.status];
+
+  const insight = {
+    profitable: isTr ? "Sistem sağlıklı, büyütülebilir" : "System is healthy, scalable",
+    marginal: isTr ? "Kâr var ama sistem kırılgan" : "Profit exists but the system is fragile",
+    loss: isTr ? "Maliyetler kontrolsüz, acil müdahale gerekli" : "Costs out of control, urgent action required",
+  }[result.status];
+
+  const summary = isTr
+    ? `${currency(revenue)} gelirden ${currency(result.netProfit)} net ${result.netProfit >= 0 ? "kazanç" : "zarar"}`
+    : `${currency(result.netProfit)} net ${result.netProfit >= 0 ? "profit" : "loss"} from ${currency(revenue)} revenue`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-5"
+    >
+      {/* Big status header */}
+      <div className={`relative rounded-xl border ${statusTheme.bg} ${statusTheme.glow} ring-1 ${statusTheme.ring} px-5 py-6 text-center overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+        <div className="relative">
+          {plate && (
+            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-2 font-mono">
+              {plate}
+            </div>
+          )}
+          <div className={`text-4xl font-bold tracking-tight ${statusTheme.text}`}>
+            {statusLabel(result.status)}
+          </div>
+        </div>
+      </div>
+
+      {/* Three premium cards */}
+      <div className="space-y-3">
+        <ResultCard
+          icon={Wallet}
+          title={isTr ? "Kâr Durumu" : "Profit Status"}
+          accent={result.netProfit >= 0 ? "text-winning" : "text-destructive"}
+          rows={[
+            { label: isTr ? "Net" : "Net", value: currency(result.netProfit) },
+            { label: isTr ? "Kâr Oranı" : "Margin", value: `%${result.margin.toFixed(1)}` },
+          ]}
+        />
+        <ResultCard
+          icon={Receipt}
+          title={isTr ? "Maliyet" : "Cost"}
+          accent="text-foreground"
+          rows={[
+            { label: isTr ? "Toplam Gider" : "Total Cost", value: currency(result.totalCost) },
+            { label: isTr ? "Yakıt Oranı" : "Fuel Ratio", value: `%${result.fuelRatio.toFixed(1)}` },
+          ]}
+        />
+        <ResultCard
+          icon={ShieldAlert}
+          title={isTr ? "Risk" : "Risk"}
+          accent={
+            result.risk === "high" ? "text-destructive" : result.risk === "medium" ? "text-risky" : "text-winning"
+          }
+          rows={[
+            { label: isTr ? "Durum" : "Status", value: statusLabel(result.status) },
+            { label: isTr ? "Risk" : "Risk", value: riskLabel(result.risk) },
+          ]}
+        />
+      </div>
+
+      {/* Patron summary */}
+      <div className="rounded-xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-4">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-primary font-semibold mb-1.5">
+          <Sparkles className="h-3 w-3" />
+          {isTr ? "Patron Özeti" : "Owner Summary"}
+        </div>
+        <p className="text-sm font-semibold text-foreground leading-relaxed">{summary}</p>
+        <p className="text-xs text-muted-foreground mt-2 italic">"{insight}"</p>
+      </div>
+
+      {/* Save button */}
+      <button
+        type="button"
+        className="w-full flex items-center justify-center gap-2 rounded-lg border border-border bg-card hover:bg-accent text-foreground text-sm font-medium py-3 transition-colors"
+      >
+        <Save className="h-4 w-4" />
+        {isTr ? "Analizi Kaydet" : "Save Analysis"}
+      </button>
+
+      <p className="text-center text-[10px] text-muted-foreground">
+        {isTr ? "Bu analiz anlık veriye göre hesaplanır" : "This analysis is calculated on real-time data"}
+      </p>
+    </motion.div>
+  );
+}
+
+function ResultCard({
+  icon: Icon, title, accent, rows,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  accent: string;
+  rows: { label: string; value: string }[];
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-4 hover:border-primary/30 transition-colors">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <h3 className="text-[11px] uppercase tracking-[0.2em] font-semibold text-muted-foreground">{title}</h3>
+      </div>
+      <div className="space-y-1.5">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">{r.label}</span>
+            <span className={`text-sm font-bold font-mono ${accent}`}>{r.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
