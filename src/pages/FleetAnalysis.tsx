@@ -7,6 +7,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 interface FleetResult {
   netProfit: number;
   margin: number;
+  fuelRatio: number;
   status: "loss" | "marginal" | "profitable";
   risk: "low" | "medium" | "high";
   totalCost: number;
@@ -16,16 +17,17 @@ function analyze(revenue: number, fuel: number, driver: number, other: number): 
   const totalCost = fuel + driver + other;
   const netProfit = revenue - totalCost;
   const margin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+  const fuelRatio = revenue > 0 ? (fuel / revenue) * 100 : 0;
 
   let status: FleetResult["status"] = "profitable";
   if (netProfit < 0) status = "loss";
   else if (margin < 15) status = "marginal";
 
   let risk: FleetResult["risk"] = "low";
-  if (margin < 10 || netProfit < 0) risk = "high";
-  else if (margin < 25) risk = "medium";
+  if (netProfit < 0 || fuelRatio > 60) risk = "high";
+  else if (fuelRatio >= 45) risk = "medium";
 
-  return { netProfit, margin, status, risk, totalCost };
+  return { netProfit, margin, fuelRatio, status, risk, totalCost };
 }
 
 export default function FleetAnalysis() {
