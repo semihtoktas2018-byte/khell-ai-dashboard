@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/" element={<ModuleSelect />} />
               <Route path="/products" element={<LandingPage />} />
               <Route path="/fleet" element={<FleetAnalysis />} />
+              <Route path="/filo" element={<FleetAnalysis />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route index element={<DashboardHome />} />
