@@ -452,7 +452,7 @@ function Stat({
 }
 
 function ResultPanel({
-  result, plate, revenue, isTr, currency, statusLabel, riskLabel,
+  result, plate, revenue, isTr, currency, statusLabel, riskLabel, onSave,
 }: {
   result: FleetResult;
   plate: string;
@@ -461,6 +461,7 @@ function ResultPanel({
   currency: (v: number) => string;
   statusLabel: (s: FleetResult["status"]) => string;
   riskLabel: (r: FleetResult["risk"]) => string;
+  onSave?: () => void;
 }) {
   const statusTheme = {
     profitable: {
@@ -560,6 +561,7 @@ function ResultPanel({
       {/* Save button */}
       <button
         type="button"
+        onClick={onSave}
         className="w-full flex items-center justify-center gap-2 rounded-lg border border-border bg-card hover:bg-accent text-foreground text-sm font-medium py-3 transition-colors"
       >
         <Save className="h-4 w-4" />
