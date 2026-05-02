@@ -35,6 +35,10 @@ interface CompareVehicle {
 
 const TRIPS_KEY = "khell_fleet_trips";
 const MAINTENANCE_PERIOD = 10000;
+const PAYWALL_KEY = "filo_count";
+const PAYWALL_LIMIT = 2;
+const WHATSAPP_NUMBER = "+90 544 645 24 30";
+const WHATSAPP_LINK = "https://wa.me/905446452430";
 
 function analyze(revenue: number, fuel: number, driver: number, other: number): FleetResult {
   const totalCost = fuel + driver + other;
@@ -82,11 +86,24 @@ export default function FleetAnalysis() {
   ]);
   const [compareResult, setCompareResult] = useState<FleetResult[] | null>(null);
 
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [filoCount, setFiloCount] = useState<number>(() => {
+    try {
+      return parseInt(localStorage.getItem(PAYWALL_KEY) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem(TRIPS_KEY, JSON.stringify(trips));
   }, [trips]);
 
   const handleAnalyze = () => {
+    if (filoCount >= PAYWALL_LIMIT) {
+      setPaywallOpen(true);
+      return;
+    }
     const r = analyze(
       parseFloat(revenue) || 0,
       parseFloat(fuel) || 0,
@@ -94,6 +111,14 @@ export default function FleetAnalysis() {
       parseFloat(other) || 0,
     );
     setResult(r);
+    const next = filoCount + 1;
+    setFiloCount(next);
+    try {
+      localStorage.setItem(PAYWALL_KEY, String(next));
+    } catch {}
+    if (next >= PAYWALL_LIMIT) {
+      // allow this result to show; next click will be blocked
+    }
   };
 
   const handleSaveTrip = () => {
