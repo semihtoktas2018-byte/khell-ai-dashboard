@@ -217,7 +217,7 @@ export default function FleetAnalysis() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-6">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-6 no-print">
             <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
               {isTr ? "Araç Bilgileri" : "Vehicle Info"}
             </h2>
@@ -227,6 +227,24 @@ export default function FleetAnalysis() {
               <Field label={isTr ? "Yakıt" : "Fuel"} value={fuel} onChange={setFuel} placeholder="0" type="number" />
               <Field label={isTr ? "Şoför" : "Driver"} value={driver} onChange={setDriver} placeholder="0" type="number" />
               <Field label={isTr ? "Diğer giderler" : "Other costs"} value={other} onChange={setOther} placeholder="0" type="number" />
+              <Field label="KM" value={km} onChange={setKm} placeholder="0" type="number" />
+
+              {maintenanceRemaining !== null && (
+                <div className={`rounded-lg border px-3 py-2.5 text-xs flex items-center gap-2 ${maintenanceWarning ? "border-risky/40 bg-risky/10 text-risky" : "border-border bg-card text-muted-foreground"}`}>
+                  <Wrench className="h-3.5 w-3.5 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-semibold">
+                      {isTr ? "Bakım'a kalan: " : "Service in: "}
+                      <span className="font-mono">{maintenanceRemaining.toLocaleString()} km</span>
+                    </div>
+                    {maintenanceWarning && (
+                      <div className="text-[11px] mt-0.5">
+                        {isTr ? "Bakım zamanı yaklaşıyor" : "Maintenance due soon"}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handleAnalyze}
@@ -239,7 +257,7 @@ export default function FleetAnalysis() {
           </motion.div>
 
           {/* Result */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-glow rounded-xl p-6">
+          <motion.div id="print-area" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-glow rounded-xl p-6">
             <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
               {isTr ? "Sonuç" : "Result"}
             </h2>
@@ -252,18 +270,152 @@ export default function FleetAnalysis() {
                 </p>
               </div>
             ) : (
-              <ResultPanel
-                result={result}
-                plate={plate}
-                revenue={parseFloat(revenue) || 0}
-                isTr={isTr}
-                currency={currency}
-                statusLabel={statusLabel}
-                riskLabel={riskLabel}
-              />
+              <>
+                <ResultPanel
+                  result={result}
+                  plate={plate}
+                  revenue={parseFloat(revenue) || 0}
+                  isTr={isTr}
+                  currency={currency}
+                  statusLabel={statusLabel}
+                  riskLabel={riskLabel}
+                  onSave={handleSaveTrip}
+                />
+                <div className="mt-3 no-print grid grid-cols-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="w-full flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium py-3 transition-colors"
+                  >
+                    <Printer className="h-4 w-4" />
+                    {isTr ? "PDF indir" : "Download PDF"}
+                  </button>
+                </div>
+              </>
             )}
           </motion.div>
         </div>
+
+        {/* History */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="card-glow rounded-xl p-6 mt-6 no-print"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+              <History className="h-4 w-4 text-primary" />
+              {isTr ? "Geçmiş Seferler" : "Past Trips"}
+            </h2>
+            <span className="text-[10px] text-muted-foreground font-mono">{trips.length}</span>
+          </div>
+          {trips.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-6">
+              {isTr ? "Henüz kayıtlı sefer yok." : "No saved trips yet."}
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {trips.map((t) => (
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/50 hover:bg-accent/40 hover:border-primary/30 transition-colors px-3 py-2.5"
+                >
+                  <button
+                    onClick={() => handleLoadTrip(t)}
+                    className="flex-1 flex items-center justify-between text-left gap-3"
+                  >
+                    <span className="text-sm font-mono font-semibold text-foreground">{t.plate}</span>
+                    <span className={`text-xs font-mono font-bold ${t.netProfit >= 0 ? "text-winning" : "text-destructive"}`}>
+                      Net: {currency(t.netProfit)}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(t.date).toLocaleDateString(isTr ? "tr-TR" : "en-US")}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTrip(t.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                    aria-label="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Comparison */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="card-glow rounded-xl p-6 mt-6 no-print"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+              <GitCompare className="h-4 w-4 text-primary" />
+              {isTr ? "Karşılaştırma" : "Comparison"}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            {compareVehicles.map((v, i) => (
+              <div key={i} className="rounded-lg border border-border bg-card/50 p-3 space-y-2">
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                  {isTr ? "Araç" : "Vehicle"} {String.fromCharCode(65 + i)}
+                </div>
+                <MiniField label={isTr ? "Gelir" : "Revenue"} value={v.revenue} onChange={(val) => updateCompareVehicle(i, "revenue", val)} />
+                <MiniField label={isTr ? "Yakıt" : "Fuel"} value={v.fuel} onChange={(val) => updateCompareVehicle(i, "fuel", val)} />
+                <MiniField label={isTr ? "Şoför" : "Driver"} value={v.driver} onChange={(val) => updateCompareVehicle(i, "driver", val)} />
+                <MiniField label={isTr ? "Diğer" : "Other"} value={v.other} onChange={(val) => updateCompareVehicle(i, "other", val)} />
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleCompare}
+            className="w-full btn-primary text-sm py-3 flex items-center justify-center gap-2"
+          >
+            <GitCompare className="h-4 w-4" />
+            {isTr ? "Karşılaştır" : "Compare"}
+          </button>
+
+          {compareResult && (
+            <div className="mt-5">
+              <div className="rounded-lg border border-winning/30 bg-winning/10 px-4 py-3 mb-3 flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-winning" />
+                <span className="text-sm font-semibold text-winning">
+                  {isTr ? "En kârlı araç: " : "Most profitable: "}
+                  {isTr ? "Araç" : "Vehicle"} {String.fromCharCode(65 + bestIdx)}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {compareResult.map((r, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-lg border p-3 ${i === bestIdx ? "border-winning/40 bg-winning/5" : "border-border bg-card/50"}`}
+                  >
+                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                      {isTr ? "Araç" : "Vehicle"} {String.fromCharCode(65 + i)}
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Net</span>
+                      <span className={`font-mono font-bold ${r.netProfit >= 0 ? "text-winning" : "text-destructive"}`}>
+                        {currency(r.netProfit)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs mt-1">
+                      <span className="text-muted-foreground">{isTr ? "Kâr Oranı" : "Margin"}</span>
+                      <span className="font-mono font-bold text-foreground">%{r.margin.toFixed(1)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
       </main>
     </div>
   );
