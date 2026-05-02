@@ -35,6 +35,10 @@ interface CompareVehicle {
 
 const TRIPS_KEY = "khell_fleet_trips";
 const MAINTENANCE_PERIOD = 10000;
+const PAYWALL_KEY = "filo_count";
+const PAYWALL_LIMIT = 2;
+const WHATSAPP_NUMBER = "+90 544 645 24 30";
+const WHATSAPP_LINK = "https://wa.me/905446452430";
 
 function analyze(revenue: number, fuel: number, driver: number, other: number): FleetResult {
   const totalCost = fuel + driver + other;
@@ -82,11 +86,24 @@ export default function FleetAnalysis() {
   ]);
   const [compareResult, setCompareResult] = useState<FleetResult[] | null>(null);
 
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [filoCount, setFiloCount] = useState<number>(() => {
+    try {
+      return parseInt(localStorage.getItem(PAYWALL_KEY) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem(TRIPS_KEY, JSON.stringify(trips));
   }, [trips]);
 
   const handleAnalyze = () => {
+    if (filoCount >= PAYWALL_LIMIT) {
+      setPaywallOpen(true);
+      return;
+    }
     const r = analyze(
       parseFloat(revenue) || 0,
       parseFloat(fuel) || 0,
@@ -94,6 +111,14 @@ export default function FleetAnalysis() {
       parseFloat(other) || 0,
     );
     setResult(r);
+    const next = filoCount + 1;
+    setFiloCount(next);
+    try {
+      localStorage.setItem(PAYWALL_KEY, String(next));
+    } catch {}
+    if (next >= PAYWALL_LIMIT) {
+      // allow this result to show; next click will be blocked
+    }
   };
 
   const handleSaveTrip = () => {
@@ -417,6 +442,44 @@ export default function FleetAnalysis() {
           )}
         </motion.div>
       </main>
+
+      {paywallOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 no-print"
+          onClick={() => setPaywallOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-2xl"
+          >
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <ShieldAlert className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              {isTr ? "Ücretsiz hakkın doldu" : "Free quota reached"}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-5">
+              {isTr
+                ? "Sınırsız analiz için iletişime geç"
+                : "Contact us for unlimited analysis"}
+            </p>
+            <a
+              href={WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-lg bg-primary text-primary-foreground font-semibold text-sm py-3 hover:brightness-110 transition"
+            >
+              {`WhatsApp: ${WHATSAPP_NUMBER}`}
+            </a>
+            <button
+              onClick={() => setPaywallOpen(false)}
+              className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isTr ? "Kapat" : "Close"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
