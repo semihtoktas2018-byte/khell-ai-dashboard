@@ -438,6 +438,23 @@ function Field({
   );
 }
 
+function MiniField({
+  label, value, onChange,
+}: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{label}</label>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="0"
+        className="w-full rounded-md border border-border bg-input px-2 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+      />
+    </div>
+  );
+}
+
 function Stat({
   label, value, icon: Icon, color,
 }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color: string }) {
