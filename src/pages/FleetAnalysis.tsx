@@ -442,6 +442,44 @@ export default function FleetAnalysis() {
           )}
         </motion.div>
       </main>
+
+      {paywallOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 no-print"
+          onClick={() => setPaywallOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-2xl"
+          >
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <ShieldAlert className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              {isTr ? "Ücretsiz hakkın doldu" : "Free quota reached"}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-5">
+              {isTr
+                ? "Sınırsız analiz için iletişime geç"
+                : "Contact us for unlimited analysis"}
+            </p>
+            <a
+              href={WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-lg bg-primary text-primary-foreground font-semibold text-sm py-3 hover:brightness-110 transition"
+            >
+              {`WhatsApp: ${WHATSAPP_NUMBER}`}
+            </a>
+            <button
+              onClick={() => setPaywallOpen(false)}
+              className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isTr ? "Kapat" : "Close"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
