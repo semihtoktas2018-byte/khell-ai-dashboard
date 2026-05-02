@@ -63,7 +63,28 @@ export default function FleetAnalysis() {
   const [fuel, setFuel] = useState("");
   const [driver, setDriver] = useState("");
   const [other, setOther] = useState("");
+  const [km, setKm] = useState("");
   const [result, setResult] = useState<FleetResult | null>(null);
+
+  const [trips, setTrips] = useState<SavedTrip[]>(() => {
+    try {
+      const raw = localStorage.getItem(TRIPS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [compareVehicles, setCompareVehicles] = useState<CompareVehicle[]>([
+    { revenue: "", fuel: "", driver: "", other: "" },
+    { revenue: "", fuel: "", driver: "", other: "" },
+    { revenue: "", fuel: "", driver: "", other: "" },
+  ]);
+  const [compareResult, setCompareResult] = useState<FleetResult[] | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem(TRIPS_KEY, JSON.stringify(trips));
+  }, [trips]);
 
   const handleAnalyze = () => {
     const r = analyze(
@@ -74,6 +95,67 @@ export default function FleetAnalysis() {
     );
     setResult(r);
   };
+
+  const handleSaveTrip = () => {
+    if (!result) return;
+    const trip: SavedTrip = {
+      id: crypto.randomUUID(),
+      plate: plate || "—",
+      revenue: parseFloat(revenue) || 0,
+      fuel: parseFloat(fuel) || 0,
+      driver: parseFloat(driver) || 0,
+      other: parseFloat(other) || 0,
+      km: parseFloat(km) || 0,
+      netProfit: result.netProfit,
+      margin: result.margin,
+      date: new Date().toISOString(),
+    };
+    setTrips((prev) => [trip, ...prev].slice(0, 50));
+  };
+
+  const handleLoadTrip = (t: SavedTrip) => {
+    setPlate(t.plate === "—" ? "" : t.plate);
+    setRevenue(String(t.revenue));
+    setFuel(String(t.fuel));
+    setDriver(String(t.driver));
+    setOther(String(t.other));
+    setKm(t.km ? String(t.km) : "");
+    setResult(analyze(t.revenue, t.fuel, t.driver, t.other));
+  };
+
+  const handleDeleteTrip = (id: string) => {
+    setTrips((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleCompare = () => {
+    const results = compareVehicles.map((v) =>
+      analyze(
+        parseFloat(v.revenue) || 0,
+        parseFloat(v.fuel) || 0,
+        parseFloat(v.driver) || 0,
+        parseFloat(v.other) || 0,
+      ),
+    );
+    setCompareResult(results);
+  };
+
+  const updateCompareVehicle = (idx: number, field: keyof CompareVehicle, value: string) => {
+    setCompareVehicles((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value };
+      return next;
+    });
+  };
+
+  // Maintenance
+  const kmNum = parseFloat(km) || 0;
+  const maintenanceRemaining = kmNum > 0 ? MAINTENANCE_PERIOD - (kmNum % MAINTENANCE_PERIOD) : null;
+  const maintenanceWarning = maintenanceRemaining !== null && maintenanceRemaining <= 1000;
+
+  // Best vehicle in comparison
+  const bestIdx = compareResult
+    ? compareResult.reduce((best, r, i, arr) => (r.netProfit > arr[best].netProfit ? i : best), 0)
+    : -1;
 
   const statusLabel = (s: FleetResult["status"]) => {
     if (s === "loss") return isTr ? "ZARAR" : "LOSS";
