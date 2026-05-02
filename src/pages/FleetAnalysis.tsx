@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
 interface FleetResult {
@@ -12,6 +12,29 @@ interface FleetResult {
   risk: "low" | "medium" | "high";
   totalCost: number;
 }
+
+interface SavedTrip {
+  id: string;
+  plate: string;
+  revenue: number;
+  fuel: number;
+  driver: number;
+  other: number;
+  km: number;
+  netProfit: number;
+  margin: number;
+  date: string;
+}
+
+interface CompareVehicle {
+  revenue: string;
+  fuel: string;
+  driver: string;
+  other: string;
+}
+
+const TRIPS_KEY = "khell_fleet_trips";
+const MAINTENANCE_PERIOD = 10000;
 
 function analyze(revenue: number, fuel: number, driver: number, other: number): FleetResult {
   const totalCost = fuel + driver + other;
