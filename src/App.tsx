@@ -10,6 +10,7 @@ import { LocaleProvider } from "@/contexts/LocaleContext";
 import LandingPage from "./pages/LandingPage";
 import ModuleSelect from "./pages/ModuleSelect";
 import FleetAnalysis from "./pages/FleetAnalysis";
+import AdAnalyzer from "./pages/AdAnalyzer";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/products" element={<LandingPage />} />
               <Route path="/fleet" element={<FleetAnalysis />} />
               <Route path="/filo" element={<FleetAnalysis />} />
+              <Route path="/ad-analyzer" element={<AdAnalyzer />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route index element={<DashboardHome />} />
