@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Truck, Package, Zap, Globe } from "lucide-react";
+import { Truck, Package, Zap, Globe, Megaphone } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
 export default function ModuleSelect() {
@@ -51,7 +51,7 @@ export default function ModuleSelect() {
             {isTr ? "Fikir senden, analiz KHELL'den" : "The idea is yours, the analysis is KHELL's"}
           </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -91,6 +91,27 @@ export default function ModuleSelect() {
                 {isTr
                   ? "Kazanan ürünleri bul, kâr marjını hesapla, viral video reklam üret."
                   : "Find winning products, calculate margins, generate viral video ads."}
+              </p>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ y: -6 }}
+              onClick={() => navigate("/ad-analyzer")}
+              className="card-glow rounded-2xl p-10 text-left group cursor-pointer border border-border hover:border-primary/50 transition-colors"
+            >
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <Megaphone className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                {isTr ? "Reklam Analizi" : "Ad Analysis"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {isTr
+                  ? "Kazanan reklamları analiz et, satış metni üret."
+                  : "Analyze winning ads, generate sales copy."}
               </p>
             </motion.button>
           </div>
