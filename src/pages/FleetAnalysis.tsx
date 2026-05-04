@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy } from "lucide-react";
+import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy, BarChart3, DollarSign } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import fleetHero from "@/assets/fleet-hero.jpg";
 
 interface FleetResult {
   netProfit: number;
@@ -198,16 +199,26 @@ export default function FleetAnalysis() {
     r === "high" ? "text-destructive" : r === "medium" ? "text-risky" : "text-winning";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Ambient floating icons */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden no-print">
+        <Truck className="absolute top-[18%] left-[5%] h-24 w-24 text-primary/[0.05] blur-[1px]" />
+        <DollarSign className="absolute top-[42%] right-[6%] h-28 w-28 text-emerald-400/[0.05] blur-[1px]" />
+        <BarChart3 className="absolute bottom-[22%] left-[7%] h-20 w-20 text-blue-400/[0.06] blur-[1px]" />
+        <TrendingUp className="absolute bottom-[10%] right-[10%] h-24 w-24 text-purple-400/[0.05] blur-[1px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-primary/[0.04] blur-[120px]" />
+      </div>
+
       {/* Top bar */}
-      <nav className="flex items-center justify-between px-6 h-16 border-b border-border sticky top-0 bg-background/80 backdrop-blur-md z-40">
+      <nav className="relative flex items-center justify-between px-6 h-16 border-b border-border/60 sticky top-0 bg-background/70 backdrop-blur-md z-40 no-print">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+            className="group flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border/60 bg-card/40 hover:bg-primary/10 hover:border-primary/40 hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.5)] text-muted-foreground hover:text-foreground transition-all"
             aria-label="Back"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <span className="text-xs font-medium">{isTr ? "Geri" : "Back"}</span>
           </button>
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
@@ -225,20 +236,35 @@ export default function FleetAnalysis() {
         </button>
       </nav>
 
-      <main className="container mx-auto max-w-4xl px-6 py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Truck className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+      <main className="relative container mx-auto max-w-4xl px-6 py-8 z-10">
+        {/* Hero cover */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative mb-8 rounded-3xl overflow-hidden border border-border/60 shadow-2xl no-print"
+        >
+          <img
+            src={fleetHero}
+            alt={isTr ? "Filo Analizi premium görseli" : "Fleet Analysis premium banner"}
+            width={1920}
+            height={640}
+            className="w-full h-[200px] md:h-[260px] object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/30" />
+          <div className="absolute inset-0 flex flex-col items-start justify-end p-6 md:p-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 backdrop-blur-md mb-3">
+              <Truck className="h-3 w-3 text-primary" />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Fleet AI</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-1.5 text-foreground">
               {isTr ? "Filo Analizi" : "Fleet Analysis"}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground max-w-xl">
               {isTr ? "Araç bazlı kâr/zarar analizi" : "Vehicle-based profit/loss analysis"}
             </p>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form */}
@@ -282,17 +308,35 @@ export default function FleetAnalysis() {
           </motion.div>
 
           {/* Result */}
-          <motion.div id="print-area" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-glow rounded-xl p-6">
+          <motion.div id="print-area" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="relative card-glow rounded-xl p-6 overflow-hidden hover:border-primary/30 hover:shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)] transition-all">
             <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">
               {isTr ? "Sonuç" : "Result"}
             </h2>
 
             {!result ? (
-              <div className="flex flex-col items-center justify-center text-center py-16 text-muted-foreground">
-                <Calculator className="h-10 w-10 mb-3 opacity-40" />
-                <p className="text-sm">
-                  {isTr ? "Bilgileri girin ve 'Analiz Et' butonuna basın." : "Enter info and click 'Analyze'."}
-                </p>
+              <div className="relative flex flex-col items-center justify-center text-center py-14 min-h-[320px]">
+                {/* Background ambient icons inside empty state */}
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                  <Truck className="absolute top-6 left-6 h-12 w-12 text-primary/[0.06]" />
+                  <BarChart3 className="absolute bottom-8 right-6 h-14 w-14 text-blue-400/[0.06]" />
+                  <DollarSign className="absolute top-1/3 right-8 h-10 w-10 text-emerald-400/[0.06]" />
+                  <TrendingUp className="absolute bottom-6 left-8 h-10 w-10 text-purple-400/[0.06]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.08),transparent_60%)]" />
+                </div>
+                <div className="relative">
+                  <div className="relative inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 mb-4 shadow-[0_0_30px_-8px_hsl(var(--primary)/0.5)]">
+                    <Calculator className="h-7 w-7 text-primary" />
+                    <span className="absolute inset-0 rounded-2xl animate-pulse bg-primary/5" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground mb-1">
+                    {isTr ? "Analiz Sonucu" : "Analysis Result"}
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
+                    {isTr
+                      ? "Verileri gir, analiz sonucu burada görünecek."
+                      : "Enter the data — your analysis result will appear here."}
+                  </p>
+                </div>
               </div>
             ) : (
               <>
