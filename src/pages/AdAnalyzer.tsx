@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, ShieldCheck, MessageCircle, FileText, Zap, RefreshCw, Copy } from "lucide-react";
+import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, ShieldCheck, MessageCircle, FileText, Zap, RefreshCw, Copy, Film, Image as ImageIcon, BarChart3, DollarSign, TrendingUp, LineChart, PieChart, Rocket } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import heroImage from "@/assets/ad-analyzer-hero.jpg";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
@@ -18,6 +19,8 @@ interface AdResult {
   shortCopy: string;
   longCopy: string;
   whatsappCopy: string;
+  videoIdeas: { title: string; scene1: string; scene2: string; scene3: string; hook: string; text: string }[];
+  thumbnailIdeas: { title: string; bg: string; object: string; text: string; color: string; goal: string }[];
 }
 
 function pick<T>(arr: T[]): T {
