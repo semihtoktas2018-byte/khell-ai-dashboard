@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2 } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 
@@ -56,7 +56,7 @@ export default function ProductAnalyzer() {
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory } = useAnalysisHistory();
   const { toast } = useToast();
-  const { t, currency, currencySymbol } = useLocale();
+  const { t, currency, currencySymbol, locale } = useLocale();
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
   const fields: { key: keyof AnalyzerInput; labelKey: string; suffix?: boolean; placeholder: string }[] = [
@@ -175,6 +175,15 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6 relative">
+      {/* Back to dashboard */}
+      <button
+        onClick={() => navigate("/")}
+        className="group inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border/60 bg-card/40 hover:bg-primary/10 hover:border-primary/40 hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.5)] text-muted-foreground hover:text-foreground transition-all"
+      >
+        <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+        <span className="text-xs font-medium">{locale === "tr" ? "Geri" : "Back"}</span>
+      </button>
+
       {/* Onboarding Step Indicator */}
       {fromOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">

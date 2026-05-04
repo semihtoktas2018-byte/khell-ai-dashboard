@@ -333,11 +333,11 @@ export default function AdAnalyzer() {
 
       <nav className="relative flex items-center justify-between px-6 h-16 border-b border-border/60 backdrop-blur-sm bg-background/40 z-10">
         <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => navigate("/")}
+          className="group flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border/60 bg-card/40 hover:bg-primary/10 hover:border-primary/40 hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.5)] text-muted-foreground hover:text-foreground transition-all"
         >
-          <ArrowLeft className="h-4 w-4" />
-          {isTr ? "Geri" : "Back"}
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-xs font-medium">{isTr ? "Geri" : "Back"}</span>
         </button>
         <div className="flex items-center gap-2">
           <Megaphone className="h-4 w-4 text-primary" />
