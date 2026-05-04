@@ -318,14 +318,26 @@ export default function AdAnalyzer() {
     : [];
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="flex items-center justify-between px-6 h-16 border-b border-border">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Ambient floating icons */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <BarChart3 className="absolute top-[12%] left-[6%] h-24 w-24 text-primary/[0.06] blur-[1px]" />
+        <DollarSign className="absolute top-[28%] right-[8%] h-28 w-28 text-emerald-400/[0.06] blur-[1px]" />
+        <TrendingUp className="absolute top-[55%] left-[4%] h-20 w-20 text-blue-400/[0.07] blur-[1px]" />
+        <LineChart className="absolute bottom-[18%] right-[6%] h-24 w-24 text-purple-400/[0.06] blur-[1px]" />
+        <PieChart className="absolute bottom-[8%] left-[10%] h-16 w-16 text-pink-400/[0.06] blur-[1px]" />
+        <Rocket className="absolute top-[70%] right-[18%] h-20 w-20 text-primary/[0.06] blur-[1px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-primary/[0.05] blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-purple-500/[0.05] blur-[120px]" />
+      </div>
+
+      <nav className="relative flex items-center justify-between px-6 h-16 border-b border-border/60 backdrop-blur-sm bg-background/40 z-10">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          {isTr ? "Ana Sayfa" : "Home"}
+          {isTr ? "Geri" : "Back"}
         </button>
         <div className="flex items-center gap-2">
           <Megaphone className="h-4 w-4 text-primary" />
@@ -333,30 +345,43 @@ export default function AdAnalyzer() {
         </div>
       </nav>
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="relative max-w-4xl mx-auto px-6 py-10 z-10">
+        {/* Hero cover */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
+          className="relative mb-10 rounded-3xl overflow-hidden border border-border/60 shadow-2xl"
         >
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
-            <Megaphone className="h-6 w-6 text-primary" />
+          <img
+            src={heroImage}
+            alt={isTr ? "Reklam Analizi premium görseli" : "Ad Analysis premium banner"}
+            width={1920}
+            height={640}
+            className="w-full h-[200px] md:h-[260px] object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/40" />
+          <div className="absolute inset-0 flex flex-col items-start justify-end p-6 md:p-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 backdrop-blur-md mb-3">
+              <Sparkles className="h-3 w-3 text-primary" />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">AI Powered</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text">
+              {isTr ? "Reklam Analizi" : "Ad Analysis"}
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground max-w-xl">
+              {isTr
+                ? "Reklam linki veya metni gir — KHELL analiz etsin, satış makinesine dönüştürsün."
+                : "Drop an ad link or copy — KHELL turns it into a selling machine."}
+            </p>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            {isTr ? "Reklam Analizi" : "Ad Analysis"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isTr
-              ? "Reklam linki veya metni gir, KHELL analiz etsin"
-              : "Enter an ad link or copy — let KHELL analyze it"}
-          </p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="card-glow rounded-2xl border border-border p-6"
+          className="card-glow rounded-2xl border border-border/80 p-6 backdrop-blur-md bg-card/60 shadow-xl"
         >
           <textarea
             value={input}
@@ -420,7 +445,7 @@ export default function AdAnalyzer() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.06 }}
-                      className="relative card-glow rounded-2xl border border-border p-5 overflow-hidden"
+                      className="group relative card-glow rounded-2xl border border-border/80 p-5 overflow-hidden backdrop-blur-md bg-card/50 hover:border-primary/40 hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.4)] hover:-translate-y-0.5 transition-all duration-300"
                     >
                       <div className={`absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br ${c.accent} blur-2xl pointer-events-none`} />
                       <div className="relative">
@@ -439,6 +464,68 @@ export default function AdAnalyzer() {
                     </motion.div>
                   );
                 })}
+              </div>
+
+              {/* Video Ideas */}
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mt-10 mb-4 flex items-center gap-2">
+                <Film className="h-3.5 w-3.5 text-primary" />
+                {isTr ? "Reklam Fikirleri (Video)" : "Ad Ideas (Video)"}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {result.videoIdeas.map((v, i) => (
+                  <motion.div
+                    key={v.title + i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + i * 0.08 }}
+                    className="card-glow rounded-2xl border border-border/80 p-5 backdrop-blur-md bg-card/50 hover:border-primary/40 hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.4)] transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">
+                        VIDEO {i + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-foreground">{v.title}</span>
+                    </div>
+                    <ul className="space-y-1.5 text-xs text-foreground/85">
+                      <li><strong className="text-primary">Sahne 1:</strong> {v.scene1}</li>
+                      <li><strong className="text-primary">Sahne 2:</strong> {v.scene2}</li>
+                      <li><strong className="text-primary">Sahne 3:</strong> {v.scene3}</li>
+                      <li className="pt-2 border-t border-border/60"><strong className="text-primary">Hook:</strong> {v.hook}</li>
+                      <li><strong className="text-primary">{isTr ? "Metin" : "Copy"}:</strong> {v.text}</li>
+                    </ul>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Thumbnail Ideas */}
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mt-10 mb-4 flex items-center gap-2">
+                <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                {isTr ? "Thumbnail / Görsel Fikirleri" : "Thumbnail / Visual Ideas"}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {result.thumbnailIdeas.map((t, i) => (
+                  <motion.div
+                    key={t.title + i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 + i * 0.08 }}
+                    className="card-glow rounded-2xl border border-border/80 p-5 backdrop-blur-md bg-card/50 hover:border-primary/40 hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.4)] transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary">
+                        THUMB {i + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-foreground">{t.title}</span>
+                    </div>
+                    <ul className="space-y-1.5 text-xs text-foreground/85">
+                      <li><strong className="text-primary">{isTr ? "Arka plan" : "Background"}:</strong> {t.bg}</li>
+                      <li><strong className="text-primary">{isTr ? "Ana obje" : "Main object"}:</strong> {t.object}</li>
+                      <li><strong className="text-primary">{isTr ? "Yazı" : "Text"}:</strong> {t.text}</li>
+                      <li><strong className="text-primary">{isTr ? "Renk stili" : "Color"}:</strong> {t.color}</li>
+                      <li><strong className="text-primary">{isTr ? "Amaç" : "Goal"}:</strong> {t.goal}</li>
+                    </ul>
+                  </motion.div>
+                ))}
               </div>
 
               <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mt-8 mb-4">
