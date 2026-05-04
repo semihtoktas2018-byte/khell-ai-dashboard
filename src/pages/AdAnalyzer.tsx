@@ -128,7 +128,117 @@ function analyzeAd(input: string, isTr: boolean, seed = 0): AdResult {
   // seed lightly varies output via pick randomness; not strict but enough
   void seed;
 
-  return { hook, triggers, audience, buyReason, trust, weaknesses: weakParts.join(" "), shortCopy, longCopy, whatsappCopy };
+  // Video ideas (3 scripted concepts)
+  const videoIdeas = isTr
+    ? [
+        {
+          title: "POV / Pattern Interrupt",
+          scene1: "Yakın çekim yüz, şaşkın ifade — 'Bunu gerçekten denedim ve...'",
+          scene2: "Ürün kutudan çıkıyor, hızlı zoom + ses efekti.",
+          scene3: "Sonuç gösterimi: öncesi/sonrası split screen, 3 saniye.",
+          hook: pick(["3 gün önce bunu görseydim...", "Bu videoyu izlemeden alışveriş yapma", "Sana kimse bunu söylemedi ama..."]),
+          text: "POV: yıllardır yanlış yapıyormuşum. Bu ürün her şeyi değiştirdi. Link bio'da, stoklar tükeniyor.",
+        },
+        {
+          title: "Sosyal Kanıt / UGC",
+          scene1: "3 farklı kullanıcı kameraya kısa yorum (her biri 2 saniye).",
+          scene2: "Ürün kullanım anı, doğal ışık, gerçek el kamerası hissi.",
+          scene3: "Yorumlar ekran kaydı: 5 yıldız + ekran görüntüleri kayıyor.",
+          hook: pick(["Binlerce kişi neden bunu konuşuyor?", "Yorumlara bak, ben ikna oldum", "Herkes aynı şeyi söylüyor:"]),
+          text: "10.000+ memnun müşteri yanılıyor olamaz. Sen de dene, beğenmezsen iade. Risksiz.",
+        },
+        {
+          title: "Demo / Wow Effect",
+          scene1: "Problem sahnesi: kullanıcı bariz şekilde zorlanıyor.",
+          scene2: "Ürün giriyor — tek hareketle çözüm. Kamera yavaş çekim.",
+          scene3: "Final: rahatlamış yüz + ürün etiketi + fiyat çapası.",
+          hook: pick(["10 saniyede sonucu göster", "Bu kadar basit olamaz dedim, oldu", "Bunu bir kez görünce bir daha eskisi gibi yapamayacaksın"]),
+          text: "Saatlerce uğraşma. Bu ürün 30 saniyede hallediyor. Bugün özel fiyat aktif.",
+        },
+      ]
+    : [
+        {
+          title: "POV / Pattern Interrupt",
+          scene1: "Close-up face, surprised look — 'I actually tried this and...'",
+          scene2: "Product unboxing, quick zoom + sound effect.",
+          scene3: "Result reveal: before/after split screen, 3 seconds.",
+          hook: pick(["I wish I saw this 3 days ago...", "Don't shop before watching this", "Nobody told you but..."]),
+          text: "POV: I've been doing it wrong for years. This product changed everything. Link in bio — selling out fast.",
+        },
+        {
+          title: "Social Proof / UGC",
+          scene1: "3 different users give 2-second testimonials to camera.",
+          scene2: "Real-use moment, natural light, handheld vibe.",
+          scene3: "Screen-record of reviews: 5 stars + scrolling screenshots.",
+          hook: pick(["Why is everyone talking about this?", "Read the reviews — I'm sold", "Everyone says the same thing:"]),
+          text: "10,000+ happy customers can't be wrong. Try it risk-free, return if you don't love it.",
+        },
+        {
+          title: "Demo / Wow Effect",
+          scene1: "Problem scene: user visibly struggling.",
+          scene2: "Product enters — one move solves it. Slow-mo camera.",
+          scene3: "Final: relieved face + product label + price anchor.",
+          hook: pick(["10-second result reveal", "Said 'no way'... it worked", "Once you see this, you can't go back"]),
+          text: "Stop wasting hours. This solves it in 30 seconds. Special price active today.",
+        },
+      ];
+
+  // Thumbnail ideas (3 visual concepts)
+  const thumbnailIdeas = isTr
+    ? [
+        {
+          title: "Şok / Yüz İfadesi",
+          bg: "Koyu gradient (lacivert → mor), hafif grain.",
+          object: "Ürün ortada, arkasında şaşkın yüz ifadesi.",
+          text: "Büyük sarı yazı: 'BUNU GÖRMEDEN ALMA'",
+          color: "Sarı + lacivert kontrast, yüksek okunurluk.",
+          goal: "Pattern interrupt, scroll'u durdur.",
+        },
+        {
+          title: "Öncesi / Sonrası",
+          bg: "Bölünmüş ekran: solda gri/donuk, sağda canlı renkler.",
+          object: "Aynı kişi/obje iki halde, ortada ürün.",
+          text: "'ÖNCE / SONRA' kısa ve net.",
+          color: "Gri vs neon yeşil — dramatik fark.",
+          goal: "Ürün etkisini saniyede ispatla.",
+        },
+        {
+          title: "Fiyat Çapası",
+          bg: "Karanlık premium, altın ışıltı.",
+          object: "Ürün izole, üstünde dolar/TL sembolü.",
+          text: "'%50 İNDİRİM — SON 24 SAAT'",
+          color: "Altın + kırmızı urgency rozeti.",
+          goal: "Tıklamayı ekonomik açgözlülükle tetikle.",
+        },
+      ]
+    : [
+        {
+          title: "Shock / Face Reaction",
+          bg: "Dark gradient (navy → purple), light grain.",
+          object: "Product centered, shocked face behind it.",
+          text: "Big yellow text: 'DON'T BUY BEFORE SEEING THIS'",
+          color: "Yellow on navy, max contrast.",
+          goal: "Pattern interrupt — stop the scroll.",
+        },
+        {
+          title: "Before / After",
+          bg: "Split screen: dull gray left, vibrant right.",
+          object: "Same subject in two states, product in middle.",
+          text: "'BEFORE / AFTER' clean and bold.",
+          color: "Gray vs neon green — dramatic.",
+          goal: "Prove product impact in one second.",
+        },
+        {
+          title: "Price Anchor",
+          bg: "Premium dark with gold shimmer.",
+          object: "Product isolated, dollar symbol overlay.",
+          text: "'50% OFF — LAST 24 HOURS'",
+          color: "Gold + red urgency badge.",
+          goal: "Trigger click with economic greed.",
+        },
+      ];
+
+  return { hook, triggers, audience, buyReason, trust, weaknesses: weakParts.join(" "), shortCopy, longCopy, whatsappCopy, videoIdeas, thumbnailIdeas };
 }
 
 export default function AdAnalyzer() {
