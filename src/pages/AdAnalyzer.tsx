@@ -5,6 +5,7 @@ import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, Sh
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImage from "@/assets/ad-analyzer-hero.jpg";
 import BackButton from "@/components/BackButton";
+import MoneyLayer from "@/components/MoneyLayer";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
@@ -565,6 +566,13 @@ export default function AdAnalyzer() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {result && (
+          <MoneyLayer
+            module="ad"
+            score={Math.min(95, 55 + Math.min(40, Math.floor(input.trim().length / 8)))}
+          />
+        )}
 
         <p className="text-center text-[11px] text-muted-foreground mt-8">
           {isTr ? "Bu analiz anlık veriye göre üretilir" : "This analysis is generated from live input"}

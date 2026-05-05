@@ -5,6 +5,7 @@ import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, 
 import { useLocale } from "@/contexts/LocaleContext";
 import fleetHero from "@/assets/fleet-hero.jpg";
 import BackButton from "@/components/BackButton";
+import MoneyLayer from "@/components/MoneyLayer";
 
 interface FleetResult {
   netProfit: number;
@@ -361,6 +362,11 @@ export default function FleetAnalysis() {
                     {isTr ? "PDF indir" : "Download PDF"}
                   </button>
                 </div>
+                <MoneyLayer
+                  module="fleet"
+                  score={Math.max(0, Math.min(100, Math.round(result.margin * 2.5 + (result.status === "profitable" ? 30 : result.status === "marginal" ? 10 : -10))))}
+                  dailyEstimate={Math.max(0, result.netProfit / 30)}
+                />
               </>
             )}
           </motion.div>
