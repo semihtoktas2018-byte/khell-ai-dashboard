@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, ShieldCheck, MessageCircle, FileText, Zap, RefreshCw, Copy, Film, Image as ImageIcon, BarChart3, DollarSign, TrendingUp, LineChart, PieChart, Rocket } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImage from "@/assets/ad-analyzer-hero.jpg";
+import BackButton from "@/components/BackButton";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
