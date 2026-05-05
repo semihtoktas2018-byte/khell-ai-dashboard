@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy, BarChart3, DollarSign } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import fleetHero from "@/assets/fleet-hero.jpg";
+import BackButton from "@/components/BackButton";
 
 interface FleetResult {
   netProfit: number;
