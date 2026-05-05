@@ -567,6 +567,13 @@ export default function AdAnalyzer() {
           )}
         </AnimatePresence>
 
+        {result && (
+          <MoneyLayer
+            module="ad"
+            score={Math.min(95, 55 + Math.min(40, Math.floor(input.trim().length / 8)))}
+          />
+        )}
+
         <p className="text-center text-[11px] text-muted-foreground mt-8">
           {isTr ? "Bu analiz anlık veriye göre üretilir" : "This analysis is generated from live input"}
         </p>
