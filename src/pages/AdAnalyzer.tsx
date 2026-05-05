@@ -5,6 +5,7 @@ import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, Sh
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImage from "@/assets/ad-analyzer-hero.jpg";
 import BackButton from "@/components/BackButton";
+import MoneyLayer from "@/components/MoneyLayer";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
