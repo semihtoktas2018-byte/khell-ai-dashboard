@@ -9,6 +9,7 @@ import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, Trending
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
+import MoneyLayer from "@/components/MoneyLayer";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -319,6 +320,11 @@ export default function ProductAnalyzer() {
                   <Lock className="h-3.5 w-3.5" /> {t("analyzer.unlockMore")}
                 </button>
               </div>
+              <MoneyLayer
+                module="product"
+                score={result.decision_score}
+                dailyEstimate={Math.max(0, result.monthly_profit / 30)}
+              />
             </motion.div>
           )}
         </AnimatePresence>
