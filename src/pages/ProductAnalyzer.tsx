@@ -8,6 +8,7 @@ import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
+import BackButton from "@/components/BackButton";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
