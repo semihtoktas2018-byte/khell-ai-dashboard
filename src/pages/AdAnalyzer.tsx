@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Megaphone, Sparkles, Loader2, Lock, Flame, Target, Brain, ShieldCheck, MessageCircle, FileText, Zap, RefreshCw, Copy, Film, Image as ImageIcon, BarChart3, DollarSign, TrendingUp, LineChart, PieChart, Rocket } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImage from "@/assets/ad-analyzer-hero.jpg";
+import BackButton from "@/components/BackButton";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
@@ -332,13 +333,7 @@ export default function AdAnalyzer() {
       </div>
 
       <nav className="relative flex items-center justify-between px-6 h-16 border-b border-border/60 backdrop-blur-sm bg-background/40 z-10">
-        <button
-          onClick={() => navigate("/")}
-          className="group flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-border/60 bg-card/40 hover:bg-primary/10 hover:border-primary/40 hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.5)] text-muted-foreground hover:text-foreground transition-all"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-xs font-medium">{isTr ? "Geri" : "Back"}</span>
-        </button>
+        <BackButton />
         <div className="flex items-center gap-2">
           <Megaphone className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">KHELL AI</span>

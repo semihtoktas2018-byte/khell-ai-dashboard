@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImg from "@/assets/hero-dashboard.png";
+import BackButton from "@/components/BackButton";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -62,7 +63,8 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <BackButton />
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
