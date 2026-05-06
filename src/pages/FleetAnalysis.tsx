@@ -676,7 +676,7 @@ export default function FleetAnalysis() {
                     data={[
                       { name: isTr ? "Yakıt" : "Fuel", value: importTotals.fuel },
                       { name: isTr ? "Şoför" : "Driver", value: importTotals.driver },
-                      { name: isTr ? "Bakım" : "Maint." : "Maint.", value: importTotals.maintenance },
+                      { name: isTr ? "Bakım" : "Maint.", value: importTotals.maintenance },
                       { name: isTr ? "Yol" : "Toll", value: importTotals.toll },
                       { name: isTr ? "Diğer" : "Other", value: importTotals.other },
                     ]}
