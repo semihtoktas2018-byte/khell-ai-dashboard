@@ -27,6 +27,7 @@ import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
+import FloatingWhatsApp from "./components/FloatingWhatsApp";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <FloatingWhatsApp />
           </BrowserRouter>
           </AnalysisHistoryProvider>
         </SavedProductsProvider>

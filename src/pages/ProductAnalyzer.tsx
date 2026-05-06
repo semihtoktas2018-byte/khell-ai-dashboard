@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import MoneyLayer from "@/components/MoneyLayer";
+import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
+import ReportActions from "@/components/ReportActions";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -324,6 +326,40 @@ export default function ProductAnalyzer() {
                 module="product"
                 score={result.decision_score}
                 dailyEstimate={Math.max(0, result.monthly_profit / 30)}
+              />
+              <AISuggestions
+                isTr={locale === "tr"}
+                suggestions={(() => {
+                  const isTr = locale === "tr";
+                  const s: Suggestion[] = [];
+                  if (result.profit_margin < 15)
+                    s.push({ level: "critical", text: isTr ? "**Kâr marjı çok düşük** — fiyat artışı veya tedarikçi pazarlığı şart." : "**Margin too low** — raise price or renegotiate supplier." });
+                  else if (result.profit_margin < 30)
+                    s.push({ level: "warn", text: isTr ? "**Marj sınırda** — kargo veya reklam giderini %15 düşür, marj 30%+ olur." : "**Margin borderline** — cut shipping or ads ~15% to push margin past 30%." });
+                  else
+                    s.push({ level: "good", text: isTr ? "**Marj sağlıklı** — bu ürünü ölçeklendirebilirsin." : "**Healthy margin** — scale this product." });
+                  if (input.monthly_orders_estimate < 20)
+                    s.push({ level: "warn", text: isTr ? "Talep düşük görünüyor — **TikTok organik test** ile pazarı doğrula." : "Low demand — **validate with TikTok organic test**." });
+                  if (result.decision_score >= 80)
+                    s.push({ level: "good", text: isTr ? "**Viral potansiyel yüksek** — günlük 50$ reklam ile ölçeklemeye başla." : "**High viral potential** — start scaling with $50/day ads." });
+                  else if (result.decision_score < 60)
+                    s.push({ level: "critical", text: isTr ? "**Skor zayıf** — fiyat / maliyet / reklam dengesini gözden geçir." : "**Weak score** — revisit price/cost/ads balance." });
+                  return s;
+                })()}
+              />
+              <ReportActions
+                isTr={locale === "tr"}
+                filename={`khell-product-${(productName || "analysis").replace(/\s+/g, "-")}-${Date.now()}`}
+                rows={[
+                  [locale === "tr" ? "Ürün" : "Product", productName || "-"],
+                  [locale === "tr" ? "Skor" : "Score", `${result.decision_score}/100`],
+                  [locale === "tr" ? "Marj" : "Margin", `${result.profit_margin.toFixed(1)}%`],
+                  [locale === "tr" ? "Birim Kâr" : "Profit/Sale", currency(result.gross_profit)],
+                  [locale === "tr" ? "Aylık Kâr" : "Monthly Profit", currency(result.monthly_profit)],
+                  [locale === "tr" ? "Risk" : "Risk", result.risk_level.toUpperCase()],
+                  [locale === "tr" ? "Talep" : "Demand", demand],
+                  [locale === "tr" ? "Rekabet" : "Competition", competition],
+                ]}
               />
             </motion.div>
           )}

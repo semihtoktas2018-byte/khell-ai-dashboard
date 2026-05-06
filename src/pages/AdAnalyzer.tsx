@@ -6,6 +6,9 @@ import { useLocale } from "@/contexts/LocaleContext";
 import heroImage from "@/assets/ad-analyzer-hero.jpg";
 import BackButton from "@/components/BackButton";
 import MoneyLayer from "@/components/MoneyLayer";
+import LoadingSteps from "@/components/LoadingSteps";
+import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
+import ReportActions from "@/components/ReportActions";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
@@ -273,7 +276,7 @@ export default function AdAnalyzer() {
       setCount(next);
       localStorage.setItem(LIMIT_KEY, String(next));
       setLoading(false);
-    }, 1400);
+    }, 1700);
   };
 
   const handleRegenerate = () => {
@@ -408,6 +411,11 @@ export default function AdAnalyzer() {
               )}
             </button>
           </div>
+          {loading && (
+            <div className="mt-4 rounded-xl border border-border/60 bg-background/40 p-4">
+              <LoadingSteps isTr={isTr} />
+            </div>
+          )}
         </motion.div>
 
         <AnimatePresence>
@@ -428,7 +436,7 @@ export default function AdAnalyzer() {
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-accent text-xs font-medium text-foreground transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                  {isTr ? "Benzer Reklam Üret" : "Generate Similar"}
+                  {isTr ? "AI Rewrite Ad" : "AI Rewrite Ad"}
                 </button>
               </div>
 
@@ -572,6 +580,43 @@ export default function AdAnalyzer() {
             module="ad"
             score={Math.min(95, 55 + Math.min(40, Math.floor(input.trim().length / 8)))}
           />
+        )}
+
+        {result && (
+          <>
+            <AISuggestions
+              isTr={isTr}
+              suggestions={(() => {
+                const s: Suggestion[] = [];
+                const txt = input.toLowerCase();
+                if (!/(son|hemen|şimdi|now|today|bugün|limited)/i.test(txt))
+                  s.push({ level: "critical", text: isTr ? "**Aciliyet eksik** — 'son 24 saat' veya stok uyarısı ekleyince CTR ciddi artar." : "**Urgency missing** — adding 'last 24h' or stock alert lifts CTR." });
+                if (!/(müşteri|customer|review|yorum|binlerce|thousands|⭐)/i.test(txt))
+                  s.push({ level: "warn", text: isTr ? "**Sosyal kanıt zayıf** — '10.000+ mutlu müşteri' veya yorum ekran görüntüsü ekle." : "**Social proof weak** — add '10,000+ customers' or review screenshots." });
+                if (input.trim().length < 80)
+                  s.push({ level: "warn", text: isTr ? "Metin **çok kısa** — vaadi 1 cümle daha açıklayan kanıt cümlesi ekle." : "Copy **too short** — add one proof sentence to expand the promise." });
+                if (input.trim().length > 320)
+                  s.push({ level: "warn", text: isTr ? "Metin **uzun** — ilk 3 saniyenin vaadini başa al, gerisini buton sonrası bırak." : "Copy **long** — move the 3-second promise to the top." });
+                if (s.length < 3)
+                  s.push({ level: "good", text: isTr ? "Hook ve duygusal tetikleyiciler **iyi yerleşmiş** — A/B test ile ölçek." : "Hook and emotional triggers are **well placed** — A/B test to scale." });
+                return s;
+              })()}
+            />
+            <ReportActions
+              isTr={isTr}
+              filename={`khell-ad-analysis-${Date.now()}`}
+              rows={[
+                [isTr ? "Hook" : "Hook", result.hook.replace(/\*\*/g, "")],
+                [isTr ? "Hedef Kitle" : "Audience", result.audience.replace(/\*\*/g, "")],
+                [isTr ? "Satın Alma Sebebi" : "Reason to Buy", result.buyReason.replace(/\*\*/g, "")],
+                [isTr ? "Güven" : "Trust", result.trust.replace(/\*\*/g, "")],
+                [isTr ? "Zayıf Noktalar" : "Weak Points", result.weaknesses.replace(/\*\*/g, "")],
+                [isTr ? "Kısa Reklam" : "Short Copy", result.shortCopy.replace(/\*\*/g, "")],
+                [isTr ? "Uzun Reklam" : "Long Copy", result.longCopy.replace(/\*\*/g, "")],
+                ["WhatsApp", result.whatsappCopy.replace(/\*\*/g, "")],
+              ]}
+            />
+          </>
         )}
 
         <p className="text-center text-[11px] text-muted-foreground mt-8">

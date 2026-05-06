@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy, BarChart3, DollarSign } from "lucide-react";
+import { ArrowLeft, Truck, Calculator, TrendingUp, TrendingDown, AlertTriangle, Zap, Globe, Wallet, Receipt, ShieldAlert, Save, Sparkles, Wrench, History, GitCompare, Printer, Trash2, Trophy, BarChart3, DollarSign, Upload, FileSpreadsheet } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Cell } from "recharts";
 import { useLocale } from "@/contexts/LocaleContext";
 import fleetHero from "@/assets/fleet-hero.jpg";
 import BackButton from "@/components/BackButton";
 import MoneyLayer from "@/components/MoneyLayer";
+import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
+import ReportActions from "@/components/ReportActions";
+import LoadingSteps from "@/components/LoadingSteps";
 
 interface FleetResult {
   netProfit: number;
@@ -34,6 +38,17 @@ interface CompareVehicle {
   fuel: string;
   driver: string;
   other: string;
+}
+
+interface FleetRow {
+  plate: string;
+  revenue: number;
+  fuel: number;
+  driver: number;
+  maintenance: number;
+  toll: number;
+  other: number;
+  netProfit: number;
 }
 
 const TRIPS_KEY = "khell_fleet_trips";
@@ -98,6 +113,11 @@ export default function FleetAnalysis() {
     }
   });
 
+  // CSV Import state
+  const [importedRows, setImportedRows] = useState<FleetRow[]>([]);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+
   useEffect(() => {
     localStorage.setItem(TRIPS_KEY, JSON.stringify(trips));
   }, [trips]);
@@ -154,6 +174,93 @@ export default function FleetAnalysis() {
   const handleDeleteTrip = (id: string) => {
     setTrips((prev) => prev.filter((t) => t.id !== id));
   };
+
+  // -------- CSV Import --------
+  const parseCsv = (text: string): FleetRow[] => {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    if (lines.length < 2) return [];
+    const splitLine = (l: string) => {
+      // simple split: comma or semicolon, no quoted-comma support needed for our schema
+      const sep = l.includes(";") && !l.includes(",") ? ";" : ",";
+      return l.split(sep).map((c) => c.trim());
+    };
+    const headers = splitLine(lines[0]).map((h) => h.toLowerCase());
+    const findIdx = (...keys: string[]) =>
+      headers.findIndex((h) => keys.some((k) => h.includes(k)));
+    const idx = {
+      plate: findIdx("plaka", "plate"),
+      revenue: findIdx("gelir", "revenue", "income"),
+      fuel: findIdx("yakıt", "yakit", "fuel"),
+      driver: findIdx("şoför", "sofor", "driver"),
+      maintenance: findIdx("bakım", "bakim", "maintenance"),
+      toll: findIdx("yol", "köprü", "kopru", "toll"),
+      other: findIdx("diğer", "diger", "other"),
+    };
+    const num = (v: string) => parseFloat((v || "").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0;
+    const rows: FleetRow[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cells = splitLine(lines[i]);
+      const r: FleetRow = {
+        plate: idx.plate >= 0 ? cells[idx.plate] || `#${i}` : `#${i}`,
+        revenue: idx.revenue >= 0 ? num(cells[idx.revenue]) : 0,
+        fuel: idx.fuel >= 0 ? num(cells[idx.fuel]) : 0,
+        driver: idx.driver >= 0 ? num(cells[idx.driver]) : 0,
+        maintenance: idx.maintenance >= 0 ? num(cells[idx.maintenance]) : 0,
+        toll: idx.toll >= 0 ? num(cells[idx.toll]) : 0,
+        other: idx.other >= 0 ? num(cells[idx.other]) : 0,
+        netProfit: 0,
+      };
+      r.netProfit = r.revenue - (r.fuel + r.driver + r.maintenance + r.toll + r.other);
+      rows.push(r);
+    }
+    return rows;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImportError(null);
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length === 0) {
+        setImportError(isTr ? "Dosya boş veya tanınmayan format." : "File empty or unrecognized format.");
+      } else {
+        setImportedRows(rows);
+      }
+    } catch (err) {
+      setImportError(isTr ? "Dosya okunamadı." : "Could not read file.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const importTotals = importedRows.reduce(
+    (acc, r) => {
+      acc.revenue += r.revenue;
+      acc.fuel += r.fuel;
+      acc.driver += r.driver;
+      acc.maintenance += r.maintenance;
+      acc.toll += r.toll;
+      acc.other += r.other;
+      acc.net += r.netProfit;
+      return acc;
+    },
+    { revenue: 0, fuel: 0, driver: 0, maintenance: 0, toll: 0, other: 0, net: 0 }
+  );
+  const losingVehicles = importedRows.filter((r) => r.netProfit < 0);
+  const biggestExpense = (() => {
+    const exp = [
+      { name: isTr ? "Yakıt" : "Fuel", v: importTotals.fuel },
+      { name: isTr ? "Şoför" : "Driver", v: importTotals.driver },
+      { name: isTr ? "Bakım" : "Maintenance", v: importTotals.maintenance },
+      { name: isTr ? "Yol/Köprü" : "Tolls", v: importTotals.toll },
+      { name: isTr ? "Diğer" : "Other", v: importTotals.other },
+    ].sort((a, b) => b.v - a.v)[0];
+    return exp;
+  })();
 
   const handleCompare = () => {
     const results = compareVehicles.map((v) =>
@@ -489,6 +596,155 @@ export default function FleetAnalysis() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* CSV Import */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="card-glow rounded-xl p-6 mt-6"
+        >
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+              <FileSpreadsheet className="h-4 w-4 text-primary" />
+              {isTr ? "Excel / CSV Yükle" : "Upload Excel / CSV"}
+            </h2>
+            <label className="no-print inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold cursor-pointer transition-colors">
+              <Upload className="h-3.5 w-3.5" />
+              {isTr ? "Dosya Seç (.csv)" : "Choose file (.csv)"}
+              <input type="file" accept=".csv,text/csv" onChange={handleFileUpload} className="hidden" />
+            </label>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+            {isTr
+              ? "Beklenen kolonlar: Plaka, Günlük gelir, Yakıt gideri, Şoför gideri, Bakım gideri, Yol/köprü gideri, Diğer giderler."
+              : "Expected columns: Plate, Daily revenue, Fuel cost, Driver cost, Maintenance, Tolls, Other."}
+          </p>
+
+          {importing && <LoadingSteps isTr={isTr} steps={isTr ? ["Dosya okunuyor...", "Satırlar parse ediliyor...", "Kâr hesaplanıyor..."] : ["Reading file...", "Parsing rows...", "Calculating profit..."]} />}
+          {importError && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {importError}
+            </div>
+          )}
+
+          {importedRows.length > 0 && (
+            <div id="print-area" className="mt-4 space-y-5">
+              {/* Totals */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Stat label={isTr ? "Günlük Net" : "Daily Net"} value={currency(importTotals.net)} icon={Wallet} color={importTotals.net >= 0 ? "text-winning" : "text-destructive"} />
+                <Stat label={isTr ? "Haftalık Tahmin" : "Weekly Est."} value={currency(importTotals.net * 7)} icon={TrendingUp} color={importTotals.net >= 0 ? "text-winning" : "text-destructive"} />
+                <Stat label={isTr ? "Aylık Tahmin" : "Monthly Est."} value={currency(importTotals.net * 30)} icon={TrendingUp} color={importTotals.net >= 0 ? "text-winning" : "text-destructive"} />
+                <Stat label={isTr ? "En Büyük Gider" : "Top Expense"} value={`${biggestExpense.name}`} icon={Receipt} color="text-risky" />
+              </div>
+
+              {/* Per-vehicle profit chart */}
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <h4 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                  {isTr ? "Araç Bazlı Net Kâr" : "Per-Vehicle Net Profit"}
+                </h4>
+                <ResponsiveContainer width="100%" height={Math.max(180, importedRows.length * 32)}>
+                  <BarChart data={importedRows} layout="vertical" margin={{ left: 20, right: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
+                    <XAxis type="number" tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="plate" tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} axisLine={false} tickLine={false} width={70} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, fontSize: 11 }}
+                      formatter={(v: number) => currency(v)}
+                    />
+                    <Bar dataKey="netProfit" radius={[0, 4, 4, 0]}>
+                      {importedRows.map((r, i) => (
+                        <Cell key={i} fill={r.netProfit >= 0 ? "hsl(142 71% 45%)" : "hsl(0 84% 60%)"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Expense distribution */}
+              <div className="rounded-xl border border-border bg-card/50 p-4">
+                <h4 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                  {isTr ? "Gider Dağılımı" : "Expense Distribution"}
+                </h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart
+                    data={[
+                      { name: isTr ? "Yakıt" : "Fuel", value: importTotals.fuel },
+                      { name: isTr ? "Şoför" : "Driver", value: importTotals.driver },
+                      { name: isTr ? "Bakım" : "Maint.", value: importTotals.maintenance },
+                      { name: isTr ? "Yol" : "Toll", value: importTotals.toll },
+                      { name: isTr ? "Diğer" : "Other", value: importTotals.other },
+                    ]}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
+                    <XAxis dataKey="name" tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(222 47% 7%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, fontSize: 11 }}
+                      formatter={(v: number) => currency(v)}
+                    />
+                    <Bar dataKey="value" fill="hsl(217 91% 60%)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Losing vehicles */}
+              {losingVehicles.length > 0 && (
+                <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                    <h4 className="text-xs font-bold text-destructive uppercase tracking-wider">
+                      {isTr ? "Zarar Eden Araçlar" : "Losing Vehicles"}
+                    </h4>
+                  </div>
+                  <ul className="text-xs text-foreground/90 space-y-1">
+                    {losingVehicles.map((v) => (
+                      <li key={v.plate} className="flex items-center justify-between font-mono">
+                        <span>{v.plate}</span>
+                        <span className="text-destructive font-bold">{currency(v.netProfit)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <AISuggestions
+                isTr={isTr}
+                suggestions={(() => {
+                  const s: Suggestion[] = [];
+                  const fuelRatio = importTotals.revenue > 0 ? (importTotals.fuel / importTotals.revenue) * 100 : 0;
+                  if (fuelRatio > 45)
+                    s.push({ level: "critical", text: isTr ? `**Yakıt maliyetin yüksek** (%${fuelRatio.toFixed(0)}) — rota optimizasyonu ve hız sınırı önerilir.` : `**Fuel cost too high** (${fuelRatio.toFixed(0)}%) — optimize routes and speed.` });
+                  else if (fuelRatio > 30)
+                    s.push({ level: "warn", text: isTr ? `Yakıt oranı %${fuelRatio.toFixed(0)} — iyileştirme alanı var.` : `Fuel ratio ${fuelRatio.toFixed(0)}% — room to improve.` });
+                  if (losingVehicles.length > 0)
+                    s.push({ level: "critical", text: isTr ? `**${losingVehicles.length} araç zarar ediyor** — bu araçları yeniden değerlendir veya sefer kompozisyonunu değiştir.` : `**${losingVehicles.length} vehicle(s) losing money** — reassign or restructure.` });
+                  if (importTotals.net > 0 && losingVehicles.length === 0)
+                    s.push({ level: "good", text: isTr ? "**Filo geneli kârlı** — kapasiteyi artırmak için iyi zaman." : "**Fleet is profitable** — good time to add capacity." });
+                  if (s.length === 0)
+                    s.push({ level: "warn", text: isTr ? "Veriler dengede — daha fazla gün eklenirse trend netleşir." : "Data balanced — more days will sharpen the trend." });
+                  return s;
+                })()}
+              />
+
+              <ReportActions
+                isTr={isTr}
+                filename={`khell-fleet-import-${Date.now()}`}
+                rows={[
+                  [isTr ? "Toplam Gelir" : "Total Revenue", currency(importTotals.revenue)],
+                  [isTr ? "Toplam Gider" : "Total Cost", currency(importTotals.fuel + importTotals.driver + importTotals.maintenance + importTotals.toll + importTotals.other)],
+                  [isTr ? "Günlük Net" : "Daily Net", currency(importTotals.net)],
+                  [isTr ? "Haftalık Tahmin" : "Weekly Est.", currency(importTotals.net * 7)],
+                  [isTr ? "Aylık Tahmin" : "Monthly Est.", currency(importTotals.net * 30)],
+                  [isTr ? "En Büyük Gider" : "Top Expense", `${biggestExpense.name} (${currency(biggestExpense.v)})`],
+                  [isTr ? "Zarar Eden Araç" : "Losing Vehicles", String(losingVehicles.length)],
+                ]}
+              />
             </div>
           )}
         </motion.div>
