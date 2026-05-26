@@ -15,6 +15,8 @@ import ReportActions from "@/components/ReportActions";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
+const RAPIDAPI_KEY = "0ff10b71d3msh3f8b4edd825040fp100f8djsn435e5bc57335";
+
 const defaultInput: AnalyzerInput = {
   product_cost: 0,
   shipping_cost: 0,
@@ -32,6 +34,63 @@ const socialProofMessages = [
   "Mehmet found a $2k/mo product 💰",
   "Emma just unlocked PRO access 🔓",
 ];
+
+interface AliProduct {
+  totalOrders: number;
+  sellers: number;
+  avgPrice: string;
+  topTitle: string;
+  rating: string;
+}
+
+async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> {
+  try {
+    const res = await fetch(
+      `https://aliexpress-datahub.p.rapidapi.com/item_search_2?q=${encodeURIComponent(keyword)}&page=1`,
+      {
+        headers: {
+          "x-rapidapi-host": "aliexpress-datahub.p.rapidapi.com",
+          "x-rapidapi-key": RAPIDAPI_KEY,
+        },
+      }
+    );
+    const data = await res.json();
+    const items: any[] = data?.result?.resultList || [];
+    if (!items.length) return null;
+
+    const orders = items.slice(0, 10).reduce((sum: number, item: any) => {
+      const raw = item?.item?.tradeDesc || "";
+      const num = parseInt(raw.replace(/[^0-9]/g, "")) || 0;
+      return sum + num;
+    }, 0);
+
+    const prices = items
+      .slice(0, 10)
+      .map((item: any) =>
+        parseFloat(item?.item?.sku?.def?.promotionPrice || item?.item?.sku?.def?.price || "0")
+      )
+      .filter((p: number) => p > 0);
+
+    const avgPrice =
+      prices.length > 0
+        ? (prices.reduce((a: number, b: number) => a + b, 0) / prices.length).toFixed(2)
+        : "0";
+
+    const rating = items[0]?.item?.averageStar || "0";
+    const topTitle = items[0]?.item?.title || keyword;
+
+    return {
+      totalOrders: orders,
+      sellers: items.length,
+      avgPrice,
+      topTitle,
+      rating,
+    };
+  } catch (e) {
+    console.warn("AliExpress API hatası:", e);
+    return null;
+  }
+}
 
 function getDemandLevel(monthlyOrders: number) {
   if (monthlyOrders >= 50) return "HIGH";
@@ -55,6 +114,8 @@ export default function ProductAnalyzer() {
   const [showHistory, setShowHistory] = useState(false);
   const [socialProofIndex, setSocialProofIndex] = useState(0);
   const [showSocialProof, setShowSocialProof] = useState(false);
+  const [aliData, setAliData] = useState<AliProduct | null>(null);
+  const [aliLoading, setAliLoading] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
@@ -86,7 +147,6 @@ export default function ProductAnalyzer() {
     }));
   }
 
-  // Social proof ticker
   useEffect(() => {
     const interval = setInterval(() => {
       setSocialProofIndex((i) => (i + 1) % socialProofMessages.length);
@@ -149,6 +209,17 @@ export default function ProductAnalyzer() {
       riskLevel: result.risk_level,
       monthlyProfit: Math.round(result.monthly_profit * 100) / 100,
     });
+
+    // AliExpress veri çek
+    if (productName.trim()) {
+      setAliData(null);
+      setAliLoading(true);
+      fetchAliExpressData(productName.trim()).then((d) => {
+        setAliData(d);
+        setAliLoading(false);
+      });
+    }
+
     setShowResult(true);
   };
 
@@ -179,10 +250,8 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6 relative">
-      {/* Back to dashboard */}
       <BackButton />
 
-      {/* Onboarding Step Indicator */}
       {fromOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="text-primary font-semibold">{t("analyzer.step")}</span>
@@ -190,7 +259,6 @@ export default function ProductAnalyzer() {
         </motion.div>
       )}
 
-      {/* Product Name */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <input
           type="text"
@@ -230,7 +298,6 @@ export default function ProductAnalyzer() {
             </button>
           </div>
 
-          {/* Remaining analyses indicator */}
           <p className={`text-xs font-medium mt-2 text-center ${remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
             {remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
           </p>
@@ -261,7 +328,47 @@ export default function ProductAnalyzer() {
                 </p>
               </div>
 
-              {/* 🔥 WINNING PRODUCT ANALYSIS — Sales Block */}
+              {/* ✅ AliExpress Pazar Verisi — YENİ BLOK */}
+              {aliLoading && (
+                <div className="card-glow rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm text-muted-foreground">AliExpress pazar verisi yükleniyor...</span>
+                </div>
+              )}
+              {aliData && !aliLoading && (
+                <div className="card-glow rounded-xl p-5 border border-border">
+                  <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                    🛒 AliExpress Pazar Verisi
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="rounded-lg bg-accent/40 p-3 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Toplam Sipariş</p>
+                      <p className="text-lg font-bold text-winning">{aliData.totalOrders.toLocaleString()}+</p>
+                    </div>
+                    <div className="rounded-lg bg-accent/40 p-3 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Satıcı Sayısı</p>
+                      <p className="text-lg font-bold text-primary">{aliData.sellers}</p>
+                    </div>
+                    <div className="rounded-lg bg-accent/40 p-3 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Ort. Fiyat</p>
+                      <p className="text-lg font-bold text-foreground">${aliData.avgPrice}</p>
+                    </div>
+                  </div>
+                  {aliData.rating !== "0" && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">En iyi ürün puanı:</span>
+                      <span className="text-xs font-bold text-winning">⭐ {aliData.rating}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {!aliLoading && !aliData && showResult && productName.trim() && (
+                <div className="card-glow rounded-xl p-4 text-center">
+                  <p className="text-xs text-muted-foreground">AliExpress'te bu ürün için veri bulunamadı.</p>
+                </div>
+              )}
+
+              {/* 🔥 WINNING PRODUCT ANALYSIS */}
               <div className="rounded-xl p-5 border border-border bg-[hsl(var(--card))] shadow-lg">
                 <h4 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
                   🔥 WINNING PRODUCT ANALYSIS
@@ -313,7 +420,7 @@ export default function ProductAnalyzer() {
                 <StatCard label="Competition" value={competition} className={competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"} />
               </div>
 
-              {/* Action Button — Paywall trigger */}
+              {/* Action Button */}
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setShowPaywall(true)}
@@ -359,6 +466,11 @@ export default function ProductAnalyzer() {
                   [locale === "tr" ? "Risk" : "Risk", result.risk_level.toUpperCase()],
                   [locale === "tr" ? "Talep" : "Demand", demand],
                   [locale === "tr" ? "Rekabet" : "Competition", competition],
+                  ...(aliData ? [
+                    [locale === "tr" ? "AliExpress Sipariş" : "AliExpress Orders", `${aliData.totalOrders.toLocaleString()}+`],
+                    [locale === "tr" ? "AliExpress Satıcı" : "AliExpress Sellers", String(aliData.sellers)],
+                    [locale === "tr" ? "AliExpress Ort. Fiyat" : "AliExpress Avg Price", `$${aliData.avgPrice}`],
+                  ] : []),
                 ]}
               />
             </motion.div>
@@ -370,7 +482,6 @@ export default function ProductAnalyzer() {
       <AnimatePresence>
         {showResult && input.selling_price > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={transition} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Pie */}
             <div className="card-glow rounded-xl p-5">
               <h4 className="text-sm font-semibold text-foreground mb-3">{t("analyzer.costDist")}</h4>
               <ResponsiveContainer width="100%" height={200}>
@@ -390,7 +501,6 @@ export default function ProductAnalyzer() {
               </div>
             </div>
 
-            {/* Bar Chart */}
             <div className="card-glow rounded-xl p-5">
               <h4 className="text-sm font-semibold text-foreground mb-3">{t("analyzer.monthlyProfit")}</h4>
               <ResponsiveContainer width="100%" height={200}>
@@ -404,7 +514,6 @@ export default function ProductAnalyzer() {
               </ResponsiveContainer>
             </div>
 
-            {/* Risk Analysis */}
             <div className="card-glow rounded-xl p-5">
               <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" /> {t("analyzer.riskAnalysis")}
@@ -433,7 +542,7 @@ export default function ProductAnalyzer() {
         )}
       </AnimatePresence>
 
-      {/* FULLSCREEN PAYWALL OVERLAY */}
+      {/* PAYWALL */}
       <AnimatePresence>
         {showPaywall && (
           <motion.div
@@ -452,25 +561,14 @@ export default function ProductAnalyzer() {
               <h2 className="text-2xl font-black text-foreground mb-2">{t("paywall.title")}</h2>
               <p className="text-sm text-muted-foreground mb-2">{t("paywall.subtitle1")}</p>
               <p className="text-sm text-muted-foreground mb-6">{t("paywall.subtitle2")}</p>
-
               <div className="text-left mb-6">
                 <p className="text-xs font-semibold text-foreground mb-3">{t("paywall.realWinning")}</p>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">{t("paywall.higherProfit")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">{t("paywall.lowerRisk")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-winning text-base">✔</span>
-                    <span className="text-sm text-foreground">{t("paywall.verifiedDemand")}</span>
-                  </div>
+                  <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{t("paywall.higherProfit")}</span></div>
+                  <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{t("paywall.lowerRisk")}</span></div>
+                  <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{t("paywall.verifiedDemand")}</span></div>
                 </div>
               </div>
-
               <a
                 href="https://www.shopier.com/bamironlinestore/46009500"
                 target="_blank"
@@ -479,13 +577,8 @@ export default function ProductAnalyzer() {
               >
                 {t("paywall.cta")}
               </a>
-
               <p className="text-[11px] text-muted-foreground mt-3">{t("paywall.price")}</p>
-
-              <button
-                onClick={() => setShowPaywall(false)}
-                className="text-xs text-muted-foreground hover:underline mt-4"
-              >
+              <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4">
                 {t("paywall.later")}
               </button>
             </motion.div>
@@ -536,7 +629,7 @@ export default function ProductAnalyzer() {
         </motion.div>
       )}
 
-      {/* Social Proof Floating Toast */}
+      {/* Social Proof */}
       <AnimatePresence>
         {showSocialProof && (
           <motion.div
