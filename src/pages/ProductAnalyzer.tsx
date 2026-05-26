@@ -46,29 +46,23 @@ interface AliProduct {
 async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> {
   try {
     const res = await fetch(
-      `https://aliexpress-datahub.p.rapidapi.com/item_search_2?q=${encodeURIComponent(keyword)}&page=1`,
+      `https://aliexpress-business-api.p.rapidapi.com/textsearch.php?keyWord=${encodeURIComponent(keyword)}&pageSize=20&pageIndex=1&country=TR&currency=USD&lang=en&filter=orders&sortBy=asc`,
       {
         headers: {
-          "x-rapidapi-host": "aliexpress-datahub.p.rapidapi.com",
+          "x-rapidapi-host": "aliexpress-business-api.p.rapidapi.com",
           "x-rapidapi-key": RAPIDAPI_KEY,
         },
       }
     );
     const data = await res.json();
-    const items: any[] = data?.result?.resultList || [];
+    const items: any[] = data?.data?.itemList || [];
     if (!items.length) return null;
 
-    const orders = items.slice(0, 10).reduce((sum: number, item: any) => {
-      const raw = item?.item?.tradeDesc || "";
-      const num = parseInt(raw.replace(/[^0-9]/g, "")) || 0;
-      return sum + num;
-    }, 0);
+    const totalCount = data?.data?.totalCount || 0;
 
     const prices = items
       .slice(0, 10)
-      .map((item: any) =>
-        parseFloat(item?.item?.sku?.def?.promotionPrice || item?.item?.sku?.def?.price || "0")
-      )
+      .map((item: any) => parseFloat(item?.salePrice || item?.originalPrice || "0"))
       .filter((p: number) => p > 0);
 
     const avgPrice =
@@ -76,8 +70,9 @@ async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> 
         ? (prices.reduce((a: number, b: number) => a + b, 0) / prices.length).toFixed(2)
         : "0";
 
-    const rating = items[0]?.item?.averageStar || "0";
-    const topTitle = items[0]?.item?.title || keyword;
+    const rating = items[0]?.averageStarRate || items[0]?.starRating || "0";
+    const topTitle = items[0]?.title || keyword;
+    const orders = totalCount;
 
     return {
       totalOrders: orders,
