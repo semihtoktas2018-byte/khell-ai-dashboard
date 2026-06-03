@@ -1,7 +1,25 @@
-import { motion } from "framer-motion";
+import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Truck, Package, Zap, Globe, Megaphone } from "lucide-react";
+import {
+  Truck, Package, Zap, Globe, Megaphone, Sparkles, ArrowRight,
+  TrendingUp, BarChart3, FileSpreadsheet, Brain, FileText, Flame,
+  CheckCircle2, Activity, DollarSign, LineChart as LineChartIcon,
+} from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useEffect, useRef } from "react";
+
+function CountUp({ to, prefix = "", suffix = "", decimals = 0 }: { to: number; prefix?: string; suffix?: string; decimals?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const mv = useMotionValue(0);
+  const rounded = useTransform(mv, (v) => `${prefix}${v.toLocaleString("tr-TR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`);
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(mv, to, { duration: 2, ease: "easeOut" });
+    return () => controls.stop();
+  }, [inView, to, mv]);
+  return <motion.span ref={ref}>{rounded}</motion.span>;
+}
 
 export default function ModuleSelect() {
   const navigate = useNavigate();
