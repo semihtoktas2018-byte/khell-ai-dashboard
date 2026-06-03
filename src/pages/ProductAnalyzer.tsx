@@ -461,12 +461,12 @@ export default function ProductAnalyzer() {
                   [locale === "tr" ? "Risk" : "Risk", result.risk_level.toUpperCase()],
                   [locale === "tr" ? "Talep" : "Demand", demand],
                   [locale === "tr" ? "Rekabet" : "Competition", competition],
-                  ...(aliData ? [
+                  ...(aliData ? ([
                     [locale === "tr" ? "AliExpress Sipariş" : "AliExpress Orders", `${aliData.totalOrders.toLocaleString()}+`],
                     [locale === "tr" ? "AliExpress Satıcı" : "AliExpress Sellers", String(aliData.sellers)],
                     [locale === "tr" ? "AliExpress Ort. Fiyat" : "AliExpress Avg Price", `$${aliData.avgPrice}`],
-                  ] : []),
-                ]}
+                  ] as [string, string | number][]) : []),
+                ] as [string, string | number][]}
               />
             </motion.div>
           )}
