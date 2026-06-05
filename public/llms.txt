@@ -1,0 +1,22 @@
+# KHELL AI
+
+KHELL AI, Türk girişimciler ve e-ticaret satıcıları için geliştirilmiş yapay zeka destekli iş analiz platformudur.
+
+## Ne Yapar?
+
+- **Ürün Analizi**: Dropshipping ürünlerinin kâr marjı, risk skoru ve karar skorunu hesaplar
+- **Viral Ürün Bulucu**: TikTok, Amazon ve AliExpress'ten trend ürünleri keşfeder
+- **Filo Kâr Merkezi**: Araç bazlı kâr/zarar analizi, masraf pusulası Excel olarak indirilir
+- **Reklam Analizi**: TikTok reklam metinleri, hook'lar ve hashtag'ler üretir
+- **Tedarikçi Karşılaştırma**: AliExpress, Alibaba ve CJ Dropshipping tedarikçilerini karşılaştırır
+- **Ürün Sayfası Oluşturucu**: Shopify için yüksek dönüşümlü Türkçe satış sayfası üretir
+- **Sales Decision Engine**: Ürünün satılıp satılmayacağına anında karar verir
+- **Risk Analizi**: Pazar, marj ve rekabet risklerini değerlendirir
+
+## Hedef Kitle
+
+Türk dropshipper'lar, e-ticaret girişimcileri, nakliyeciler ve küçük işletme sahipleri.
+
+## URL
+
+https://khell-profit-wizard.lovable.app
