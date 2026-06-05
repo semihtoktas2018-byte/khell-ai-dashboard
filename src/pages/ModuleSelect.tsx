@@ -306,6 +306,9 @@ export default function ModuleSelect() {
             ))}
           </motion.div>
 
+          {/* Instant Profit Calculator */}
+          <ProfitCalculator />
+
           {/* Modules heading */}
           <div id="modules" className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-2">
