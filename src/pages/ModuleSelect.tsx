@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useEffect, useRef } from "react";
+import ProfitCalculator from "@/components/ProfitCalculator";
+import SEO from "@/components/SEO";
 
 function CountUp({ to, prefix = "", suffix = "", decimals = 0 }: { to: number; prefix?: string; suffix?: string; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
