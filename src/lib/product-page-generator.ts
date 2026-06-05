@@ -31,29 +31,152 @@ export interface ProductPageContent {
   facebookHooks: string[];
 }
 
-const categoryKeywords: Record<string, { emotion: string; pain: string; audience: string }> = {
-  Fitness: { emotion: "sağlıklı ve enerjik", pain: "ağrı, yorgunluk ve hareketsizlik", audience: "spor tutkunları, ofis çalışanları ve sağlıklı yaşam severler" },
-  Pet: { emotion: "mutlu ve güvende", pain: "evcil hayvan bakımında zorluk ve endişe", audience: "evcil hayvan sahipleri, hayvan severler ve yeni pet ebeveynleri" },
-  Tech: { emotion: "modern ve pratik", pain: "zaman kaybı ve karmaşık çözümler", audience: "teknoloji meraklıları, öğrenciler ve uzaktan çalışanlar" },
-  Home: { emotion: "huzurlu ve şık", pain: "sıkıcı ve düzensiz yaşam alanları", audience: "ev dekorasyon tutkunları, yeni ev sahipleri ve minimalistler" },
-  Car: { emotion: "güvenli ve konforlu", pain: "araç içi düzensizlik ve güvenlik endişeleri", audience: "sürücüler, uzun yol yapanlar ve araç tutkunları" },
-};
+// Claude AI ile gerçek içerik üretimi
+export async function generateProductPageAI(input: ProductPageInput): Promise<ProductPageContent> {
+  const marginPct = input.margin.toFixed(0);
+  const profit = (input.sellingPrice - input.cost).toFixed(2);
 
-const angleConfig: Record<SalesAngle, { tone: string; headlineSuffix: string; ctaPrefix: string }> = {
-  problem: { tone: "Bu sorunu çözen tek ürün.", headlineSuffix: "— Sorununuza Kalıcı Çözüm", ctaPrefix: "🛡️ Şimdi Çözümü Al" },
-  trend: { tone: "Herkes bundan konuşuyor.", headlineSuffix: "— Sosyal Medyanın Yeni Fenomeni", ctaPrefix: "🔥 Trendi Yakala" },
-  premium: { tone: "Kaliteye yatırım yapın.", headlineSuffix: "— Üstün Kalite, Eşsiz Deneyim", ctaPrefix: "💎 Premium Deneyimi Keşfet" },
-  budget: { tone: "Bu fiyata başka yok.", headlineSuffix: "— İnanılmaz Fiyat Avantajı", ctaPrefix: "💰 Fırsatı Kaçırma" },
-};
+  const angleLabels: Record<SalesAngle, string> = {
+    problem: "Problem Çözen / Pain Point Odaklı",
+    trend: "Trend / Viral Odaklı",
+    premium: "Premium / Kalite Odaklı",
+    budget: "Bütçe Dostu / Fırsat Odaklı",
+  };
 
-const reviewNames = ["Ayşe K.", "Mehmet D.", "Zeynep T.", "Burak S.", "Elif Y.", "Ahmet Ç."];
+  const prompt = `Sen bir e-ticaret dropshipping uzmanısın. Bir ürün satış sayfası için yüksek dönüşümlü Türkçe içerik üreteceksin.
 
-function seededRandom(seed: string): number {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
-  return Math.abs(h % 100) / 100;
+ÜRÜN BİLGİLERİ:
+- Ürün Adı: ${input.name}
+- Kategori: ${input.category}
+- Satış Fiyatı: $${input.sellingPrice}
+- Maliyet: $${input.cost}
+- Net Kâr: $${profit}
+- Kâr Marjı: %${marginPct}
+- Trend Skoru: ${input.trendScore}/100
+- Risk Seviyesi: ${input.riskLevel}
+- Satış Açısı: ${angleLabels[input.salesAngle]}
+
+Aşağıdaki JSON formatında içerik üret. Her alan satışı artırmak için optimize edilmiş, duygusal bağ kuran, ikna edici olmalı. "Bu ürünü neden almalıyım?" sorusunu zihinlere kazı. 
+
+SADECE JSON döndür, başka hiçbir şey yazma:
+
+{
+  "title": "Güçlü, SEO dostu ürün başlığı (max 80 karakter)",
+  "shortDescription": "2-3 cümle, duygusal hook ile başlayan, problemi ve çözümü net belirten kısa açıklama",
+  "longDescription": "4-5 cümle, ürünün hayatı nasıl değiştirdiğini anlatan, somut faydalar içeren detaylı açıklama",
+  "benefits": [
+    "Fayda 1 - somut ve ölçülebilir",
+    "Fayda 2 - duygusal bağ kuran",
+    "Fayda 3 - rekabetten ayıran özellik",
+    "Fayda 4 - kullanım kolaylığı",
+    "Fayda 5 - güven artıran garanti/kalite"
+  ],
+  "specs": [
+    "Kategori: ${input.category}",
+    "Fiyat: $${input.sellingPrice}",
+    "Malzeme/Özellik: ürüne uygun teknik detay",
+    "Boyut/Kapasite: ürüne uygun ölçü",
+    "Kargo: Hızlı ve güvenli teslimat",
+    "Garanti: Memnuniyet garantisi"
+  ],
+  "targetAudience": "Kime uygun - spesifik persona tanımı, 2 cümle",
+  "whyNow": "Neden şimdi alınmalı - aciliyet ve fırsat vurgusu, 2 cümle",
+  "ctaText": "Güçlü CTA metni, emoji ile başlayan, max 60 karakter",
+  "urgency": [
+    "🔴 Stok aciliyeti mesajı",
+    "⏰ Zaman sınırlı fırsat mesajı",
+    "🏆 Sosyal kanıt + satış rakamı mesajı"
+  ],
+  "trustReview": {
+    "name": "Türk isim + soyad baş harfi",
+    "text": "Gerçekçi, detaylı müşteri yorumu - 2-3 cümle, somut deneyim",
+    "rating": 4.8
+  },
+  "tiktokHooks": [
+    "TikTok hook 1 - duygusal/şok edici açılış",
+    "TikTok hook 2 - problem anlatımı",
+    "TikTok hook 3 - sonuç/dönüşüm vurgusu"
+  ],
+  "facebookHooks": [
+    "Facebook hook 1 - hikaye başlangıcı",
+    "Facebook hook 2 - sosyal kanıt + fayda",
+    "Facebook hook 3 - fırsat + aciliyet"
+  ],
+  "shopifyTitle": "Shopify SEO başlığı",
+  "seoTitle": "Google SEO title - anahtar kelime içeren",
+  "metaDescription": "160 karakter meta description"
+}`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  const data = await response.json();
+  const text = data.content?.map((i: { type: string; text?: string }) => i.text || "").join("") || "";
+  
+  // JSON parse
+  const clean = text.replace(/```json|```/g, "").trim();
+  const parsed = JSON.parse(clean);
+  
+  // Eksik alan kontrolü
+  const rand = seededRandom(input.name + input.category);
+  const soldNum = Math.floor(1200 + rand * 3800);
+  const stockNum = Math.floor(3 + rand * 15);
+  const reviewCount = Math.floor(280 + rand * 720);
+
+  return {
+    title: parsed.title || input.name,
+    shortDescription: parsed.shortDescription || "",
+    longDescription: parsed.longDescription || "",
+    benefits: parsed.benefits || [],
+    specs: parsed.specs || [],
+    targetAudience: parsed.targetAudience || "",
+    whyNow: parsed.whyNow || "",
+    ctaText: parsed.ctaText || "🛒 Şimdi Sipariş Ver",
+    urgency: parsed.urgency || [
+      `🔴 Sınırlı stok — Yalnızca ${stockNum} adet kaldı!`,
+      `⏰ Bugüne özel indirim — Gece yarısına kadar geçerli!`,
+      `🏆 Son 30 günde ${soldNum}+ satış yapıldı!`,
+    ],
+    trustReview: parsed.trustReview || { name: "Ayşe K.", text: "Harika ürün!", rating: 4.8 },
+    trustStats: {
+      rating: parsed.trustReview?.rating || 4.8,
+      reviewCount,
+      soldCount: soldNum,
+    },
+    tiktokHooks: parsed.tiktokHooks || [],
+    facebookHooks: parsed.facebookHooks || [],
+    shopifyTitle: parsed.shopifyTitle || input.name,
+    shopifyBody: buildShopifyBody(parsed),
+    seoTitle: parsed.seoTitle || `${input.name} | KHELL AI`,
+    metaDescription: parsed.metaDescription || "",
+  };
 }
 
+function buildShopifyBody(p: Record<string, unknown>): string {
+  const benefits = Array.isArray(p.benefits) ? p.benefits : [];
+  return `<h2>${p.title || ""}</h2>
+<p>${p.shortDescription || ""}</p>
+<h3>Neden Bu Ürünü Seçmelisiniz?</h3>
+<p>${p.longDescription || ""}</p>
+<h3>Faydaları</h3>
+<ul>
+${benefits.map((b: unknown) => `<li>${b}</li>`).join("\n")}
+</ul>
+<h3>Kime Uygun?</h3>
+<p>${p.targetAudience || ""}</p>
+<h3>Neden Şimdi Almalısınız?</h3>
+<p>${p.whyNow || ""}</p>
+<p><strong>${p.ctaText || ""}</strong></p>`;
+}
+
+// Fallback - AI çalışmazsa template kullan (geriye dönük uyumluluk)
 export function generateProductPage(input: ProductPageInput): ProductPageContent {
   const cat = categoryKeywords[input.category] || categoryKeywords.Tech;
   const angle = angleConfig[input.salesAngle] || angleConfig.trend;
@@ -63,21 +186,27 @@ export function generateProductPage(input: ProductPageInput): ProductPageContent
   const title = `${input.name} ${angle.headlineSuffix}`;
 
   const shortDescByAngle: Record<SalesAngle, string> = {
-    problem: `${input.name}, ${cat.pain} sorununa son veren devrim niteliğinde bir üründür. Artık bu sorunu yaşamanıza gerek yok — hemen deneyin!`,
-    trend: `${input.name}, sosyal medyada ${input.trendScore} trend skoruyla viral olan, ${cat.emotion} hissetmenizi sağlayan yenilikçi üründür. Herkes konuşuyor, siz de deneyin!`,
-    premium: `${input.name}, üstün kalite malzeme ve zarif tasarımıyla fark yaratan bir üründür. Kendinize en iyisini hak ediyorsunuz.`,
-    budget: `${input.name}, bu fiyata bulamayacağınız kalitede bir üründür. ${cat.emotion} hissetmenizi sağlarken cüzdanınızı zorlamaz!`,
+    problem: `${input.name}, ${cat.pain} sorununa son veren, binlerce kullanıcının hayatını değiştiren devrim niteliğinde bir üründür. "Keşke daha önce bulsaydım" dedirtecek bu çözümü şimdi keşfedin.`,
+    trend: `${input.name} şu an sosyal medyayı kasıp kavuruyor — ${input.trendScore} trend skoru, viral olmanın eşiğinde! ${cat.emotion} hissetmek isteyenlerin ilk tercihi haline geldi.`,
+    premium: `${input.name}, titizlikle seçilmiş premium malzemeler ve mühendislik harikası tasarımıyla sıradan ürünlerden farklı bir deneyim sunar. Kendinize en iyisini hak ediyorsunuz.`,
+    budget: `${input.name}, bu fiyata başka yerde bulamayacağınız bir kalite-fiyat dengesini sunuyor. Cüzdanınızı zorlamadan ${cat.emotion} hissedin!`,
   };
   const shortDescription = shortDescByAngle[input.salesAngle];
 
-  const longDescription = `${input.name}, ${input.category} kategorisinde en çok tercih edilen ürünlerden biridir. ${angle.tone} ${cat.pain} sorunlarına pratik ve etkili bir çözüm sunar. Yüksek kaliteli malzemelerden üretilmiş olup dayanıklı ve uzun ömürlüdür. Ergonomik tasarımı sayesinde günlük kullanımda maksimum konfor sağlar. Binlerce müşterinin güvenini kazanmış bu ürün, trend skoru ${input.trendScore} ile sosyal medyada viral olmaya devam etmektedir. Hızlı kargo ve kolay iade seçenekleriyle güvenle sipariş verebilirsiniz.`;
+  const longDescByAngle: Record<SalesAngle, string> = {
+    problem: `Her gün ${cat.pain} ile mi mücadele ediyorsunuz? ${input.name} tam da bunun için tasarlandı. Pratik kullanımı, dayanıklı yapısı ve kanıtlanmış etkinliğiyle bu sorunu kökten çözüyor. ${input.trendScore} trend skoru ile sosyal medyada herkesin konuştuğu bu ürün, %${marginPct} kâr marjı sunarak dropshipper'lar için de altın fırsat. Hızlı kargo ve kolay iade ile risksiz deneyin.`,
+    trend: `${input.name} sosyal medyayı kasıp kavuruyor! ${input.trendScore} trend skoru ile ${input.category} kategorisinin zirvesinde. ${cat.audience} arasında hızla yayılan bu ürün, ${cat.emotion} hissini yaşatıyor. Yüksek kalite malzeme, ergonomik tasarım ve %${marginPct} kâr marjı ile hem kullanıcı hem satıcı için ideal. Stoklar hızla tükeniyor, geç kalmayın.`,
+    premium: `${input.name}, ${input.category} kategorisinde kalite standartlarını yeniden belirliyor. Her detay özenle tasarlanmış; malzeme kalitesi, işçilik ve estetik bir arada. %${marginPct} kâr marjı ile premium fiyata premium değer sunuyor. ${cat.audience} için mükemmel bir hediye ya da kendinize yapabileceğiniz en iyi yatırım. Güvenli ödeme, hızlı kargo, tam memnuniyet garantisi.`,
+    budget: `${input.name} ile kaliteyi fiyata feda etmek zorunda değilsiniz! $${input.cost} maliyetle $${input.sellingPrice} satış fiyatı — bu kadar basit. %${marginPct} kâr marjı hem alıcıya hem satıcıya kazan-kazan. ${cat.pain} sorununu uygun fiyata çözen bu ürün, ${cat.audience} için biçilmiş kaftan. Binlerce memnun müşteri yanılmaz!`,
+  };
+  const longDescription = longDescByAngle[input.salesAngle];
 
   const benefits = [
-    `Pratik ve kullanışlı tasarımıyla günlük hayatınızı kolaylaştırır`,
-    `Premium kalite malzeme ile uzun ömürlü kullanım garantisi sunar`,
-    `Ergonomik yapısı sayesinde konforlu ve rahat bir deneyim yaşatır`,
-    `Kompakt boyutuyla taşıması kolay, her yerde kullanılabilir`,
-    `Binlerce müşteri tarafından 5 yıldızla değerlendirilen güvenilir bir üründür`,
+    `${cat.pain} sorununu kalıcı olarak çözer — artık bu stresi yaşamayın`,
+    `Premium kalite malzeme ile günlük yoğun kullanıma dayanıklı`,
+    `Ergonomik ve sezgisel tasarım — sıfır öğrenme eğrisi, anında kullanım`,
+    `Kompakt ve hafif yapısıyla yanınızdan hiç ayrılmaz`,
+    `${(280 + Math.floor(rand * 720)).toLocaleString()}+ memnun müşteri tarafından 4.8/5 ile değerlendirildi`,
   ];
 
   const specs = [
@@ -85,77 +214,77 @@ export function generateProductPage(input: ProductPageInput): ProductPageContent
     `Fiyat: $${input.sellingPrice.toFixed(2)}`,
     `Trend Skoru: ${input.trendScore}/100`,
     `Kâr Marjı: %${marginPct}`,
-    `Risk Seviyesi: ${input.riskLevel}`,
-    `Kargo: Hızlı ve ücretsiz kargo`,
+    `Risk: ${input.riskLevel}`,
+    `Kargo: Hızlı & güvenli teslimat`,
   ];
 
-  const targetAudience = `Bu ürün özellikle ${cat.audience} için tasarlanmıştır. ${cat.pain} yaşayan herkes bu üründen faydalanabilir. Kendine veya sevdiklerine özel bir hediye arayanlar için de mükemmel bir seçenektir.`;
+  const targetAudience = `Bu ürün özellikle ${cat.audience} için tasarlandı. ${cat.pain} ile baş başa kalan ve pratik, güvenilir bir çözüm arayan herkes için mükemmel seçim.`;
 
-  const whyNow = `Bu ürün şu an sosyal medyada ${input.trendScore} trend skoruyla viral olmaktadır. Stoklar hızla tükenmekte ve fiyat artışı beklenmektedir. %${marginPct} kâr marjı ile bu fırsatı kaçırmayın. Erken sipariş veren müşteriler özel indirimden yararlanmaktadır.`;
+  const whyNow = `${input.name} şu an ${input.trendScore} trend skoruyla zirvedeyken stoklar hızla tükeniyor. %${marginPct} kâr marjı ve sınırlı stok — bu fırsatı kaçırmak istemezsiniz. Fiyat artışı başlamadan şimdi sipariş verin!`;
 
   const ctaText = `${angle.ctaPrefix} — Stoklar Tükenmeden Yakala!`;
-
   const shopifyTitle = `${input.name} | ${input.salesAngle === "premium" ? "Premium Kalite" : input.salesAngle === "budget" ? "Uygun Fiyat" : "Trend Ürün"} | Hızlı Kargo`;
-
-  const shopifyBody = `<h2>${title}</h2>
-<p>${shortDescription}</p>
-<h3>Ürün Özellikleri</h3>
-<p>${longDescription}</p>
-<h3>Faydaları</h3>
-<ul>
-${benefits.map(b => `<li>${b}</li>`).join("\n")}
-</ul>
-<h3>Kime Uygun?</h3>
-<p>${targetAudience}</p>
-<h3>Neden Şimdi Almalısınız?</h3>
-<p>${whyNow}</p>
-<p><strong>${ctaText}</strong></p>`;
-
-  const metaDescription = `${input.name} — ${cat.emotion} hissetmenizi sağlayan yenilikçi ürün. %${marginPct} kâr marjı, trend skoru ${input.trendScore}. Hızlı kargo ile kapınızda!`;
+  const shopifyBody = buildShopifyBody({ title, shortDescription, longDescription, benefits, targetAudience, whyNow, ctaText });
+  const metaDescription = `${input.name} — ${cat.emotion} hissetmenizi sağlayan, ${(280 + Math.floor(rand * 720)).toLocaleString()}+ müşterinin tercihi. %${marginPct} kâr marjı, trend skoru ${input.trendScore}. Hızlı kargo!`;
   const seoTitle = `${input.name} | En Uygun Fiyat & Hızlı Kargo — KHELL AI`;
 
-  // Urgency
   const soldNum = Math.floor(1200 + rand * 3800);
   const stockNum = Math.floor(3 + rand * 15);
+  const reviewCount = Math.floor(280 + rand * 720);
+
   const urgency = [
     `🔴 Sınırlı stok — Yalnızca ${stockNum} adet kaldı!`,
     `⏰ Bugüne özel %${Math.floor(15 + rand * 25)} indirim — Gece yarısına kadar geçerli!`,
-    `🏆 En çok satan — Son 30 günde ${soldNum}+ satış yapıldı!`,
+    `🏆 En çok satan — Son 30 günde ${soldNum.toLocaleString()}+ satış yapıldı!`,
   ];
 
-  // Trust
+  const reviewNames = ["Ayşe K.", "Mehmet D.", "Zeynep T.", "Burak S.", "Elif Y.", "Ahmet Ç.", "Selin M.", "Emre A."];
   const reviewerIdx = Math.floor(rand * reviewNames.length);
   const reviewTexts: Record<SalesAngle, string> = {
-    problem: `Uzun süredir ${cat.pain} yaşıyordum. ${input.name} sayesinde artık bu sorun tamamen çözüldü. Kesinlikle tavsiye ederim!`,
-    trend: `Sosyal medyada gördüm ve hemen aldım. ${input.name} gerçekten reklamlardaki kadar iyi! Arkadaşlarım da sipariş verdi.`,
-    premium: `Kalitesi gerçekten üst düzey. ${input.name}'in her detayı özenle tasarlanmış. Fiyatına değen nadir ürünlerden.`,
-    budget: `Bu fiyata bu kaliteyi beklemiyordum! ${input.name} beklentilerimi fazlasıyla aştı. Herkese öneriyorum.`,
+    problem: `${cat.pain} yaşıyordum ve ${input.name}'i denemekten çekiniyordum. Ama şimdi hayatıma nasıl girmedi diye düşünüyorum! Kesinlikle her kuruşuna değer, arkadaşlarıma da tavsiye ettim.`,
+    trend: `TikTok'ta gördüm ve hemen sipariş verdim — gerçekten reklamlarda göründüğü kadar iyi! Hem kalitesi hem de kullanımı mükemmel. Kargo da beklenenden çabuk geldi.`,
+    premium: `Kalitesi gerçekten premium seviyede. ${input.name}'in her detayı özenle düşünülmüş. Bu fiyata bu kaliteyi bulmak zor, keşke daha önce alsaydım.`,
+    budget: `Bu fiyata bu kaliteyi beklemiyordum! ${input.name} beklentilerimi fazlasıyla aştı. Fiyat-performans açısından piyasanın en iyisi.`,
   };
-  const rating = parseFloat((4.4 + rand * 0.5).toFixed(1));
-  const reviewCount = Math.floor(280 + rand * 720);
 
-  const trustReview = {
-    name: reviewNames[reviewerIdx],
-    text: reviewTexts[input.salesAngle],
-    rating,
-  };
+  const rating = parseFloat((4.5 + rand * 0.45).toFixed(1));
+  const trustReview = { name: reviewNames[reviewerIdx], text: reviewTexts[input.salesAngle], rating };
   const trustStats = { rating, reviewCount, soldCount: soldNum };
 
-  // Ad hooks
   const tiktokHooks = [
-    `Bu ürünü keşfetmemi isteyenler haklıydı… ${input.name} hayatımı değiştirdi 🤯`,
-    `${input.name}'i denedim ve ${cat.pain} sorunum 3 günde bitti 🔥`,
-    `TikTok'ta gördüğüm en iyi ürün — ${input.name} gerçekten işe yarıyor!`,
+    `Bu ürünü keşfetmem hayatımı değiştirdi — ${input.name} ile ${cat.pain} sorunu tamamen bitti 🤯`,
+    `${cat.pain} yaşıyorsan dur ve izle: ${input.name} 3 günde fark yarattı 🔥`,
+    `TikTok'ın en çok paylaşılan ürünü şimdi elimde — ${input.name} gerçek mi sahte mi?`,
   ];
   const facebookHooks = [
-    `${cat.pain} yaşıyorsanız ${input.name}'i mutlaka deneyin. ${soldNum}+ müşteri yanılamaz!`,
-    `⭐ ${rating}/5 puanla değerlendirilen ${input.name} şimdi %${Math.floor(15 + rand * 25)} indirimde!`,
-    `"Keşke daha önce alsaydım" diyeceksiniz — ${input.name} ile ${cat.emotion} hissedin.`,
+    `${cat.pain} yaşayan ${cat.audience} dikkat: ${input.name} artık hayatınızı kolaylaştırıyor. ${soldNum.toLocaleString()}+ kişi zaten denedi!`,
+    `⭐ ${rating}/5 puan ve ${reviewCount}+ değerlendirme: ${input.name} şimdi %${Math.floor(15 + rand * 25)} indirimde!`,
+    `"Keşke daha önce alsaydım" diyeceksiniz — ${input.name} ile ${cat.emotion} hissedin. Sınırlı stok!`,
   ];
 
   return {
     title, shortDescription, longDescription, benefits, specs, targetAudience, whyNow, ctaText,
-    shopifyTitle, shopifyBody, metaDescription, seoTitle,
-    urgency, trustReview, trustStats, tiktokHooks, facebookHooks,
+    shopifyTitle, shopifyBody, metaDescription, seoTitle, urgency, trustReview, trustStats, tiktokHooks, facebookHooks,
   };
 }
+
+function seededRandom(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  return Math.abs(h % 100) / 100;
+}
+
+const categoryKeywords: Record<string, { emotion: string; pain: string; audience: string }> = {
+  Fitness: { emotion: "sağlıklı, güçlü ve enerjik", pain: "ağrı, yorgunluk ve hareketsizlik", audience: "spor tutkunları, ofis çalışanları ve sağlıklı yaşam severler" },
+  Pet: { emotion: "huzurlu ve güvende", pain: "evcil hayvan bakımında zorluk ve endişe", audience: "evcil hayvan sahipleri, hayvan severler ve yeni pet ebeveynleri" },
+  Tech: { emotion: "modern, akıllı ve üretken", pain: "zaman kaybı, karmaşıklık ve verimsizlik", audience: "teknoloji meraklıları, öğrenciler ve uzaktan çalışanlar" },
+  Home: { emotion: "huzurlu, şık ve organize", pain: "dağınıklık, sıkıcılık ve yetersiz alan kullanımı", audience: "ev dekorasyon tutkunları, yeni ev sahipleri ve minimalistler" },
+  Car: { emotion: "güvenli, rahat ve özgür", pain: "araç içi düzensizlik, güvenlik endişeleri ve yolculuk yorgunluğu", audience: "günlük sürücüler, uzun yol yapanlar ve araç tutkunları" },
+};
+
+const angleConfig: Record<SalesAngle, { tone: string; headlineSuffix: string; ctaPrefix: string }> = {
+  problem: { tone: "Bu sorunu çözen tek ürün.", headlineSuffix: "— Sorununuza Kalıcı Çözüm", ctaPrefix: "🛡️ Şimdi Çözümü Al" },
+  trend: { tone: "Sosyal medyayı kasıp kavuruyor.", headlineSuffix: "— Herkes Konuşuyor", ctaPrefix: "🔥 Trendi Yakala" },
+  premium: { tone: "Kaliteye yatırım yapın.", headlineSuffix: "— Üstün Kalite, Eşsiz Deneyim", ctaPrefix: "💎 Premium Deneyimi Keşfet" },
+  budget: { tone: "Bu fiyata başka yok.", headlineSuffix: "— İnanılmaz Fiyat Avantajı", ctaPrefix: "💰 Fırsatı Kaçırma" },
+};
