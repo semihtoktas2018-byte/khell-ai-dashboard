@@ -111,7 +111,7 @@ SADECE JSON döndür, başka hiçbir şey yazma:
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5",
       max_tokens: 1000,
       messages: [{ role: "user", content: prompt }],
     }),
