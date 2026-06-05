@@ -4,14 +4,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText, Copy, Check, Flame, Calculator, Sparkles, ShoppingBag,
   Target, Clock, MousePointerClick, Tag, Globe, Search, Star, AlertTriangle,
-  MessageSquare, Megaphone, ClipboardList,
+  MessageSquare, Megaphone, ClipboardList, Loader2, Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { generateProductPage, type ProductPageInput, type ProductPageContent, type SalesAngle } from "@/lib/product-page-generator";
+import {
+  generateProductPage,
+  generateProductPageAI,
+  type ProductPageInput,
+  type ProductPageContent,
+  type SalesAngle,
+} from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -36,6 +42,7 @@ export default function ProductPageGenerator() {
   const [input, setInput] = useState<ProductPageInput>(defaultInput);
   const [content, setContent] = useState<ProductPageContent | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
   const hasAutoFilled = useRef(false);
 
   useEffect(() => {
@@ -54,6 +61,25 @@ export default function ProductPageGenerator() {
       setContent(generateProductPage(filled));
     }
   }, [searchParams]);
+
+  const handleGenerateAI = async () => {
+    if (!input.name.trim()) { toast({ title: "Hata", description: "Ürün adı giriniz", variant: "destructive" }); return; }
+    if (input.sellingPrice <= 0) { toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" }); return; }
+    const margin = input.sellingPrice > 0 ? ((input.sellingPrice - input.cost) / input.sellingPrice) * 100 : 0;
+    const finalInput = { ...input, margin };
+    setIsLoadingAI(true);
+    try {
+      const result = await generateProductPageAI(finalInput);
+      setContent(result);
+      toast({ title: "✅ AI İçerik Hazır!", description: "Claude tarafından üretildi" });
+    } catch (err) {
+      console.error("AI hatası:", err);
+      toast({ title: "AI Hatası", description: "Template içerik kullanılıyor", variant: "destructive" });
+      setContent(generateProductPage(finalInput));
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   const handleGenerate = () => {
     if (!input.name.trim()) { toast({ title: "Hata", description: "Ürün adı giriniz", variant: "destructive" }); return; }
@@ -181,7 +207,7 @@ export default function ProductPageGenerator() {
               </div>
             </div>
 
-            {/* Sales Angle Selector */}
+            {/* Sales Angle */}
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-2 block">Satış Açısı</label>
               <div className="flex flex-wrap gap-2">
@@ -198,15 +224,51 @@ export default function ProductPageGenerator() {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button onClick={handleGenerate} className="gap-2"><Sparkles className="h-4 w-4" />Metin Oluştur</Button>
-              <Button variant="outline" onClick={handleFetchFromViral} className="gap-2"><Flame className="h-4 w-4" />Viral Ürün'den Getir</Button>
-              <Button variant="outline" onClick={() => navigate("/dashboard/analyzer")} className="gap-2"><Calculator className="h-4 w-4" />Ürün Analizi'nden Getir</Button>
+              {/* AI Butonu - Ana buton */}
+              <Button
+                onClick={handleGenerateAI}
+                disabled={isLoadingAI}
+                className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 font-semibold px-5"
+              >
+                {isLoadingAI ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />Claude AI Yazıyor...</>
+                ) : (
+                  <><Zap className="h-4 w-4" />AI ile Oluştur</>
+                )}
+              </Button>
+
+              {/* Hızlı Template */}
+              <Button variant="outline" onClick={handleGenerate} className="gap-2 text-xs">
+                <Sparkles className="h-4 w-4" />Hızlı Template
+              </Button>
+
+              <Button variant="outline" onClick={handleFetchFromViral} className="gap-2">
+                <Flame className="h-4 w-4" />Viral Ürün'den Getir
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/dashboard/analyzer")} className="gap-2">
+                <Calculator className="h-4 w-4" />Ürün Analizi'nden Getir
+              </Button>
               {content && (
                 <Button variant="outline" onClick={handleCopyAll} className="gap-2 border-primary/40 text-primary hover:bg-primary/10">
                   <ClipboardList className="h-4 w-4" />Tümünü Kopyala
                 </Button>
               )}
             </div>
+
+            {/* AI Loading State */}
+            {isLoadingAI && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-3"
+              >
+                <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Claude AI içerik üretiyor...</p>
+                  <p className="text-xs text-muted-foreground">Dönüşüm odaklı, ikna edici metinler hazırlanıyor</p>
+                </div>
+              </motion.div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -272,7 +334,7 @@ export default function ProductPageGenerator() {
               </CardContent>
             </Card>
 
-            {/* Urgency Block */}
+            {/* Urgency */}
             <Card className="border-destructive/30">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -289,7 +351,7 @@ export default function ProductPageGenerator() {
               </CardContent>
             </Card>
 
-            {/* Trust Section */}
+            {/* Trust */}
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
