@@ -11,6 +11,7 @@ import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import LoadingSteps from "@/components/LoadingSteps";
 import SEO from "@/components/SEO";
+import MasrafPusulasiExport from "@/components/MasrafPusulasiExport";
 
 interface FleetResult {
   netProfit: number;
