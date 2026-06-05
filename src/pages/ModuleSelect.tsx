@@ -31,6 +31,10 @@ export default function ModuleSelect() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO
+        title="KHELL AI — E-Ticaret Kârlılık ve Analiz Platformu"
+        description="Ürün, filo ve reklam analizi için AI destekli platform. Anlık kâr hesaplayıcı, kazanan ürün bulucu ve premium analiz modülleri."
+      />
       {/* Top bar */}
       <nav className="flex items-center justify-between px-6 h-16 border-b border-border">
         <div className="flex items-center gap-2">
