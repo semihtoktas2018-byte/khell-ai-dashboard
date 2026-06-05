@@ -12,6 +12,7 @@ import BackButton from "@/components/BackButton";
 import MoneyLayer from "@/components/MoneyLayer";
 import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -245,6 +246,7 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6 relative">
+      <SEO title="Ürün Analizi | KHELL AI" description="Ürün kârlılığını, marjını ve risk düzeyini AI ile saniyeler içinde analiz et." />
       <BackButton />
 
       {fromOnboarding && (

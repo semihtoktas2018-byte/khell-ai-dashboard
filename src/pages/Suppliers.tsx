@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Search, Star, Award, ArrowUpDown, CheckCircle, Clock } from "lucide-react";
 import { suppliers } from "@/lib/mock-data";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -53,6 +54,7 @@ export default function Suppliers() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Tedarikçi Karşılaştırma | KHELL AI" description="AliExpress, Alibaba ve CJ tedarikçilerini fiyat ve teslimat üzerinden karşılaştır." />
       {/* Başlık */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Tedarikçiler</h1>

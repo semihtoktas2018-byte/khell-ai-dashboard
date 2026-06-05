@@ -13,6 +13,7 @@ import {
   FileText, Mic, MousePointerClick,
 } from "lucide-react";
 import { generateContent, type ContentEngineOutput } from "@/lib/content-engine";
+import SEO from "@/components/SEO";
 
 export default function ContentEngine() {
   const { t } = useLocale();
@@ -74,6 +75,7 @@ export default function ContentEngine() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
+      <SEO title="İçerik Motoru | KHELL AI" description="TikTok kancaları, başlık varyasyonları ve ürün konumlandırma metinleri üret." />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const allProducts = getViralProducts();
 
@@ -90,6 +91,7 @@ export default function ViralProducts() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Viral Ürün Bulucu | KHELL AI" description="Anlık viral ürün listesi, kâr potansiyeli ve hot ürün rozetleri." />
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="text-primary font-semibold">{t("viralProd.step")}</span>
         <span>{t("viralProd.stepDesc")}</span>
