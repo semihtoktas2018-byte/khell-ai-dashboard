@@ -176,7 +176,7 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
   const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
   const fadeUp = {
     hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 280, damping: 28 } },
+    visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 280, damping: 28 } },
   };
 
   return (
