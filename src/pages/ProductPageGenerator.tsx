@@ -19,7 +19,7 @@ import {
   type SalesAngle,
 } from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
-import SEO from "@/components/SEO";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -45,6 +45,7 @@ export default function ProductPageGenerator() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const hasAutoFilled = useRef(false);
+  const { currencySymbol } = useLocale();
 
   useEffect(() => {
     if (hasAutoFilled.current) return;
@@ -146,7 +147,6 @@ export default function ProductPageGenerator() {
     const hasHalf = rating - full >= 0.3;
     return (
       <span className="flex items-center gap-0.5">
-        <SEO title="Ürün Sayfası Üretici | KHELL AI" description="Shopify uyumlu, satışa hazır profesyonel ürün sayfalarını AI ile üret." />
         {Array.from({ length: 5 }, (_, i) => (
           <Star key={i} className={`h-4 w-4 ${i < full ? "fill-yellow-400 text-yellow-400" : i === full && hasHalf ? "fill-yellow-400/50 text-yellow-400" : "text-muted-foreground/30"}`} />
         ))}
@@ -187,11 +187,11 @@ export default function ProductPageGenerator() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Satış Fiyatı ($)</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Satış Fiyatı ({currencySymbol})</label>
                 <Input type="number" value={input.sellingPrice || ""} onChange={(e) => setInput(p => ({ ...p, sellingPrice: parseFloat(e.target.value) || 0 }))} placeholder="29.99" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Maliyet ($)</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Maliyet ({currencySymbol})</label>
                 <Input type="number" value={input.cost || ""} onChange={(e) => setInput(p => ({ ...p, cost: parseFloat(e.target.value) || 0 }))} placeholder="8.50" />
               </div>
               <div>
