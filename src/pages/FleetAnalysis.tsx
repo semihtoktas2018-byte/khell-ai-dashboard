@@ -11,6 +11,7 @@ import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import LoadingSteps from "@/components/LoadingSteps";
 import SEO from "@/components/SEO";
+import MasrafPusulasiExport from "@/components/MasrafPusulasiExport";
 
 interface FleetResult {
   netProfit: number;
@@ -600,6 +601,24 @@ export default function FleetAnalysis() {
               </div>
             </div>
           )}
+        </motion.div>
+
+        {/* Masraf Pusulası Export */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-6"
+        >
+          <MasrafPusulasiExport
+            isTr={isTr}
+            plate={plate}
+            km={km}
+            fuel={fuel}
+            driverCost={driver}
+            other={other}
+            revenue={revenue}
+          />
         </motion.div>
 
         {/* CSV Import */}
