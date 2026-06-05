@@ -9,6 +9,7 @@ import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import HeroSection from "@/components/HeroSection";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -97,6 +98,7 @@ export default function DashboardHome() {
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
+      <SEO title="Dashboard | KHELL AI" description="Kârlılık metrikleri, kazanan ürünler ve risk dağılımının canlı görünümü." />
 
       {/* ── YENİ PREMIUM HERO ── */}
       <motion.div variants={fadeUp}>

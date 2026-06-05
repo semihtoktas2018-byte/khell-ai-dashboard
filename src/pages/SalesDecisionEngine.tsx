@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { runDecisionEngine, type DecisionInput, type DecisionOutput } from "@/lib/sales-decision-engine";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const categories = [
   "Furniture", "Home Decor", "Luxury Decor", "Fashion", "Jewelry", "Watches",
@@ -105,6 +106,7 @@ export default function SalesDecisionEngine() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <SEO title="Satış Karar Motoru | KHELL AI" description="Sat / satma kararını veri ve AI skoru ile saniyeler içinde al." />
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center"><Zap className="h-5 w-5 text-primary" /></div>
         <div>

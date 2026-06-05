@@ -10,6 +10,7 @@ import MoneyLayer from "@/components/MoneyLayer";
 import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import LoadingSteps from "@/components/LoadingSteps";
+import SEO from "@/components/SEO";
 
 interface FleetResult {
   netProfit: number;
@@ -309,6 +310,7 @@ export default function FleetAnalysis() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEO title="Filo Analizi | KHELL AI" description="Filo verilerini analiz et, maliyetleri düşür ve kâr potansiyelini ortaya çıkar." />
       {/* Ambient floating icons */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden no-print">
         <Truck className="absolute top-[18%] left-[5%] h-24 w-24 text-primary/[0.05] blur-[1px]" />

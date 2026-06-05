@@ -19,6 +19,7 @@ import {
   type SalesAngle,
 } from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -145,6 +146,7 @@ export default function ProductPageGenerator() {
     const hasHalf = rating - full >= 0.3;
     return (
       <span className="flex items-center gap-0.5">
+        <SEO title="Ürün Sayfası Üretici | KHELL AI" description="Shopify uyumlu, satışa hazır profesyonel ürün sayfalarını AI ile üret." />
         {Array.from({ length: 5 }, (_, i) => (
           <Star key={i} className={`h-4 w-4 ${i < full ? "fill-yellow-400 text-yellow-400" : i === full && hasHalf ? "fill-yellow-400/50 text-yellow-400" : "text-muted-foreground/30"}`} />
         ))}

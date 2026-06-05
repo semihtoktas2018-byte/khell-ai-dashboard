@@ -14,6 +14,7 @@ import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
+import SEO from "@/components/SEO";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#f59e0b", "#10b981", "#8b5cf6"];
 
@@ -75,6 +76,7 @@ export default function ViralDiscovery() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Viral Keşif | KHELL AI" description="TikTok, Amazon ve AliExpress trendlerinden viral ürünleri keşfet." />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t("viralDisc.title")}</h1>

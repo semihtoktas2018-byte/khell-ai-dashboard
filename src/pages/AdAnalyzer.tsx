@@ -9,6 +9,7 @@ import MoneyLayer from "@/components/MoneyLayer";
 import LoadingSteps from "@/components/LoadingSteps";
 import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
+import SEO from "@/components/SEO";
 
 const LIMIT_KEY = "khell_ad_count";
 const FREE_LIMIT = 3;
@@ -324,6 +325,7 @@ export default function AdAnalyzer() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEO title="Reklam Analizi | KHELL AI" description="Reklam kampanyalarının ROAS, dönüşüm ve kâr performansını AI ile değerlendir." />
       {/* Ambient floating icons */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <BarChart3 className="absolute top-[12%] left-[6%] h-24 w-24 text-primary/[0.06] blur-[1px]" />

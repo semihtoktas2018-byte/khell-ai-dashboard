@@ -5,6 +5,7 @@ import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -70,6 +71,7 @@ export default function SavedProducts() {
   if (products.length === 0) {
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center h-[60vh] text-center">
+        <SEO title="Kayıtlı Ürünler | KHELL AI" description="Analiz ettiğin ürünleri arşivle, ara ve filtrele." />
         <div className="h-16 w-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
           <Bookmark className="h-7 w-7 text-muted-foreground" />
         </div>

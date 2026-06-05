@@ -12,6 +12,7 @@ import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from "recharts";
+import SEO from "@/components/SEO";
 
 export default function AutoHunter() {
   const { toast } = useToast();
@@ -60,6 +61,7 @@ export default function AutoHunter() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Otomatik Ürün Avcısı | KHELL AI" description="AI destekli avcı motoru ile yüksek skorlu ürünleri otomatik tara." />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

@@ -4,6 +4,7 @@ import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
 import { Filter } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const marginFilters = [
@@ -40,6 +41,7 @@ export default function WinningProducts() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Kazanan Ürünler | KHELL AI" description="Yüksek kârlılık potansiyeli taşıyan kazanan ürünleri keşfet." />
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2">
           {platforms.map((p) => (

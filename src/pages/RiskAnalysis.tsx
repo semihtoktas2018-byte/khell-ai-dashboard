@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { Shield, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -37,6 +38,7 @@ export default function RiskAnalysis() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Risk Analizi | KHELL AI" description="Ürünlerinin pazar, marj ve rekabet risklerini detaylı incele." />
       <div className="flex flex-wrap gap-2">
         {presets.map((p, i) => (
           <button key={p.name} onClick={() => handlePreset(i)}
