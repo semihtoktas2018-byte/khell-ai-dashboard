@@ -14,7 +14,7 @@ export default function WinningProducts() {
   const [marginFilter, setMarginFilter] = useState(0);
   const [trendFilter, setTrendFilter] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const { t, currencySymbol, locale } = useLocale();
+  const { t, currency, locale } = useLocale();
 
   const marginFilters = [
     { label: t("winning.all"), min: 0, max: 100 },
@@ -102,8 +102,8 @@ export default function WinningProducts() {
               <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
               <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
               <div className="space-y-2">
-                <DataRow label={t("winning.sellingPrice")} value={`${currencySymbol}${product.estimatedSellingPrice.toFixed(2)}`} />
-                <DataRow label={t("winning.supplierPrice")} value={`${currencySymbol}${product.supplierPrice.toFixed(2)}`} />
+                <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
+                <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
                 <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
                 <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
                 <DataRow label={t("winning.competition")} value={product.competition} />
