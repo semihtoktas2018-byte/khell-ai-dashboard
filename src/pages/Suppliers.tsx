@@ -15,7 +15,7 @@ export default function Suppliers() {
   const [source, setSource] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("totalCost");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const { t, currencySymbol } = useLocale();
+  const { t, currency } = useLocale();
 
   const sources = ["all", "AliExpress", "Alibaba", "CJ Dropshipping"];
   const sourceLabel = (s: string) => (s === "all" ? t("suppliers.all") : s);
@@ -56,7 +56,6 @@ export default function Suppliers() {
   return (
     <div className="space-y-6">
       <SEO title="Tedarikçi Karşılaştırma | KHELL AI" description="AliExpress, Alibaba ve CJ tedarikçilerini fiyat ve teslimat üzerinden karşılaştır." />
-      {/* Başlık */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("suppliers.title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t("suppliers.desc")}</p>
@@ -154,9 +153,11 @@ export default function Suppliers() {
                       }`}>{s.source}</span>
                     </td>
                     <td className="py-3 px-4 text-xs text-muted-foreground">{s.product}</td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-foreground">{currencySymbol}{s.price.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-foreground">{currency(s.price)}</td>
                     <td className="py-3 px-4 text-right font-mono tabular-nums text-muted-foreground">
-                      {s.shippingCost === 0 ? <span className="text-winning text-xs font-medium">{t("suppliers.freeUpper")}</span> : `${currencySymbol}${s.shippingCost.toFixed(2)}`}
+                      {s.shippingCost === 0
+                        ? <span className="text-winning text-xs font-medium">{t("suppliers.freeUpper")}</span>
+                        : currency(s.shippingCost)}
                     </td>
                     <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">{s.deliveryTime}</td>
                     <td className="py-3 px-4">
@@ -172,7 +173,7 @@ export default function Suppliers() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right font-mono tabular-nums text-foreground font-medium">
-                      {currencySymbol}{(s.price + s.shippingCost).toFixed(2)}
+                      {currency(s.price + s.shippingCost)}
                     </td>
                   </motion.tr>
                 );
