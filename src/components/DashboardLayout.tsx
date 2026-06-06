@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const navKeys = [
   { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -29,6 +30,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { t, locale, setLocale } = useLocale();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -155,6 +157,14 @@ export default function DashboardLayout() {
           >
             <Globe className="h-3.5 w-3.5" />
             {locale === "tr" ? "TR" : "EN"}
+          </button>
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+            title={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+            className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
         </header>
 
