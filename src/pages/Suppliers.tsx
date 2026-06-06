@@ -17,7 +17,8 @@ export default function Suppliers() {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const { t, currencySymbol } = useLocale();
 
-  const sources = [t("suppliers.all"), "AliExpress", "Alibaba", "CJ Dropshipping"];
+  const sources = ["all", "AliExpress", "Alibaba", "CJ Dropshipping"];
+  const sourceLabel = (s: string) => (s === "all" ? t("suppliers.all") : s);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -26,7 +27,7 @@ export default function Suppliers() {
 
   const filtered = useMemo(() => {
     let items = suppliers.filter((s) => {
-      if (source !== t("suppliers.all") && s.source !== source) return false;
+      if (source !== "all" && s.source !== source) return false;
       if (query && !s.name.toLowerCase().includes(query.toLowerCase()) && !s.product.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     });
@@ -37,7 +38,7 @@ export default function Suppliers() {
       return sortDir === "asc" ? aVal - bVal : bVal - aVal;
     });
     return items;
-  }, [query, source, sortKey, sortDir, t]);
+  }, [query, source, sortKey, sortDir]);
 
   const bestId = useMemo(() => {
     if (filtered.length === 0) return null;
@@ -57,17 +58,17 @@ export default function Suppliers() {
       <SEO title="Tedarikçi Karşılaştırma | KHELL AI" description="AliExpress, Alibaba ve CJ tedarikçilerini fiyat ve teslimat üzerinden karşılaştır." />
       {/* Başlık */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Tedarikçiler</h1>
-        <p className="text-sm text-muted-foreground mt-1">AliExpress, Alibaba ve CJ Dropshipping tedarikçilerini karşılaştırın</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("suppliers.title")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("suppliers.desc")}</p>
       </div>
 
       {/* Özet İstatistikler */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Toplam Tedarikçi", value: suppliers.length, color: "text-foreground" },
-          { label: "Doğrulanmış", value: suppliers.filter(s => s.verified).length, color: "text-winning" },
-          { label: "Ücretsiz Kargo", value: suppliers.filter(s => s.shippingCost === 0).length, color: "text-primary" },
-          { label: "Min. Sipariş = 1", value: suppliers.filter(s => s.minOrder === 1).length, color: "text-primary" },
+          { label: t("suppliers.totalSuppliers"), value: suppliers.length, color: "text-foreground" },
+          { label: t("suppliers.verified"), value: suppliers.filter(s => s.verified).length, color: "text-winning" },
+          { label: t("suppliers.freeShipping"), value: suppliers.filter(s => s.shippingCost === 0).length, color: "text-primary" },
+          { label: t("suppliers.minOrder1"), value: suppliers.filter(s => s.minOrder === 1).length, color: "text-primary" },
         ].map((stat) => (
           <div key={stat.label} className="card-glow rounded-xl p-4">
             <p className={`text-2xl font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
@@ -94,7 +95,7 @@ export default function Suppliers() {
               key={s}
               onClick={() => setSource(s)}
               className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${source === s ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}
-            >{s}</button>
+            >{sourceLabel(s)}</button>
           ))}
         </div>
       </div>
@@ -108,13 +109,13 @@ export default function Suppliers() {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground w-8"></th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Tedarikçi</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Platform</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Ürün Grubu</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">{t("suppliers.supplier")}</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">{t("suppliers.platform")}</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">{t("suppliers.productGroup")}</th>
                 <SortHeader label={t("suppliers.price")} sortField="price" />
                 <SortHeader label={t("suppliers.shipping")} sortField="shippingCost" />
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Teslimat</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">Yanıt</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">{t("suppliers.delivery")}</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">{t("suppliers.response")}</th>
                 <SortHeader label={t("suppliers.minOrder")} sortField="minOrder" />
                 <SortHeader label={t("suppliers.rating")} sortField="rating" />
                 <SortHeader label={t("suppliers.total")} sortField="totalCost" />
@@ -134,7 +135,7 @@ export default function Suppliers() {
                     <td className="py-3 px-4">
                       {isBest && (
                         <span className="verdict-winning rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 w-fit whitespace-nowrap">
-                          <Award className="h-3 w-3" /> EN İYİ
+                          <Award className="h-3 w-3" /> {t("suppliers.best")}
                         </span>
                       )}
                     </td>
@@ -155,7 +156,7 @@ export default function Suppliers() {
                     <td className="py-3 px-4 text-xs text-muted-foreground">{s.product}</td>
                     <td className="py-3 px-4 text-right font-mono tabular-nums text-foreground">{currencySymbol}{s.price.toFixed(2)}</td>
                     <td className="py-3 px-4 text-right font-mono tabular-nums text-muted-foreground">
-                      {s.shippingCost === 0 ? <span className="text-winning text-xs font-medium">ÜCRETSİZ</span> : `${currencySymbol}${s.shippingCost.toFixed(2)}`}
+                      {s.shippingCost === 0 ? <span className="text-winning text-xs font-medium">{t("suppliers.freeUpper")}</span> : `${currencySymbol}${s.shippingCost.toFixed(2)}`}
                     </td>
                     <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">{s.deliveryTime}</td>
                     <td className="py-3 px-4">

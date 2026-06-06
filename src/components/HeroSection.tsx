@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Zap, BarChart2, TrendingUp, ShieldCheck, Cpu, FileSpreadsheet, FileText, Sparkles } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 
 /* ─── Sayı animasyonu hook'u ─── */
 function useCountUp(target: number, duration = 2000, start = false) {
@@ -145,18 +146,19 @@ function FakeAIDashboard() {
 }
 
 /* ─── Feature Pill ─── */
-const features = [
-  { icon: TrendingUp, label: "Viral Ürün Analizi" },
-  { icon: BarChart2, label: "Filo Kâr Hesabı" },
-  { icon: Cpu, label: "Reklam AI" },
-  { icon: FileSpreadsheet, label: "CSV / Excel Analizi" },
-  { icon: Sparkles, label: "AI Önerileri" },
-  { icon: FileText, label: "PDF Rapor" },
+const featureDefs = [
+  { icon: TrendingUp, key: "hero.feat.viral" },
+  { icon: BarChart2, key: "hero.feat.fleet" },
+  { icon: Cpu, key: "hero.feat.ad" },
+  { icon: FileSpreadsheet, key: "hero.feat.csv" },
+  { icon: Sparkles, key: "hero.feat.ai" },
+  { icon: FileText, key: "hero.feat.pdf" },
 ];
 
 /* ─── Ana Hero ─── */
 export default function HeroSection({ onStart }: { onStart: () => void }) {
   const navigate = useNavigate();
+  const { t, locale } = useLocale();
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
 
@@ -220,7 +222,7 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
                 }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                AI destekli iş analiz platformu
+                {t("hero.badge")}
               </span>
             </motion.div>
 
@@ -231,21 +233,20 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
                   background: "linear-gradient(90deg, hsl(217 91% 65%), hsl(199 89% 70%))",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                }}>Kazancı</span>{" "}analiz et.<br />
-                Zararı durdur.<br />
+                }}>{t("hero.line1Highlight")}</span>{t("hero.line1Rest")}<br />
+                {t("hero.line2")}<br />
                 <span style={{
                   background: "linear-gradient(90deg, hsl(142 71% 50%), hsl(166 80% 50%))",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                }}>Büyümeyi</span>{" "}hızlandır.
+                }}>{t("hero.line3Highlight")}</span>{t("hero.line3Rest")}
               </h1>
             </motion.div>
 
             {/* Açıklama */}
             <motion.p variants={fadeUp} className="text-sm md:text-base leading-relaxed max-w-lg"
               style={{ color: "hsl(215 20% 62%)" }}>
-              KHELL AI; filo giderlerini, viral ürünleri ve reklam performansını analiz ederek işletmelerin
-              daha hızlı ve daha kârlı kararlar almasını sağlar.
+              {t("hero.desc")}
             </motion.p>
 
             {/* CTA butonları */}
@@ -262,7 +263,7 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 0 20px hsl(217 91% 60% / 0.4)")}
               >
                 <Zap className="h-4 w-4" />
-                Ücretsiz Analize Başla
+                {t("hero.cta")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
@@ -282,24 +283,40 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
                   (e.currentTarget as HTMLButtonElement).style.color = "hsl(215 20% 75%)";
                 }}
               >
-                Sistemi İncele
+                {t("hero.cta2")}
               </button>
+            </motion.div>
+
+            {/* Slogan */}
+            <motion.div variants={fadeUp}>
+              <p
+                className="text-2xl md:text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight"
+                style={{
+                  background:
+                    "linear-gradient(90deg, hsl(217 91% 70%) 0%, hsl(199 89% 75%) 40%, hsl(142 71% 55%) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: "drop-shadow(0 0 18px hsl(217 91% 60% / 0.35))",
+                }}
+              >
+                {t("hero.slogan")}
+              </p>
             </motion.div>
 
             {/* Güven satırı */}
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
-              {["Gerçek analizler", "AI destekli öneriler", "Mobil uyumlu", "Anında sonuç"].map((item) => (
-                <span key={item} className="flex items-center gap-1.5 text-xs" style={{ color: "hsl(215 20% 55%)" }}>
+              {["hero.trust.real", "hero.trust.ai", "hero.trust.mobile", "hero.trust.instant"].map((k) => (
+                <span key={k} className="flex items-center gap-1.5 text-xs" style={{ color: "hsl(215 20% 55%)" }}>
                   <ShieldCheck className="h-3 w-3" style={{ color: "hsl(142 71% 45%)" }} />
-                  {item}
+                  {t(k)}
                 </span>
               ))}
             </motion.div>
 
             {/* Feature pills */}
             <motion.div variants={fadeUp} className="flex flex-wrap gap-2 pt-1">
-              {features.map(({ icon: Icon, label }) => (
-                <span key={label}
+              {featureDefs.map(({ icon: Icon, key }) => (
+                <span key={key}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-default"
                   style={{
                     background: "hsl(217 32% 10%)",
@@ -318,7 +335,7 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
                   }}
                 >
                   <Icon className="h-3 w-3" />
-                  {label}
+                  {t(key)}
                 </span>
               ))}
             </motion.div>
@@ -345,10 +362,10 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
           style={{ borderTop: "1px solid hsl(217 32% 15%)" }}
         >
           {[
-            { label: "Analiz edilen gelir", value: `₺${(rev / 1000000).toFixed(1)}M+`, suffix: "" },
-            { label: "Tamamlanan analiz", value: analyses.toLocaleString("tr-TR"), suffix: "" },
-            { label: "Daha hızlı karar", value: `%${speed}`, suffix: "" },
-            { label: "AI analiz modülü", value: "3", suffix: " adet" },
+            { label: t("hero.stat.revenue"), value: `${locale === "tr" ? "₺" : "$"}${(rev / 1000000).toFixed(1)}M+`, suffix: "" },
+            { label: t("hero.stat.completed"), value: analyses.toLocaleString(locale === "tr" ? "tr-TR" : "en-US"), suffix: "" },
+            { label: t("hero.stat.faster"), value: locale === "tr" ? `%${speed}` : `${speed}%`, suffix: "" },
+            { label: t("hero.stat.modules"), value: "3", suffix: t("hero.stat.modulesSuffix") },
           ].map((stat) => (
             <div key={stat.label} className="text-center p-4 rounded-xl"
               style={{ background: "hsl(217 32% 8%)", border: "1px solid hsl(217 32% 15%)" }}>
