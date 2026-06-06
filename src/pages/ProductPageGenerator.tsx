@@ -45,7 +45,14 @@ export default function ProductPageGenerator() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const hasAutoFilled = useRef(false);
-  const { currencySymbol } = useLocale();
+  const { currencySymbol, t } = useLocale();
+
+  const salesAnglesI18n: { value: SalesAngle; key: string; icon: string }[] = [
+    { value: "problem", key: "ppg.problemSolving", icon: "🛡️" },
+    { value: "trend", key: "ppg.trendViral", icon: "🔥" },
+    { value: "premium", key: "ppg.premium", icon: "💎" },
+    { value: "budget", key: "ppg.budget", icon: "💰" },
+  ];
 
   useEffect(() => {
     if (hasAutoFilled.current) return;
@@ -160,10 +167,10 @@ export default function ProductPageGenerator() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <FileText className="h-6 w-6 text-primary" />
-          Ürün Sayfası Oluşturucu
+          {t("ppg.title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Shopify ürün sayfası için hazır, yüksek dönüşümlü içerik bloğu oluşturun
+          {t("ppg.desc")}
         </p>
       </motion.div>
 
@@ -171,54 +178,54 @@ export default function ProductPageGenerator() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.05 }}>
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">Ürün Bilgileri</CardTitle>
+            <CardTitle className="text-base">{t("ppg.productInfo")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ürün Adı</label>
-                <Input value={input.name} onChange={(e) => setInput(p => ({ ...p, name: e.target.value }))} placeholder="Ürün adı girin..." />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.productName")}</label>
+                <Input value={input.name} onChange={(e) => setInput(p => ({ ...p, name: e.target.value }))} placeholder={t("analyzer.productName")} />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Kategori</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.category")}</label>
                 <select value={input.category} onChange={(e) => setInput(p => ({ ...p, category: e.target.value }))}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                   {categories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Satış Fiyatı ({currencySymbol})</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.sellingPrice")} ({currencySymbol})</label>
                 <Input type="number" value={input.sellingPrice || ""} onChange={(e) => setInput(p => ({ ...p, sellingPrice: parseFloat(e.target.value) || 0 }))} placeholder="29.99" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Maliyet ({currencySymbol})</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.cost")} ({currencySymbol})</label>
                 <Input type="number" value={input.cost || ""} onChange={(e) => setInput(p => ({ ...p, cost: parseFloat(e.target.value) || 0 }))} placeholder="8.50" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Trend Skoru</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.trendScore")}</label>
                 <Input type="number" value={input.trendScore || ""} onChange={(e) => setInput(p => ({ ...p, trendScore: parseFloat(e.target.value) || 0 }))} placeholder="85" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Risk Seviyesi</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.riskLevel")}</label>
                 <select value={input.riskLevel} onChange={(e) => setInput(p => ({ ...p, riskLevel: e.target.value }))}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                  <option value="Düşük">Düşük</option>
-                  <option value="Orta">Orta</option>
-                  <option value="Yüksek">Yüksek</option>
+                  <option value="Düşük">{t("ppg.lowRisk")}</option>
+                  <option value="Orta">{t("ppg.medRisk")}</option>
+                  <option value="Yüksek">{t("ppg.highRisk")}</option>
                 </select>
               </div>
             </div>
 
             {/* Sales Angle */}
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-2 block">Satış Açısı</label>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("ppg.salesAngle")}</label>
               <div className="flex flex-wrap gap-2">
-                {salesAngles.map(a => (
+                {salesAnglesI18n.map(a => (
                   <button key={a.value} onClick={() => setInput(p => ({ ...p, salesAngle: a.value }))}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${input.salesAngle === a.value
                       ? "border-primary bg-primary/10 text-primary shadow-sm"
                       : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50"}`}>
-                    <span>{a.icon}</span>{a.label}
+                    <span>{a.icon}</span>{t(a.key)}
                   </button>
                 ))}
               </div>
