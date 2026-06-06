@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/contexts/LocaleContext";
-import SEO from "@/components/SEO";
 
 const allProducts = getViralProducts();
 
@@ -36,7 +35,7 @@ export default function ViralProducts() {
   const navigate = useNavigate();
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
-  const { t, currencySymbol } = useLocale();
+  const { t, currency } = useLocale();
 
   const filtered = useMemo(() => {
     let list = [...allProducts];
@@ -91,7 +90,6 @@ export default function ViralProducts() {
 
   return (
     <div className="space-y-6">
-      <SEO title="Viral Ürün Bulucu | KHELL AI" description="Anlık viral ürün listesi, kâr potansiyeli ve hot ürün rozetleri." />
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="text-primary font-semibold">{t("viralProd.step")}</span>
         <span>{t("viralProd.stepDesc")}</span>
@@ -158,7 +156,7 @@ export default function ViralProducts() {
 
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   <Stat label={t("winning.trendScore")} value={`${p.trendScore}`} icon={<TrendingUp className="h-3 w-3" />} />
-                  <Stat label={t("viralProd.profit")} value={`${currencySymbol}${(p.sellingPrice - p.cost).toFixed(2)}`} />
+                  <Stat label={t("viralProd.profit")} value={currency(p.sellingPrice - p.cost)} />
                   <Stat label={t("viralProd.margin")} value={`%${p.margin.toFixed(0)}`} />
                   <Stat label={t("viralProd.decisionScore")} value={`${p.decisionScore}`} highlight />
                 </div>
