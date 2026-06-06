@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import LandingPage from "./pages/LandingPage";
 import ModuleSelect from "./pages/ModuleSelect";
 import FleetAnalysis from "./pages/FleetAnalysis";
@@ -38,6 +39,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <ThemeProvider>
       <LocaleProvider>
       <AuthProvider>
         <SavedProductsProvider>
@@ -74,6 +76,7 @@ const App = () => (
         </SavedProductsProvider>
       </AuthProvider>
       </LocaleProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
