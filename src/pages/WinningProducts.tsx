@@ -7,17 +7,6 @@ import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
-const marginFilters = [
-  { label: "Tümü", min: 0, max: 100 },
-  { label: "%30+", min: 30, max: 100 },
-  { label: "%40+", min: 40, max: 100 },
-  { label: "%50+", min: 50, max: 100 },
-];
-const trendFilters = [
-  { label: "Tümü", min: 0 },
-  { label: "80+", min: 80 },
-  { label: "90+", min: 90 },
-];
 
 export default function WinningProducts() {
   const [platform, setPlatform] = useState("Tümü");
@@ -25,19 +14,33 @@ export default function WinningProducts() {
   const [marginFilter, setMarginFilter] = useState(0);
   const [trendFilter, setTrendFilter] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const { t, currencySymbol } = useLocale();
+  const { t, currencySymbol, locale } = useLocale();
 
-  const platforms = [t("winning.all"), "TikTok", "Amazon", "AliExpress"];
+  const marginFilters = [
+    { label: t("winning.all"), min: 0, max: 100 },
+    { label: locale === "tr" ? "%30+" : "30%+", min: 30, max: 100 },
+    { label: locale === "tr" ? "%40+" : "40%+", min: 40, max: 100 },
+    { label: locale === "tr" ? "%50+" : "50%+", min: 50, max: 100 },
+  ];
+  const trendFilters = [
+    { label: t("winning.all"), min: 0 },
+    { label: "80+", min: 80 },
+    { label: "90+", min: 90 },
+  ];
+
+  const platforms = ["Tümü", "TikTok", "Amazon", "AliExpress"];
+  const platformLabel = (p: string) => (p === "Tümü" ? t("winning.all") : p);
+  const catLabel = (c: string) => t(`cat.${c}`) ?? c;
 
   const filtered = useMemo(() => {
     return trendingProducts.filter((p) => {
-      if (platform !== t("winning.all") && p.platform !== platform) return false;
+      if (platform !== "Tümü" && p.platform !== platform) return false;
       if (category !== "Tümü" && p.category !== category) return false;
       if (p.profitMargin < marginFilters[marginFilter].min) return false;
       if (p.trendScore < trendFilters[trendFilter].min) return false;
       return true;
     });
-  }, [platform, category, marginFilter, trendFilter, t]);
+  }, [platform, category, marginFilter, trendFilter]);
 
   return (
     <div className="space-y-6">
@@ -47,7 +50,7 @@ export default function WinningProducts() {
           {platforms.map((p) => (
             <button key={p} onClick={() => setPlatform(p)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${platform === p ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
-              {p}
+              {platformLabel(p)}
             </button>
           ))}
         </div>
@@ -62,7 +65,7 @@ export default function WinningProducts() {
             <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("winning.category")}</label>
             <div className="flex flex-wrap gap-1.5">
               {categories.map((c) => (
-                <button key={c} onClick={() => setCategory(c)} className={`px-3 py-1 text-xs rounded-md transition-colors ${category === c ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground hover:text-foreground"}`}>{c}</button>
+                <button key={c} onClick={() => setCategory(c)} className={`px-3 py-1 text-xs rounded-md transition-colors ${category === c ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground hover:text-foreground"}`}>{catLabel(c)}</button>
               ))}
             </div>
           </div>
@@ -97,12 +100,12 @@ export default function WinningProducts() {
                 <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
               </div>
               <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
-              <p className="text-[10px] text-muted-foreground mb-3">{product.category} · {product.platform}</p>
+              <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
               <div className="space-y-2">
                 <DataRow label={t("winning.sellingPrice")} value={`${currencySymbol}${product.estimatedSellingPrice.toFixed(2)}`} />
                 <DataRow label={t("winning.supplierPrice")} value={`${currencySymbol}${product.supplierPrice.toFixed(2)}`} />
                 <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
-                <DataRow label={t("winning.profitMargin")} value={`%${product.profitMargin}`} color={verdict.color} />
+                <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
                 <DataRow label={t("winning.competition")} value={product.competition} />
               </div>
             </motion.div>
