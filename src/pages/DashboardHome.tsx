@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import HeroSection from "@/components/HeroSection";
 import SEO from "@/components/SEO";
+import TrendScoreWidget from "@/components/TrendScoreWidget";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -103,6 +104,11 @@ export default function DashboardHome() {
       {/* ── YENİ PREMIUM HERO ── */}
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
+      </motion.div>
+
+      {/* ── Anlık Trend Skoru Widget ── */}
+      <motion.div variants={fadeUp}>
+        <TrendScoreWidget />
       </motion.div>
 
       {/* ── Buradan itibaren mevcut içerik ── */}
