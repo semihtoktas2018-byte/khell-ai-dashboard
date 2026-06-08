@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Loader2, ExternalLink } from "lucide-react";
 
-const CJ_EMAIL = "CJ4943028";
+const CJ_EMAIL = "bamir.global@gmail.com";
 const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
 
 interface CJProduct {
@@ -44,7 +44,12 @@ export default function CJProductSearch() {
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
-      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
+      const res = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "CJ-Access-Token": token,
+        },
+      });
       const data = await res.json();
       if (!data?.data?.list) throw new Error(data?.message || "Sonuç bulunamadı");
       setResults(data.data.list);
