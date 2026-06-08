@@ -103,7 +103,7 @@ export default function CJProductSearch() {
             {results.map((p, i) => (
               <motion.a
                 key={p.pid || i}
-                href={p.productUrl || "#"}
+                href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                 target="_blank"
                 rel="noreferrer"
                 initial={{ opacity: 0, y: 10 }}
