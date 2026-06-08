@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImg from "@/assets/hero-dashboard.png";
 import BackButton from "@/components/BackButton";
@@ -60,8 +60,17 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      {/* CJ Entegrasyon Banner - Sayfanın en üstü */}
+      <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
+        <Package className="h-3 w-3 text-primary shrink-0" />
+        <p className="text-[11px] text-primary font-medium">
+          CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif
+        </p>
+        <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+      </div>
+
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <nav className="fixed top-7 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <BackButton />
@@ -89,18 +98,27 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 px-6">
+      <section className="relative pt-40 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
 
         <div className="container mx-auto relative z-10">
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
-            <motion.div variants={fadeUp} className="mb-4">
+            <motion.div variants={fadeUp} className="mb-4 flex flex-col items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
                 {t("landing.badge")}
               </span>
+              {/* CJ Rozeti */}
+              
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Package className="h-3 w-3" />
+                CJdropshipping entegrasyonu aktif — gerçek ürün verisi
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+              </a>
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
@@ -265,7 +283,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 {plan.href ? (
-                  <a
+                  
                     href={plan.href}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -276,7 +294,7 @@ export default function LandingPage() {
                 ) : (
                   <button
                     onClick={() => navigate("/dashboard/analyzer")}
-                    className={`w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost`}
+                    className="w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost"
                   >
                     {plan.cta}
                   </button>
