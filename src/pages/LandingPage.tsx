@@ -60,7 +60,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
-      {/* CJ Entegrasyon Banner - Sayfanın en üstü */}
+      {/* CJ Entegrasyon Banner */}
       <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
         <Package className="h-3 w-3 text-primary shrink-0" />
         <p className="text-[11px] text-primary font-medium">
@@ -102,7 +102,6 @@ export default function LandingPage() {
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
-
         <div className="container mx-auto relative z-10">
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
             <motion.div variants={fadeUp} className="mb-4 flex flex-col items-center gap-2">
@@ -110,7 +109,6 @@ export default function LandingPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
                 {t("landing.badge")}
               </span>
-              {/* CJ Rozeti */}
               
                 href="/dashboard"
                 className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
@@ -143,12 +141,7 @@ export default function LandingPage() {
 
             <motion.div variants={fadeUp} className="relative mx-auto max-w-5xl">
               <div className="relative rounded-xl overflow-hidden border border-border shadow-2xl">
-                <img
-                  src={heroImg}
-                  alt="KHELL AI Dashboard"
-                  className="w-full h-auto"
-                  loading="eager"
-                />
+                <img src={heroImg} alt="KHELL AI Dashboard" className="w-full h-auto" loading="eager" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
               </div>
             </motion.div>
@@ -223,7 +216,6 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.featuresTitle")}</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.featuresDesc")}</p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
               <motion.div
@@ -253,7 +245,6 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.pricing")}</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.pricingDesc")}</p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan, i) => (
               <motion.div
