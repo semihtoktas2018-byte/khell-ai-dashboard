@@ -125,7 +125,7 @@ export default function DashboardLayout() {
 
         {!collapsed && (
           <div className="px-4 py-4 border-t border-border space-y-3">
-            
+            <a
               href="https://www.shopier.com/bamironlinestore/46009500"
               target="_blank"
               rel="noopener noreferrer"
