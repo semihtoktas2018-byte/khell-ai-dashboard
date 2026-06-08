@@ -11,6 +11,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 import HeroSection from "@/components/HeroSection";
 import SEO from "@/components/SEO";
 import TrendScoreWidget from "@/components/TrendScoreWidget";
+import CJProductSearch from "@/components/CJProductSearch";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -109,6 +110,11 @@ export default function DashboardHome() {
       {/* ── Anlık Trend Skoru Widget ── */}
       <motion.div variants={fadeUp}>
         <TrendScoreWidget />
+      </motion.div>
+
+      {/* ── CJdropshipping Ürün Arama ── */}
+      <motion.div variants={fadeUp}>
+        <CJProductSearch />
       </motion.div>
 
       {/* ── Buradan itibaren mevcut içerik ── */}
