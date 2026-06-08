@@ -2,11 +2,18 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon, Bell, X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useTheme } from "@/contexts/ThemeContext";
+
+const CHANGELOG_VERSION = "v1.2.0";
+
+const changelog = [
+  { version: "v1.2.0", date: "08 Haziran 2026", items: ["CJdropshipping ürün arama entegrasyonu eklendi", "Dashboard performansı iyileştirildi", "Mobil görünüm düzeltildi"] },
+  { version: "v1.1.0", date: "01 Haziran 2026", items: ["Viral Ürün Bulucu eklendi", "Risk Analizi modülü güncellendi"] },
+];
 
 const navKeys = [
   { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -23,9 +30,18 @@ const navKeys = [
   { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
 ];
 
+function useChangelog() {
+  const key = `changelog_seen_${CHANGELOG_VERSION}`;
+  const seen = localStorage.getItem(key) === "true";
+  const markSeen = () => localStorage.setItem(key, "true");
+  return { seen, markSeen };
+}
+
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { seen, markSeen } = useChangelog();
+  const [notifOpen, setNotifOpen] = useState(!seen);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -35,6 +51,11 @@ export default function DashboardLayout() {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const handleDismiss = () => {
+    markSeen();
+    setNotifOpen(false);
   };
 
   return (
@@ -60,7 +81,6 @@ export default function DashboardLayout() {
         animate={{ width: collapsed ? 72 : 260 }}
         transition={{ duration: 0.15 }}
       >
-        {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
           <div className="flex items-center gap-2 overflow-hidden">
             <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
@@ -80,7 +100,6 @@ export default function DashboardLayout() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navKeys.map((item) => {
             const active = location.pathname === item.path;
@@ -104,10 +123,9 @@ export default function DashboardLayout() {
           })}
         </nav>
 
-        {/* User & Logout */}
         {!collapsed && (
           <div className="px-4 py-4 border-t border-border space-y-3">
-            <a
+            
               href="https://www.shopier.com/bamironlinestore/46009500"
               target="_blank"
               rel="noopener noreferrer"
@@ -150,7 +168,71 @@ export default function DashboardLayout() {
               ? t(navKeys.find((n) => n.path === location.pathname)!.labelKey)
               : "Dashboard"}
           </h2>
-          {/* Language Toggle */}
+
+          {/* Bildirim ikonu */}
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="relative flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {!seen && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {notifOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-10 w-80 rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">Yenilikler</span>
+                      <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium">{CHANGELOG_VERSION}</span>
+                    </div>
+                    <button onClick={() => setNotifOpen(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto">
+                    {changelog.map((log) => (
+                      <div key={log.version} className="px-4 py-3 border-b border-border/50 last:border-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-primary">{log.version}</span>
+                          <span className="text-[10px] text-muted-foreground">{log.date}</span>
+                        </div>
+                        <ul className="space-y-1">
+                          {log.items.map((item, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <span className="text-primary mt-0.5">•</span>
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="px-4 py-3 border-t border-border">
+                    <button
+                      onClick={handleDismiss}
+                      className="w-full text-xs font-medium bg-primary text-primary-foreground rounded-lg py-2 hover:opacity-90 transition-opacity"
+                    >
+                      Anladım ✓
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <button
             onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
@@ -161,7 +243,6 @@ export default function DashboardLayout() {
           <button
             onClick={toggleTheme}
             aria-label={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
-            title={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
             className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
           >
             {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
