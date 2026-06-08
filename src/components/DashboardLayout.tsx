@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon, Bell, X,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -60,7 +60,6 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Mobile overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -73,7 +72,6 @@ export default function DashboardLayout() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <motion.aside
         className={`fixed lg:relative z-50 h-full flex flex-col border-r border-border bg-sidebar ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -125,7 +123,7 @@ export default function DashboardLayout() {
 
         {!collapsed && (
           <div className="px-4 py-4 border-t border-border space-y-3">
-            <a
+            
               href="https://www.shopier.com/bamironlinestore/46009500"
               target="_blank"
               rel="noopener noreferrer"
@@ -154,8 +152,16 @@ export default function DashboardLayout() {
         )}
       </motion.aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* CJ Entegrasyon Banner */}
+        <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
+          <Package className="h-3 w-3 text-primary shrink-0" />
+          <p className="text-[11px] text-primary font-medium">
+            CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif
+          </p>
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+        </div>
+
         <header className="h-14 flex items-center gap-3 px-4 border-b border-border shrink-0">
           <button
             onClick={() => setMobileOpen(true)}
@@ -169,7 +175,6 @@ export default function DashboardLayout() {
               : "Dashboard"}
           </h2>
 
-          {/* Bildirim ikonu */}
           <div className="relative">
             <button
               onClick={() => setNotifOpen((v) => !v)}
