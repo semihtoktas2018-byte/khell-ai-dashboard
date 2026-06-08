@@ -48,34 +48,21 @@ export default function DashboardLayout() {
   const { t, locale, setLocale } = useLocale();
   const { theme, toggle: toggleTheme } = useTheme();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
-  const handleDismiss = () => {
-    markSeen();
-    setNotifOpen(false);
-  };
+  const handleLogout = () => { logout(); navigate("/"); };
+  const handleDismiss = () => { markSeen(); setNotifOpen(false); };
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
+            onClick={() => setMobileOpen(false)} />
         )}
       </AnimatePresence>
 
       <motion.aside
-        className={`fixed lg:relative z-50 h-full flex flex-col border-r border-border bg-sidebar ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } transition-transform lg:transition-none`}
+        className={`fixed lg:relative z-50 h-full flex flex-col border-r border-border bg-sidebar ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} transition-transform lg:transition-none`}
         animate={{ width: collapsed ? 72 : 260 }}
         transition={{ duration: 0.15 }}
       >
@@ -84,16 +71,9 @@ export default function DashboardLayout() {
             <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            {!collapsed && (
-              <span className="text-sm font-bold text-foreground tracking-tight whitespace-nowrap">
-                KHELL AI
-              </span>
-            )}
+            {!collapsed && <span className="text-sm font-bold text-foreground tracking-tight whitespace-nowrap">KHELL AI</span>}
           </div>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent text-muted-foreground"
-          >
+          <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent text-muted-foreground">
             <ChevronLeft className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
           </button>
         </div>
@@ -102,17 +82,8 @@ export default function DashboardLayout() {
           {navKeys.map((item) => {
             const active = location.pathname === item.path;
             return (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setMobileOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                }`}
+              <button key={item.path} onClick={() => { navigate(item.path); setMobileOpen(false); }}
+                className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
                 {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
@@ -145,54 +116,36 @@ export default function DashboardLayout() {
                 </button>
               </div>
             )}
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              {t("nav.production")}
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{t("nav.production")}</p>
           </div>
         )}
       </motion.aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* CJ Entegrasyon Banner */}
         <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
           <Package className="h-3 w-3 text-primary shrink-0" />
-          <p className="text-[11px] text-primary font-medium">
-            CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif
-          </p>
+          <p className="text-[11px] text-primary font-medium">CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif</p>
           <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
         </div>
 
         <header className="h-14 flex items-center gap-3 px-4 border-b border-border shrink-0">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground"
-          >
+          <button onClick={() => setMobileOpen(true)} className="lg:hidden h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent text-muted-foreground">
             <Menu className="h-5 w-5" />
           </button>
           <h2 className="text-sm font-semibold text-foreground flex-1">
-            {navKeys.find((n) => n.path === location.pathname)?.labelKey
-              ? t(navKeys.find((n) => n.path === location.pathname)!.labelKey)
-              : "Dashboard"}
+            {navKeys.find((n) => n.path === location.pathname)?.labelKey ? t(navKeys.find((n) => n.path === location.pathname)!.labelKey) : "Dashboard"}
           </h2>
 
           <div className="relative">
-            <button
-              onClick={() => setNotifOpen((v) => !v)}
-              className="relative flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-            >
+            <button onClick={() => setNotifOpen((v) => !v)}
+              className="relative flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="h-3.5 w-3.5" />
-              {!seen && (
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
-              )}
+              {!seen && <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />}
             </button>
-
             <AnimatePresence>
               {notifOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.95 }} transition={{ duration: 0.15 }}
                   className="absolute right-0 top-10 w-80 rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden"
                 >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -205,7 +158,6 @@ export default function DashboardLayout() {
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-
                   <div className="max-h-72 overflow-y-auto">
                     {changelog.map((log) => (
                       <div key={log.version} className="px-4 py-3 border-b border-border/50 last:border-0">
@@ -224,12 +176,8 @@ export default function DashboardLayout() {
                       </div>
                     ))}
                   </div>
-
                   <div className="px-4 py-3 border-t border-border">
-                    <button
-                      onClick={handleDismiss}
-                      className="w-full text-xs font-medium bg-primary text-primary-foreground rounded-lg py-2 hover:opacity-90 transition-opacity"
-                    >
+                    <button onClick={handleDismiss} className="w-full text-xs font-medium bg-primary text-primary-foreground rounded-lg py-2 hover:opacity-90 transition-opacity">
                       Anladım ✓
                     </button>
                   </div>
@@ -238,18 +186,13 @@ export default function DashboardLayout() {
             </AnimatePresence>
           </div>
 
-          <button
-            onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <button onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
             <Globe className="h-3.5 w-3.5" />
             {locale === "tr" ? "TR" : "EN"}
           </button>
-          <button
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
-            className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <button onClick={toggleTheme} aria-label={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+            className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
             {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </button>
         </header>
