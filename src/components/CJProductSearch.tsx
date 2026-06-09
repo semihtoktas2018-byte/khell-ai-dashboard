@@ -4,7 +4,7 @@ import { Search, Package, Loader2, Radio, BarChart3, FileText } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
+const CJ_PASSWORD = "tfMwW8nUnDeWe!x";
 
 interface CJProduct {
   pid: string;
@@ -23,7 +23,7 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "bamir.global@gmail.com", password: "tfMwW8nUnDeWe!x" }),
+    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
   });
   const data = await res.json();
   if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
@@ -48,7 +48,6 @@ export default function CJProductSearch() {
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
       const res = await fetch(url, {
         headers: {
-          "Authorization": `Bearer ${token}`,
           "CJ-Access-Token": token,
         },
       });
