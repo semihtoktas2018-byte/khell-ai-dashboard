@@ -24,9 +24,14 @@ async function getAccessToken(): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
+    mode: "cors",
   });
   const data = await res.json();
-  if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
+  console.log("CJ Token API Response:", data);
+  if (!data?.data?.accessToken) {
+    const msg = data?.message || "Token alınamadı";
+    throw new Error(`Token Hatası: ${msg} (code: ${data?.code})`);
+  }
   cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
   return cachedToken.token;
 }
