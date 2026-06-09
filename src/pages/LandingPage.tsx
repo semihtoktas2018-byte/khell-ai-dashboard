@@ -109,7 +109,7 @@ export default function LandingPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
                 {t("landing.badge")}
               </span>
-              
+              <a
                 href="/dashboard"
                 className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
               >
@@ -274,7 +274,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 {plan.href ? (
-                  
+                  <a
                     href={plan.href}
                     target="_blank"
                     rel="noopener noreferrer"
