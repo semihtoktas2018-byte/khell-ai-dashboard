@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Package, Loader2, ExternalLink } from "lucide-react";
+import { Search, Package, Loader2, Radio, BarChart3, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
 const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
@@ -35,6 +36,7 @@ export default function CJProductSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CJProduct[]>([]);
+  const navigate = useNavigate();
 
   const search = async () => {
     if (!query.trim()) return;
@@ -61,10 +63,22 @@ export default function CJProductSearch() {
   };
 
   return (
-    <div className="card-glow rounded-xl p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Package className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">CJdropshipping Ürün Arama</h3>
+    <div className="card-glow rounded-xl p-5 border border-orange-500/20 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-md bg-orange-500/10">
+            <Package className="h-4 w-4 text-orange-500" />
+          </div>
+          <h3 className="text-sm font-semibold text-foreground">CJ Dropshipping Ürün Arama</h3>
+        </div>
+        <motion.span
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-500 border border-orange-500/30"
+        >
+          <Radio className="h-2.5 w-2.5" /> CANLI VERİ
+        </motion.span>
       </div>
 
       <div className="flex gap-2 mb-4">
@@ -81,7 +95,7 @@ export default function CJProductSearch() {
         <button
           onClick={search}
           disabled={loading || !query.trim()}
-          className="h-10 px-5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+          className="h-10 px-5 rounded-md bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-500/20"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Ara
@@ -100,39 +114,70 @@ export default function CJProductSearch() {
             exit={{ opacity: 0 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
           >
-            {results.map((p, i) => (
-              <motion.a
-                key={p.pid || i}
-                href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
-                target="_blank"
-                rel="noreferrer"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
-                className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-primary/50 transition-colors"
-              >
-                <div className="aspect-square bg-background overflow-hidden">
-                  {p.productImage ? (
-                    <img
-                      src={p.productImage.split(",")[0]}
-                      alt={p.productName}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      <Package className="h-8 w-8" />
+            {results.map((p, i) => {
+              const cost = parseFloat(p.sellPrice || "0") || 0;
+              const estSale = cost * 3;
+              const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
+              return (
+                <motion.div
+                  key={p.pid || i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
+                  className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
+                >
+                  <a
+                    href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block aspect-square bg-background overflow-hidden"
+                  >
+                    {p.productImage ? (
+                      <img
+                        src={p.productImage.split(",")[0]}
+                        alt={p.productName}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <Package className="h-8 w-8" />
+                      </div>
+                    )}
+                  </a>
+                  <div className="p-3 space-y-2 flex-1 flex flex-col">
+                    <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productName}</p>
+                    <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                      <div className="rounded bg-background/60 px-2 py-1">
+                        <p className="text-muted-foreground">Maliyet</p>
+                        <p className="font-mono font-bold text-foreground">${cost.toFixed(2)}</p>
+                      </div>
+                      <div className="rounded bg-orange-500/10 px-2 py-1">
+                        <p className="text-muted-foreground">Satış</p>
+                        <p className="font-mono font-bold text-orange-500">${estSale.toFixed(2)}</p>
+                      </div>
                     </div>
-                  )}
-                </div>
-                <div className="p-3 space-y-1">
-                  <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productName}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-primary">${p.sellPrice || "—"}</span>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary" />
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-muted-foreground">Kâr Marjı</span>
+                      <span className="font-mono font-bold text-winning">%{margin}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
+                      <button
+                        onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(p.productName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
+                        className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
+                      >
+                        <BarChart3 className="h-3 w-3" /> Analiz Et
+                      </button>
+                      <button
+                        onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(p.productName)}&image=${encodeURIComponent(p.productImage?.split(",")[0] || "")}&price=${estSale.toFixed(2)}`)}
+                        className="h-7 rounded-md bg-orange-500/15 text-orange-500 text-[10px] font-semibold hover:bg-orange-500/25 transition-colors flex items-center justify-center gap-1"
+                      >
+                        <FileText className="h-3 w-3" /> Sayfa Oluştur
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.a>
-            ))}
+                </motion.div>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
