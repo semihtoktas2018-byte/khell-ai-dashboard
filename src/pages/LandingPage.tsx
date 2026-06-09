@@ -274,7 +274,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 {plan.href ? (
-                  
+                  <a
                     href={plan.href}
                     target="_blank"
                     rel="noopener noreferrer"
