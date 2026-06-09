@@ -22,7 +22,7 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
+    body: JSON.stringify({ email: "bamir.global@gmail.com", password: "tfMwW8nUnDeWe!x" }),
   });
   const data = await res.json();
   if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
