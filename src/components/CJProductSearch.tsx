@@ -52,14 +52,20 @@ export default function CJProductSearch() {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
       const res = await fetch(url, {
+        mode: "cors",
         headers: {
           "CJ-Access-Token": token,
         },
       });
       const data = await res.json();
-      if (!data?.data?.list) throw new Error(data?.message || "Sonuç bulunamadı");
+      console.log("CJ Product API Response:", data);
+      if (!data?.data?.list) {
+        const msg = data?.message || "Sonuç bulunamadı";
+        throw new Error(`Ürün Arama Hatası: ${msg} (code: ${data?.code})`);
+      }
       setResults(data.data.list);
     } catch (e: any) {
+      console.error("CJ Search Error:", e);
       setError(e?.message || "Hata oluştu");
     } finally {
       setLoading(false);
