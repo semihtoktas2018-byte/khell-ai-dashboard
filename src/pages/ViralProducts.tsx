@@ -1,8 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, Bookmark, Filter, FileText, Users, Search, BarChart3, Package, Loader2 } from "lucide-react";
-import { type ViralProduct } from "@/lib/viral-products-data";
+import { Flame, TrendingUp, Filter, Search, BarChart3, FileText, Bookmark, Users } from "lucide-react";
+import { getViralProducts, type ViralProduct } from "@/lib/viral-products-data";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -10,24 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/contexts/LocaleContext";
 
-// CJdropshipping Kimlik Bilgileri (Güvenli geçici doğrudan erişim)
-const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://cjdropshipping.com", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) throw new Error("Token alınamadı");
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
-}
+const allProducts = getViralProducts();
 
 const riskColor: Record<string, string> = {
   "Düşük": "bg-winning/15 text-winning border-winning/30",
@@ -35,75 +18,26 @@ const riskColor: Record<string, string> = {
   "Yüksek": "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+const categoryColor: Record<string, string> = {
+  Fitness: "bg-primary/15 text-primary",
+  Pet: "bg-accent text-accent-foreground",
+  Tech: "bg-secondary text-secondary-foreground",
+  Home: "bg-muted text-muted-foreground",
+  Car: "bg-primary/10 text-primary",
+};
+
 type FilterKey = "highTrend" | "highProfit";
 
 export default function ViralProducts() {
-  const [liveProducts, setLiveProducts] = useState<ViralProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterKey[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  
   const navigate = useNavigate();
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { toast } = useToast();
   const { t, currency } = useLocale();
 
-  // 🌍 CJ API'den Canlı Trend Verilerini Çeken useEffect
-  useEffect(() => {
-    async function fetchLiveTrends() {
-      try {
-        setLoading(true);
-        const token = await getAccessToken();
-        // En çok mağazaya eklenen (listedNum) popüler 24 dropshipping ürününü çekiyoruz
-        const url = "https://cjdropshipping.com";
-        const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-        const resData = await res.json();
-
-        if (resData?.data?.list) {
-          const mapped = resData.data.list.map((p: any, index: number) => {
-            const cost = parseFloat(p.sellPrice || "0") || 0;
-            const estSale = cost * 3; // 3 katı satış fiyatı kuralı
-            const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
-            
-            // Gerçekçi e-ticaret simülasyon algoritmaları
-            const trendScore = 82 + Math.floor(Math.abs(Math.sin(index)) * 17);
-            const decisionScore = Math.round((margin * 0.5) + (trendScore * 0.5));
-            const riskLevel = margin > 60 ? "Düşük" : margin > 40 ? "Orta" : "Yüksek";
-
-            return {
-              id: p.pid || String(index),
-              name: p.productName || "E-Commerce Product",
-              nameTr: p.productNameEn || p.productName || "Trend Ürün",
-              category: p.categoryName || "Genel",
-              platform: index % 3 === 0 ? "TikTok" : index % 3 === 1 ? "Instagram" : "Amazon",
-              sellingPrice: estSale,
-              cost: cost,
-              margin: margin,
-              trendScore: trendScore,
-              decisionScore: decisionScore,
-              riskLevel: riskLevel,
-              isHot: trendScore >= 90,
-              targetMarket: "Sosyal medya kullanıcıları, global pazar",
-              monthlySearchVolume: `${300 + (index * 15)}K+ aylık arama`,
-              image: p.productImage?.split(",")[0] || ""
-            };
-          });
-          setLiveProducts(mapped);
-        } else {
-          setError("Canlı trend verileri şu an yüklenemiyor.");
-        }
-      } catch (err) {
-        setError("Canlı veri bağlantı hatası.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchLiveTrends();
-  }, []);
-
   const filtered = useMemo(() => {
-    let list = [...liveProducts];
+    let list = [...allProducts];
     if (filters.includes("highTrend")) list = list.filter((p) => p.trendScore > 85);
     if (filters.includes("highProfit")) list = list.filter((p) => p.margin > 50);
     if (searchQuery.trim()) {
@@ -115,7 +49,7 @@ export default function ViralProducts() {
       );
     }
     return list.sort((a, b) => b.decisionScore - a.decisionScore);
-  }, [filters, searchQuery, liveProducts]);
+  }, [filters, searchQuery]);
 
   const handleSave = (p: ViralProduct) => {
     if (isProductSaved(p.name)) {
@@ -136,8 +70,8 @@ export default function ViralProducts() {
   const handleAnalyze = (p: ViralProduct) => {
     const params = new URLSearchParams({
       productName: p.name,
-      selling_price: String(p.sellingPrice.toFixed(2)),
-      product_cost: String(p.cost.toFixed(2)),
+      selling_price: String(p.sellingPrice),
+      product_cost: String(p.cost),
       onboarding: "1",
     });
     navigate(`/dashboard/analyzer?${params.toString()}`);
@@ -145,58 +79,40 @@ export default function ViralProducts() {
 
   const handleGeneratePage = (p: ViralProduct) => {
     const params = new URLSearchParams({
-      name: p.nameTr, category: p.category, sellingPrice: String(p.sellingPrice.toFixed(2)),
-      cost: String(p.cost.toFixed(2)), margin: String(p.margin), trendScore: String(p.trendScore), riskLevel: p.riskLevel,
+      name: p.nameTr, category: p.category, sellingPrice: String(p.sellingPrice),
+      cost: String(p.cost), margin: String(p.margin), trendScore: String(p.trendScore), riskLevel: p.riskLevel,
     });
     navigate(`/dashboard/product-page-generator?${params.toString()}`);
   };
 
-  if (loading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm">Canlı e-ticaret trendleri ve ürünleri yükleniyor...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-[40vh] flex items-center justify-center text-sm text-destructive bg-destructive/5 rounded-xl border border-destructive/20 p-5">
-        {error}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="text-primary font-semibold">CANLI VERİ MODU aktif</span>
-        <span>· CJdropshipping trend havuzundan anlık besleniyor.</span>
+        <span className="text-primary font-semibold">{t("viralProd.step") || "Adım 1/3"}</span>
+        <span>{t("viralProd.stepDesc") || "Bir ürün seçin ve işleme başlayın."}</span>
       </motion.div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Flame className="h-6 w-6 text-primary" /> Viral Ürün Bulucu
+            <Flame className="h-6 w-6 text-primary" /> {t("viralProd.title") || "Viral Ürün Bulucu"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{filtered.length} gerçek trend listeleniyor</p>
+          <p className="text-sm text-muted-foreground mt-1">{filtered.length} ürün listeleniyor</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <ToggleGroup type="multiple" value={filters} onValueChange={(v) => setFilters(v as FilterKey[])} className="flex-wrap">
-            <ToggleGroupItem value="highTrend" size="sm" className="text-xs">Yüksek Trend (85+)</ToggleGroupItem>
-            <ToggleGroupItem value="highProfit" size="sm" className="text-xs">Yüksek Marj (%50+)</ToggleGroupItem>
+            <ToggleGroupItem value="highTrend" size="sm" className="text-xs">Yüksek Trend</ToggleGroupItem>
+            <ToggleGroupItem value="highProfit" size="sm" className="text-xs">Yüksek Kâr</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
 
-      {/* Arama */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Canlı ürünlerde ara..."
+          placeholder="Ürün veya kategori ara..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -205,7 +121,7 @@ export default function ViralProducts() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map((p, i) => (
-          <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+          <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
             <Card className="relative overflow-hidden group hover:border-primary/40 transition-colors h-full flex flex-col">
               {p.isHot && (
                 <div className="absolute top-3 right-3 z-10">
@@ -213,8 +129,64 @@ export default function ViralProducts() {
                 </div>
               )}
               
-              {/* Real Live Image Box */}
-              <div className="w-full h-44 bg-background overflow-hidden border-b border-border/40 flex items-center justify-center relative">
-                {p.image ? (
-                  <img src={p.image} alt={p.nameTr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                ) : (
+              <CardContent className="p-5 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full w-fit ${categoryColor[p.category] ?? "bg-muted text-muted-foreground"}`}>{p.category}</span>
+                  <span className="text-[10px] text-muted-foreground">{p.platform}</span>
+                </div>
+
+                <h3 className="text-sm font-bold text-foreground mt-2 leading-snug line-clamp-2 min-h-[2.5rem]">{p.nameTr}</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{p.name}</p>
+
+                <div className="flex items-center gap-1 mt-2">
+                  <Users className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground line-clamp-1">{p.targetMarket}</span>
+                </div>
+
+                <div className="flex items-center gap-1 mt-1">
+                  <Search className="h-3 w-3 text-primary/60" />
+                  <span className="text-[10px] text-primary/80 font-medium">{p.monthlySearchVolume}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Stat label="Trend" value={`${p.trendScore}`} icon={<TrendingUp className="h-3 w-3" />} />
+                  <Stat label="Kâr" value={currency(p.sellingPrice - p.cost)} />
+                  <Stat label="Marj" value={`%${p.margin.toFixed(0)}`} />
+                  <Stat label="Skor" value={`${p.decisionScore}`} highlight />
+                </div>
+
+                <div className="mt-4 pt-2 border-t border-border/40 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground">Risk Seviyesi:</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${riskColor[p.riskLevel] || "bg-muted"}`}>{p.riskLevel}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-1.5 mt-2">
+                    <button onClick={() => handleAnalyze(p)} className="h-7 rounded bg-primary text-primary-foreground text-[10px] font-medium hover:opacity-95 flex items-center justify-center gap-1">
+                      <BarChart3 className="h-3 w-3" /> Analiz Et
+                    </button>
+                    <button onClick={() => handleGeneratePage(p)} className="h-7 rounded bg-accent text-accent-foreground text-[10px] font-medium hover:bg-accent/80 flex items-center justify-center gap-1">
+                      <FileText className="h-3 w-3" /> Sayfa Oluştur
+                    </button>
+                  </div>
+                  <button onClick={() => handleSave(p)} className="h-7 w-full rounded border border-border bg-transparent text-muted-foreground text-[10px] font-medium hover:text-foreground flex items-center justify-center gap-1 mt-0.5">
+                    <Bookmark className="h-3 w-3" /> Listeme Kaydet
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, icon, highlight }: { label: string; value: string; icon?: React.ReactNode; highlight?: boolean }) {
+  return (
+    <div className={`p-2 rounded-lg ${highlight ? "bg-primary/10 border border-primary/20" : "bg-muted/40"} flex flex-col justify-center`}>
+      <span className="text-[9px] text-muted-foreground block mb-0.5 flex items-center gap-1">{icon}{label}</span>
+      <span className={`text-xs font-mono font-bold tabular-nums ${highlight ? "text-primary" : "text-foreground"}`}>{value}</span>
+    </div>
+  );
+}
