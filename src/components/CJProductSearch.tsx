@@ -4,7 +4,7 @@ import { Search, Package, Loader2, Radio, BarChart3, FileText } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_PASSWORD = "tfMwW8nUnDeWe!x";
+const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
 
 interface CJProduct {
   pid: string;
@@ -23,12 +23,11 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
+    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
   });
   const data = await res.json();
   if (!data?.data?.accessToken) {
-    const msg = data?.message || "Token alınamadı";
-    throw new Error(`Token Hatası: ${msg} (code: ${data?.code})`);
+    throw new Error(`Token Hatası: ${data?.message} (code: ${data?.code})`);
   }
   cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
   return cachedToken.token;
@@ -54,8 +53,7 @@ export default function CJProductSearch() {
       });
       const data = await res.json();
       if (!data?.data?.list) {
-        const msg = data?.message || "Sonuç bulunamadı";
-        throw new Error(`Ürün Arama Hatası: ${msg} (code: ${data?.code})`);
+        throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
       setResults(data.data.list);
     } catch (e: any) {
@@ -129,7 +127,7 @@ export default function CJProductSearch() {
                   className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
                 >
                   
-                    <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                    href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                     target="_blank"
                     rel="noreferrer"
                     className="block aspect-square bg-background overflow-hidden"
