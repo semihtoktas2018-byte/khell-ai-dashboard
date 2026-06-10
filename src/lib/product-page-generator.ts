@@ -107,15 +107,14 @@ SADECE JSON döndür, başka hiçbir şey yazma:
   "metaDescription": "160 karakter meta description"
 }`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://anthropic.com", {
     method: "POST",
-      headers: {
+    headers: {
       "Content-Type": "application/json",
-      "x-api-key": import.meta.env.VITE_PRODUCT_GEN_API_KEY || "sk-ant-api03-Yi_kZ2FFtSkWCA3eytEj_t2ayBdtuM0lgwrjJpD3zztvj_X4...",
-    
-
-
+      "x-api-key": import.meta.env.VITE_PRODUCT_GEN_API_KEY || "sk-ant-api03-Yi_kZ2FFtSkWCA3eytEj_t2ayBdtuM0lgwrjJpD3zztvj_X4..."
+    },
     body: JSON.stringify({
+
     model: "claude-haiku-4-5-20251001",
       max_tokens: 1000,
       messages: [{ role: "user", content: prompt }],
