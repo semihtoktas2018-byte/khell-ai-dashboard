@@ -1,106 +1,20 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { categories } from "@/lib/mock-data";
+import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
-import { Filter, Loader2, Package } from "lucide-react";
+import { Filter } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-// Geçici olarak doğrudan koda gömülen API bilgileri
-const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
-
-interface CJProduct {
-  id: string;
-  name: string;
-  image: string;
-  estimatedSellingPrice: number;
-  supplierPrice: number;
-  trendScore: number;
-  profitMargin: number;
-  competition: string;
-  category: string;
-  platform: string;
-}
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://cjdropshipping.com", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) {
-    throw new Error("Token alınamadı");
-  }
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
-}
-
 export default function WinningProducts() {
-  const [products, setProducts] = useState<CJProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [platform, setPlatform] = useState("Tümü");
   const [category, setCategory] = useState("Tümü");
   const [marginFilter, setMarginFilter] = useState(0);
   const [trendFilter, setTrendFilter] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const { t, currency, locale } = useLocale();
-
-  // CJ'den Canlı Trend Ürünleri Çeken useEffect
-  useEffect(() => {
-    async function fetchLiveTrendingProducts() {
-      try {
-        setLoading(true);
-        const token = await getAccessToken();
-        
-        // CJdropshipping'in en çok listelenen popüler ürünlerini çekiyoruz
-        const url = "https://cjdropshipping.com";
-        const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-        const resData = await res.json();
-        
-        if (resData?.data?.list) {
-          const mappedProducts = resData.data.list.map((p: any, index: number) => {
-            const cost = parseFloat(p.sellPrice || "0") || 0;
-            const estSale = cost * 3; // Maliyetin 3 katı satış fiyatı kuralı
-            const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
-            
-            // Dinamik trend skoru ve rekabet simülasyonu
-            const dynamicTrendScore = 80 + Math.floor(Math.abs(Math.sin(index)) * 20); 
-            const dynamicCompetition = index % 3 === 0 ? "Yüksek" : index % 3 === 1 ? "Orta" : "Düşük";
-
-            return {
-              id: p.pid || String(index),
-              name: p.productNameEn || p.productName || "E-Commerce Product",
-              image: p.productImage?.split(",")[0] || "", // İlk görseli alıyoruz
-              supplierPrice: cost,
-              estimatedSellingPrice: estSale,
-              profitMargin: margin,
-              trendScore: dynamicTrendScore,
-              competition: dynamicCompetition,
-              category: p.categoryName || "Genel",
-              platform: index % 4 === 0 ? "TikTok" : index % 4 === 1 ? "Amazon" : index % 4 === 2 ? "AliExpress" : "TikTok"
-            };
-          });
-          setProducts(mappedProducts);
-        } else {
-          setError("Canlı ürün verisi yüklenemedi.");
-        }
-      } catch (err: any) {
-        setError("Bağlantı hatası oluştu. Lütfen API bilgilerini kontrol edin.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchLiveTrendingProducts();
-  }, []);
 
   const marginFilters = [
     { label: t("winning.all"), min: 0, max: 100 },
@@ -119,31 +33,14 @@ export default function WinningProducts() {
   const catLabel = (c: string) => t(`cat.${c}`) ?? c;
 
   const filtered = useMemo(() => {
-    return products.filter((p) => {
+    return trendingProducts.filter((p) => {
       if (platform !== "Tümü" && p.platform !== platform) return false;
       if (category !== "Tümü" && p.category !== category) return false;
       if (p.profitMargin < marginFilters[marginFilter].min) return false;
       if (p.trendScore < trendFilters[trendFilter].min) return false;
       return true;
     });
-  }, [platform, category, marginFilter, trendFilter, products]);
-
-  if (loading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-3 text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-        <p className="text-sm">CJ Dropshipping üzerinden canlı kazanan ürünler çekiliyor...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center text-risky text-sm bg-risky/5 rounded-xl p-5 border border-risky/20">
-        {error}
-      </div>
-    );
-  }
+  }, [platform, category, marginFilter, trendFilter]);
 
   return (
     <div className="space-y-6">
@@ -197,14 +94,39 @@ export default function WinningProducts() {
         {filtered.map((product, i) => {
           const verdict = getVerdict(product.profitMargin);
           return (
-            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 overflow-hidden flex flex-col cursor-default">
+            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 cursor-default">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 rounded bg-background overflow-hidden border border-border/40 flex-shrink-0">
-                  {product.image ? (
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-5 w-5" /></div>
-                  )}
-                </div>
+                <span className="text-3xl">{product.image}</span>
                 <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
               </div>
+              <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
+              <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
+              <div className="space-y-2">
+                <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
+                <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
+                <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
+                <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
+                <DataRow label={t("winning.competition")} value={product.competition} />
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-sm">{t("winning.noProducts")}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DataRow({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-mono font-medium tabular-nums text-foreground" style={color ? { color } : undefined}>{value}</span>
+    </div>
+  );
+}
