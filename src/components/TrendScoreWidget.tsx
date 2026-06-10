@@ -17,7 +17,8 @@ interface TrendResult {
   reason: string;
 }
 
-const ANTHROPIC_KEY = "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";
+const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "sk-ant-api03-wiS8BbILwmOXRR9QEacvM3KQlCZyUFvaYptFSJ-66nCe2YJe8UYjA49_SMAI9VvgN3dW_ohvbIWhcedGH-A...";
+
 
 async function analyzeProduct(name: string, isTr: boolean): Promise<TrendResult> {
   const prompt = isTr
