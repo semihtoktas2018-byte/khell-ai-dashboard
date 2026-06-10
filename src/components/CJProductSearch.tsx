@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Package, Loader2, Radio, BarChart3, FileText } from "lucide-react";
+import { Search, Package, Loader2, Radio, BarChart3, FileText, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
-
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "";
+const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || "93c44c1933cf646eb";
 
 interface CJProduct {
   pid: string;
@@ -15,6 +16,15 @@ interface CJProduct {
   productSku?: string;
   productUrl?: string;
   categoryName?: string;
+}
+
+interface TrendyolPrice {
+  min: number;
+  max: number;
+  avg: number;
+  count: number;
+  loading: boolean;
+  error: boolean;
 }
 
 let cachedToken: { token: string; exp: number } | null = null;
@@ -34,11 +44,54 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.token;
 }
 
+async function fetchTrendyolPrices(productName: string): Promise<TrendyolPrice> {
+  try {
+    const query = encodeURIComponent(`${productName} fiyat`);
+    const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${query}&num=10`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      return { min: 0, max: 0, avg: 0, count: 0, loading: false, error: true };
+    }
+
+    const prices: number[] = [];
+    data.items.forEach((item: any) => {
+      const text = `${item.title} ${item.snippet}`;
+      // TL fiyatlarını yakala: 299 TL, ₺299, 1.299,00 TL gibi formatlar
+      const matches = text.match(/[\₺]?\s?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)\s*(?:TL|₺)/gi);
+      if (matches) {
+        matches.forEach((m) => {
+          const cleaned = m.replace(/[₺TL\s]/gi, "").replace(/\./g, "").replace(",", ".");
+          const num = parseFloat(cleaned);
+          if (!isNaN(num) && num > 10 && num < 100000) {
+            prices.push(num);
+          }
+        });
+      }
+    });
+
+    if (prices.length === 0) {
+      return { min: 0, max: 0, avg: 0, count: 0, loading: false, error: true };
+    }
+
+    prices.sort((a, b) => a - b);
+    const min = prices[0];
+    const max = prices[prices.length - 1];
+    const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+
+    return { min, max, avg, count: prices.length, loading: false, error: false };
+  } catch {
+    return { min: 0, max: 0, avg: 0, count: 0, loading: false, error: true };
+  }
+}
+
 export default function CJProductSearch() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CJProduct[]>([]);
+  const [trendyolPrices, setTrendyolPrices] = useState<Record<string, TrendyolPrice>>({});
   const navigate = useNavigate();
 
   const search = async () => {
@@ -46,6 +99,7 @@ export default function CJProductSearch() {
     setLoading(true);
     setError(null);
     setResults([]);
+    setTrendyolPrices({});
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
@@ -57,6 +111,22 @@ export default function CJProductSearch() {
         throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
       setResults(data.data.list);
+
+      // Trendyol fiyatlarını arka planda yükle
+      if (GOOGLE_API_KEY) {
+        const initialPrices: Record<string, TrendyolPrice> = {};
+        data.data.list.forEach((p: CJProduct) => {
+          initialPrices[p.pid] = { min: 0, max: 0, avg: 0, count: 0, loading: true, error: false };
+        });
+        setTrendyolPrices(initialPrices);
+
+        // Her ürün için ayrı ayrı fiyat çek (rate limit aşmamak için sırayla)
+        for (const p of data.data.list) {
+          const price = await fetchTrendyolPrices(p.productName);
+          setTrendyolPrices((prev) => ({ ...prev, [p.pid]: price }));
+          await new Promise((r) => setTimeout(r, 200)); // rate limit koruması
+        }
+      }
     } catch (e: any) {
       setError(e?.message || "Hata oluştu");
     } finally {
@@ -120,6 +190,8 @@ export default function CJProductSearch() {
               const cost = parseFloat(p.sellPrice || "0") || 0;
               const estSale = cost * 3;
               const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
+              const tp = trendyolPrices[p.pid];
+
               return (
                 <motion.div
                   key={p.pid || i}
@@ -127,8 +199,7 @@ export default function CJProductSearch() {
                   animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
                   className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
                 >
-                  
-                    <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                  <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                     target="_blank"
                     rel="noreferrer"
                     className="block aspect-square bg-background overflow-hidden"
@@ -159,10 +230,45 @@ export default function CJProductSearch() {
                         <p className="font-mono font-bold text-orange-500">${estSale.toFixed(2)}</p>
                       </div>
                     </div>
+
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-muted-foreground">Kâr Marjı</span>
                       <span className="font-mono font-bold text-winning">%{margin}</span>
                     </div>
+
+                    {/* Trendyol Fiyat Bölümü */}
+                    {GOOGLE_API_KEY && (
+                      <div className="rounded-md border border-[#FF6000]/20 bg-[#FF6000]/5 px-2 py-1.5 text-[10px]">
+                        <div className="flex items-center gap-1 mb-1">
+                          <ShoppingCart className="h-2.5 w-2.5 text-[#FF6000]" />
+                          <span className="font-semibold text-[#FF6000]">Trendyol Fiyatları</span>
+                        </div>
+                        {!tp || tp.loading ? (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                            <span>Yükleniyor...</span>
+                          </div>
+                        ) : tp.error || tp.count === 0 ? (
+                          <span className="text-muted-foreground">Veri bulunamadı</span>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Aralık</span>
+                              <span className="font-mono font-bold text-foreground">
+                                ₺{tp.min.toLocaleString("tr-TR")} – ₺{tp.max.toLocaleString("tr-TR")}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Ortalama</span>
+                              <span className="font-mono font-bold text-[#FF6000]">
+                                ₺{tp.avg.toLocaleString("tr-TR")}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
                       <button
                         onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(p.productName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
