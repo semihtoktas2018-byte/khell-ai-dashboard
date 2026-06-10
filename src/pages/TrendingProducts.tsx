@@ -128,7 +128,7 @@ export default function TrendingProducts() {
                   </span>
                 )}
                 
-                  href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                 <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                   target="_blank"
                   rel="noreferrer"
                   className="block aspect-square bg-background overflow-hidden"
