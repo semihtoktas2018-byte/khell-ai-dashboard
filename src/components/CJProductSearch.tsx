@@ -127,7 +127,7 @@ export default function CJProductSearch() {
                   className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
                 >
                   
-                    href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                    <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                     target="_blank"
                     rel="noreferrer"
                     className="block aspect-square bg-background overflow-hidden"
