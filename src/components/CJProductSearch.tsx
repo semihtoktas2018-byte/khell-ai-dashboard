@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Loader2, Radio, BarChart3, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
+const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
+const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
+
 
 interface CJProduct {
   pid: string;
