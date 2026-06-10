@@ -114,12 +114,12 @@ SADECE JSON döndür, başka hiçbir şey yazma:
       "x-api-key": import.meta.env.VITE_PRODUCT_GEN_API_KEY || "sk-ant-api03-Yi_kZ2FFtSkWCA3eytEj_t2ayBdtuM0lgwrjJpD3zztvj_X4..."
     },
     body: JSON.stringify({
-
-    model: "claude-haiku-4-5-20251001",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1000,
-      messages: [{ role: "user", content: prompt }],
-    }),
+      messages: [{ role: "user", content: prompt }]
+    })
   });
+
 
   const data = await response.json();
   const text = data.content?.map((i: { type: string; text?: string }) => i.text || "").join("") || "";
