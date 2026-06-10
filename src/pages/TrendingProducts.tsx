@@ -4,7 +4,7 @@ import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp } from 
 import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_PASSWORD = "tfMwW8nUnDeWe!x";
+const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
 
 interface CJProduct {
   pid: string;
@@ -22,8 +22,7 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
-    mode: "cors",
+    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
   });
   const data = await res.json();
   if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
@@ -54,12 +53,11 @@ export default function TrendingProducts() {
       try {
         const token = await getAccessToken();
         const url = "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&sortField=recentOrders&sortType=DESC";
-        const res = await fetch(url, { mode: "cors", headers: { "CJ-Access-Token": token } });
+        const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
         const data = await res.json();
         if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
         setItems(data.data.list);
       } catch (e: any) {
-        console.error("CJ Trending Error:", e);
         setError(e?.message || "Hata");
         setItems(MOCK);
       } finally {
@@ -129,7 +127,7 @@ export default function TrendingProducts() {
                     <TrendingUp className="h-2.5 w-2.5" /> TOP {i + 1}
                   </span>
                 )}
-                <a
+                
                   href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                   target="_blank"
                   rel="noreferrer"
