@@ -26,7 +26,6 @@ async function getAccessToken(): Promise<string> {
     body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
   });
   const data = await res.json();
-  console.log("CJ Token API Response:", data);
   if (!data?.data?.accessToken) {
     const msg = data?.message || "Token alınamadı";
     throw new Error(`Token Hatası: ${msg} (code: ${data?.code})`);
@@ -51,19 +50,15 @@ export default function CJProductSearch() {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
       const res = await fetch(url, {
-        headers: {
-          "CJ-Access-Token": token,
-        },
+        headers: { "CJ-Access-Token": token },
       });
       const data = await res.json();
-      console.log("CJ Product API Response:", data);
       if (!data?.data?.list) {
         const msg = data?.message || "Sonuç bulunamadı";
         throw new Error(`Ürün Arama Hatası: ${msg} (code: ${data?.code})`);
       }
       setResults(data.data.list);
     } catch (e: any) {
-      console.error("CJ Search Error:", e);
       setError(e?.message || "Hata oluştu");
     } finally {
       setLoading(false);
