@@ -147,7 +147,8 @@ export default function CJProductSearch() {
                     )}
                   </a>
                   <div className="p-3 space-y-2 flex-1 flex flex-col">
-                    <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productName}</p>
+                    <p className="text-x5 font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productNameEn || p.productName}</p>
+
                     <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                       <div className="rounded bg-background/60 px-2 py-1">
                         <p className="text-muted-foreground">Maliyet</p>
