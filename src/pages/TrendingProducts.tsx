@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp } from "lucide-react";
+import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
 const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
+const REFRESH_INTERVAL = 30 * 60 * 1000;
 
 interface CJProduct {
   pid: string;
   productName: string;
+  productNameEn?: string;
   productImage: string;
   sellPrice?: string;
   productUrl?: string;
@@ -30,9 +32,21 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.token;
 }
 
+function getDisplayName(p: CJProduct): string {
+  if (p.productNameEn && p.productNameEn.trim()) return p.productNameEn;
+  if (p.productName && !/[\u4e00-\u9fff]/.test(p.productName)) return p.productName;
+  return "CJ Product";
+}
+
 const MOCK: CJProduct[] = Array.from({ length: 12 }).map((_, i) => ({
   pid: `mock-${i}`,
   productName: [
+    "Wireless Bluetooth Earbuds Pro", "LED Strip Light RGB 5M", "Mini Portable Blender USB",
+    "Smart Watch Fitness Tracker", "Magnetic Phone Car Mount", "Pet Hair Remover Roller",
+    "Posture Corrector Back Brace", "Silicone Kitchen Utensil Set", "Foldable Laptop Stand",
+    "Massage Gun Deep Tissue", "Electric Lint Remover", "Solar LED Garden Lights",
+  ][i],
+  productNameEn: [
     "Wireless Bluetooth Earbuds Pro", "LED Strip Light RGB 5M", "Mini Portable Blender USB",
     "Smart Watch Fitness Tracker", "Magnetic Phone Car Mount", "Pet Hair Remover Roller",
     "Posture Corrector Back Brace", "Silicone Kitchen Utensil Set", "Foldable Laptop Stand",
@@ -46,25 +60,48 @@ export default function TrendingProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<CJProduct[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = await getAccessToken();
-        const url = "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&sortField=recentOrders&sortType=DESC";
-        const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-        const data = await res.json();
-        if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
-        setItems(data.data.list);
-      } catch (e: any) {
-        setError(e?.message || "Hata");
-        setItems(MOCK);
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const fetchTrending = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      const url = "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&sortField=recentOrders&sortType=DESC";
+      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
+      const data = await res.json();
+      if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
+      setItems(data.data.list);
+      setLastUpdated(new Date());
+      setCountdown(REFRESH_INTERVAL / 1000);
+    } catch (e: any) {
+      setError(e?.message || "Hata");
+      setItems(MOCK);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTrending();
+    const interval = setInterval(fetchTrending, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [fetchTrending]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev <= 1 ? REFRESH_INTERVAL / 1000 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lastUpdated]);
+
+  const formatCountdown = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -77,17 +114,33 @@ export default function TrendingProducts() {
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
               CJ Trend Ürünler <span>🔥</span>
             </h1>
-            <p className="text-xs text-muted-foreground">En çok sipariş alan ürünler (canlı CJdropshipping verisi)</p>
+            <p className="text-xs text-muted-foreground">En çok sipariş alan ürünler — canlı CJdropshipping verisi</p>
           </div>
         </div>
-        <motion.span
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-orange-500/15 text-orange-500 border border-orange-500/30"
-        >
-          <Radio className="h-2.5 w-2.5" /> CANLI VERİ
-        </motion.span>
+        <div className="flex items-center gap-2">
+          <motion.span
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-orange-500/15 text-orange-500 border border-orange-500/30"
+          >
+            <Radio className="h-2.5 w-2.5" /> CANLI VERİ
+          </motion.span>
+          <button
+            onClick={fetchTrending}
+            disabled={loading}
+            className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border border-border bg-card hover:bg-accent text-muted-foreground transition-colors"
+          >
+            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            {formatCountdown(countdown)}
+          </button>
+        </div>
       </div>
+
+      {lastUpdated && (
+        <p className="text-[10px] text-muted-foreground">
+          Son güncelleme: {lastUpdated.toLocaleTimeString("tr-TR")} — 30 dk'da bir otomatik yenilenir
+        </p>
+      )}
 
       {error && (
         <div className="rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs px-3 py-2">
@@ -115,6 +168,7 @@ export default function TrendingProducts() {
             const estSale = cost * 3;
             const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
             const img = p.productImage?.split(",")[0] || "";
+            const displayName = getDisplayName(p);
             return (
               <motion.div
                 key={p.pid || i}
@@ -128,19 +182,21 @@ export default function TrendingProducts() {
                   </span>
                 )}
                 
-                 <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
+                  href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                   target="_blank"
                   rel="noreferrer"
                   className="block aspect-square bg-background overflow-hidden"
                 >
                   {img ? (
-                    <img src={img} alt={p.productName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <Package className="h-8 w-8" />
+                    </div>
                   )}
                 </a>
                 <div className="p-3 space-y-2 flex-1 flex flex-col">
-                  <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productName}</p>
+                  <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                     <div className="rounded bg-background/60 px-2 py-1">
                       <p className="text-muted-foreground">Maliyet</p>
@@ -157,13 +213,13 @@ export default function TrendingProducts() {
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
                     <button
-                      onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(p.productName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
+                      onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(displayName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
                       className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
                     >
                       <BarChart3 className="h-3 w-3" /> Analiz Et
                     </button>
                     <button
-                      onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(p.productName)}&image=${encodeURIComponent(img)}&price=${estSale.toFixed(2)}`)}
+                      onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(displayName)}&image=${encodeURIComponent(img)}&price=${estSale.toFixed(2)}`)}
                       className="h-7 rounded-md bg-orange-500/15 text-orange-500 text-[10px] font-semibold hover:bg-orange-500/25 transition-colors flex items-center justify-center gap-1"
                     >
                       <FileText className="h-3 w-3" /> Sayfa Oluştur
