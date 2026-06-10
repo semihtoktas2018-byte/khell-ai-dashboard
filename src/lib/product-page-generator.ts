@@ -109,7 +109,7 @@ SADECE JSON döndür, başka hiçbir şey yazma:
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    headers: { "Content-Type": "application/json","x-api-key": "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", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({
     model: "claude-haiku-4-5-20251001",
       max_tokens: 1000,
