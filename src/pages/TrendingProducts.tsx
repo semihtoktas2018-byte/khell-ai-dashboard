@@ -33,25 +33,15 @@ async function getAccessToken(): Promise<string> {
 }
 
 function getDisplayName(p: CJProduct): string {
-  if (p.productNameEn && p.productNameEn.trim()) return p.productNameEn;
+  if (p.productNameEn && p.productNameEn.trim() && !/[\u4e00-\u9fff]/.test(p.productNameEn)) return p.productNameEn;
   if (p.productName && !/[\u4e00-\u9fff]/.test(p.productName)) return p.productName;
   return "CJ Product";
 }
 
 const MOCK: CJProduct[] = Array.from({ length: 12 }).map((_, i) => ({
   pid: `mock-${i}`,
-  productName: [
-    "Wireless Bluetooth Earbuds Pro", "LED Strip Light RGB 5M", "Mini Portable Blender USB",
-    "Smart Watch Fitness Tracker", "Magnetic Phone Car Mount", "Pet Hair Remover Roller",
-    "Posture Corrector Back Brace", "Silicone Kitchen Utensil Set", "Foldable Laptop Stand",
-    "Massage Gun Deep Tissue", "Electric Lint Remover", "Solar LED Garden Lights",
-  ][i],
-  productNameEn: [
-    "Wireless Bluetooth Earbuds Pro", "LED Strip Light RGB 5M", "Mini Portable Blender USB",
-    "Smart Watch Fitness Tracker", "Magnetic Phone Car Mount", "Pet Hair Remover Roller",
-    "Posture Corrector Back Brace", "Silicone Kitchen Utensil Set", "Foldable Laptop Stand",
-    "Massage Gun Deep Tissue", "Electric Lint Remover", "Solar LED Garden Lights",
-  ][i],
+  productName: ["Wireless Bluetooth Earbuds Pro","LED Strip Light RGB 5M","Mini Portable Blender USB","Smart Watch Fitness Tracker","Magnetic Phone Car Mount","Pet Hair Remover Roller","Posture Corrector Back Brace","Silicone Kitchen Utensil Set","Foldable Laptop Stand","Massage Gun Deep Tissue","Electric Lint Remover","Solar LED Garden Lights"][i],
+  productNameEn: ["Wireless Bluetooth Earbuds Pro","LED Strip Light RGB 5M","Mini Portable Blender USB","Smart Watch Fitness Tracker","Magnetic Phone Car Mount","Pet Hair Remover Roller","Posture Corrector Back Brace","Silicone Kitchen Utensil Set","Foldable Laptop Stand","Massage Gun Deep Tissue","Electric Lint Remover","Solar LED Garden Lights"][i],
   productImage: `https://picsum.photos/seed/cj${i}/400/400`,
   sellPrice: (5 + i * 1.3).toFixed(2),
 }));
@@ -97,10 +87,11 @@ export default function TrendingProducts() {
     return () => clearInterval(timer);
   }, [lastUpdated]);
 
-  const formatCountdown = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
+  const formatCountdown = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const openProduct = (p: CJProduct) => {
+    const url = p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`;
+    window.open(url, "_blank", "noreferrer");
   };
 
   return (
@@ -181,11 +172,9 @@ export default function TrendingProducts() {
                     <TrendingUp className="h-2.5 w-2.5" /> TOP {i + 1}
                   </span>
                 )}
-                
-                  href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block aspect-square bg-background overflow-hidden"
+                <div
+                  onClick={() => openProduct(p)}
+                  className="block aspect-square bg-background overflow-hidden cursor-pointer"
                 >
                   {img ? (
                     <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -194,7 +183,7 @@ export default function TrendingProducts() {
                       <Package className="h-8 w-8" />
                     </div>
                   )}
-                </a>
+                </div>
                 <div className="p-3 space-y-2 flex-1 flex flex-col">
                   <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
