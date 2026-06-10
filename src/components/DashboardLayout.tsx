@@ -20,6 +20,7 @@ const navKeys = [
   { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator },
   { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp },
   { labelKey: "nav.discovery", path: "/dashboard/discovery", icon: Flame },
+  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame },
   { labelKey: "nav.viral", path: "/dashboard/viral-products", icon: Search },
   { labelKey: "nav.hunter", path: "/dashboard/hunter", icon: Crosshair },
   { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck },
@@ -67,12 +68,12 @@ export default function DashboardLayout() {
         transition={{ duration: 0.15 }}
       >
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
-          <div className="flex items-center gap-2 overflow-hidden">
+          <button onClick={() => navigate("/")} className="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
             <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
             {!collapsed && <span className="text-sm font-bold text-foreground tracking-tight whitespace-nowrap">KHELL AI</span>}
-          </div>
+          </button>
           <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent text-muted-foreground">
             <ChevronLeft className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
           </button>
@@ -122,9 +123,9 @@ export default function DashboardLayout() {
       </motion.aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
-          <Package className="h-3 w-3 text-primary shrink-0" />
-          <p className="text-[11px] text-primary font-medium">CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif</p>
+        <div className="flex items-center justify-center gap-2 bg-green-500/10 border-b border-green-500/20 py-1.5 px-4">
+          <Package className="h-3 w-3 text-green-600 dark:text-green-400 shrink-0" />
+          <p className="text-[11px] text-green-700 dark:text-green-400 font-medium">CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif</p>
           <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
         </div>
 
