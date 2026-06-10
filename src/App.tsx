@@ -26,6 +26,7 @@ import ViralProducts from "./pages/ViralProducts";
 import ProductPageGenerator from "./pages/ProductPageGenerator";
 import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
+import TrendingProducts from "./pages/TrendingProducts";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="product-page-generator" element={<ProductPageGenerator />} />
                 <Route path="sales-decision" element={<SalesDecisionEngine />} />
                 <Route path="content-engine" element={<ContentEngine />} />
+                <Route path="trending" element={<TrendingProducts />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
