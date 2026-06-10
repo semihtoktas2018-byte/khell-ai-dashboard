@@ -24,7 +24,6 @@ async function getAccessToken(): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: CJ_EMAIL, password: CJ_PASSWORD }),
-    mode: "cors",
   });
   const data = await res.json();
   console.log("CJ Token API Response:", data);
@@ -52,7 +51,6 @@ export default function CJProductSearch() {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
       const res = await fetch(url, {
-        mode: "cors",
         headers: {
           "CJ-Access-Token": token,
         },
@@ -135,7 +133,7 @@ export default function CJProductSearch() {
                   animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
                   className="group rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
                 >
-                  <a
+                  
                     href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                     target="_blank"
                     rel="noreferrer"
