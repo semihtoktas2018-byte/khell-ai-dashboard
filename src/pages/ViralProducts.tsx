@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, Bookmark, Filter, FileText, Users, Search, BarChart3, Package } from "lucide-react";
+import { Flame, TrendingUp, ArrowRight, Bookmark, Filter, FileText, Users, Search } from "lucide-react";
 import { getViralProducts, type ViralProduct } from "@/lib/viral-products-data";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -39,7 +40,7 @@ export default function ViralProducts() {
   const filtered = useMemo(() => {
     let list = [...allProducts];
     if (filters.includes("highTrend")) list = list.filter((p) => p.trendScore > 70);
-    // Not: Orijinal veride competitionLevel kontrolü varsa kalabilir, getViralProducts verimize göre esnek kurgulanmıştır
+    if (filters.includes("lowComp")) list = list.filter((p) => p.competitionLevel === "low");
     if (filters.includes("highProfit")) list = list.filter((p) => p.margin > 40);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -47,7 +48,7 @@ export default function ViralProducts() {
         p.name.toLowerCase().includes(q) ||
         p.nameTr.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
-        (p.targetMarket && p.targetMarket.toLowerCase().includes(q))
+        p.targetMarket.toLowerCase().includes(q)
       );
     }
     return list.sort((a, b) => b.decisionScore - a.decisionScore);
@@ -55,7 +56,7 @@ export default function ViralProducts() {
 
   const handleSave = (p: ViralProduct) => {
     if (isProductSaved(p.name)) {
-      toast({ title: t("viralProd.info") || "Bilgi", description: t("viralProd.alreadySaved") || "Bu ürün zaten kayıtlı." });
+      toast({ title: t("viralProd.info"), description: t("viralProd.alreadySaved") });
       return;
     }
     saveProduct({
@@ -66,7 +67,7 @@ export default function ViralProducts() {
       monthlyProfit: Math.round((p.sellingPrice - p.cost) * 100) / 100,
       platform: p.platform,
     });
-    toast({ title: t("analyzer.saved") || "Kaydedildi", description: `${p.nameTr} başarıyla kaydedildi.` });
+    toast({ title: t("analyzer.saved"), description: `${p.nameTr} ${t("viralProd.savedMsg")}` });
   };
 
   const handleAnalyze = (p: ViralProduct) => {
@@ -90,23 +91,23 @@ export default function ViralProducts() {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="text-primary font-semibold">{t("viralProd.step") || "Adım 1/3"}</span>
-        <span>{t("viralProd.stepDesc") || "Bir ürün seçin ve işleme başlayın."}</span>
+        <span className="text-primary font-semibold">{t("viralProd.step")}</span>
+        <span>{t("viralProd.stepDesc")}</span>
       </motion.div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Flame className="h-6 w-6 text-primary" /> {t("viralProd.title") || "Viral Ürün Bulucu"}
+            <Flame className="h-6 w-6 text-primary" /> {t("viralProd.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{filtered.length} ürün listeleniyor</p>
+          <p className="text-sm text-muted-foreground mt-1">{filtered.length} {t("viralProd.listing")}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <ToggleGroup type="multiple" value={filters} onValueChange={(v) => setFilters(v as FilterKey[])} className="flex-wrap">
-            <ToggleGroupItem value="highTrend" size="sm" className="text-xs">Yüksek Trend</ToggleGroupItem>
-            <ToggleGroupItem value="lowComp" size="sm" className="text-xs">Düşük Rekabet</ToggleGroupItem>
-            <ToggleGroupItem value="highProfit" size="sm" className="text-xs">Yüksek Kâr</ToggleGroupItem>
+            <ToggleGroupItem value="highTrend" size="sm" className="text-xs">{t("viralProd.highTrend")}</ToggleGroupItem>
+            <ToggleGroupItem value="lowComp" size="sm" className="text-xs">{t("viralProd.lowComp")}</ToggleGroupItem>
+            <ToggleGroupItem value="highProfit" size="sm" className="text-xs">{t("viralProd.highProfit")}</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
@@ -132,23 +133,13 @@ export default function ViralProducts() {
                   <Badge className="bg-destructive/90 text-destructive-foreground border-0 text-[10px] font-bold px-2 py-0.5">HOT 🔥</Badge>
                 </div>
               )}
-              
-              {/* ✨ YENİ: Gerçek Görsel Alanı */}
-              <div className="w-full h-40 bg-accent/30 overflow-hidden border-b border-border/40 flex items-center justify-center relative">
-                {p.image ? (
-                  <img src={p.image} alt={p.nameTr} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                ) : (
-                  <Package className="h-8 w-8 text-muted-foreground/50" />
-                )}
-              </div>
-
-              <CardContent className="p-4 flex flex-col flex-1">
+              <CardContent className="p-5 flex flex-col flex-1">
                 <div className="flex items-center justify-between mb-1">
                   <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full w-fit ${categoryColor[p.category] ?? "bg-muted text-muted-foreground"}`}>{p.category}</span>
                   <span className="text-[10px] text-muted-foreground">{p.platform}</span>
                 </div>
 
-                <h3 className="text-sm font-bold text-foreground mt-2 leading-snug line-clamp-2 min-h-[2.5rem]">{p.nameTr}</h3>
+                <h3 className="text-sm font-bold text-foreground mt-2 leading-snug line-clamp-2">{p.nameTr}</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{p.name}</p>
 
                 {/* Pazar bilgisi */}
@@ -160,28 +151,56 @@ export default function ViralProducts() {
                 {/* Aylık arama hacmi */}
                 <div className="flex items-center gap-1 mt-1">
                   <Search className="h-3 w-3 text-primary/60" />
-                  <span className="text-[10px] text-primary/80 font-medium">{p.monthlySearchVolume}</span>
+                  <span className="text-[10px] text-primary/80 font-medium">{p.monthlySearchVolume} aylık arama</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mt-3">
-                  <Stat label="Trend" value={`${p.trendScore}`} icon={<TrendingUp className="h-3 w-3" />} />
-                  <Stat label="Kâr" value={currency(p.sellingPrice - p.cost)} />
-                  <Stat label="Marj" value={`%${p.margin.toFixed(0)}`} />
-                  <Stat label="Skor" value={`${p.decisionScore}`} highlight />
+                  <Stat label={t("winning.trendScore")} value={`${p.trendScore}`} icon={<TrendingUp className="h-3 w-3" />} />
+                  <Stat label={t("viralProd.profit")} value={currency(p.sellingPrice - p.cost)} />
+                  <Stat label={t("viralProd.margin")} value={`%${p.margin.toFixed(0)}`} />
+                  <Stat label={t("viralProd.decisionScore")} value={`${p.decisionScore}`} highlight />
                 </div>
 
-                <div className="mt-4 pt-2 border-t border-border/40 flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-muted-foreground">Risk Seviyesi:</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${riskColor[p.riskLevel] || "bg-muted"}`}>{p.riskLevel}</span>
+                <div className="mt-3">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${riskColor[p.riskLevel]}`}>
+                    {t("viralProd.risk")}: {p.riskLevel}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2 mt-auto pt-4">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => handleSave(p)} disabled={isProductSaved(p.name)}>
+                      <Bookmark className="h-3 w-3 mr-1" /> {isProductSaved(p.name) ? t("viralProd.saved") : t("viralProd.saveBtn")}
+                    </Button>
+                    <Button size="sm" className="flex-1 text-xs" onClick={() => handleAnalyze(p)}>
+                      {t("viralProd.sendAnalysis")} <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
                   </div>
-                  
-                  {/* Buton Aksiyon Alanları */}
-                  <div className="grid grid-cols-2 gap-1.5 mt-2">
-                    <button onClick={() => handleAnalyze(p)} className="h-7 rounded bg-primary text-primary-foreground text-[10px] font-medium hover:opacity-95 flex items-center justify-center gap-1">
-                      <BarChart3 className="h-3 w-3" /> Analiz Et
-                    </button>
-                    <button onClick={() => handleGeneratePage(p)} className="h-7 rounded bg-accent text-accent-foreground text-[10px] font-medium hover:bg-accent/80 flex items-center justify-center gap-1">
-                      <FileText className="h-3 w-3" /> Sayfa Oluştur
-                    </button>
-                  </div>
+                  <Button size="sm" variant="secondary" className="w-full text-xs" onClick={() => handleGeneratePage(p)}>
+                    <FileText className="h-3 w-3 mr-1" /> {t("viralProd.createPage")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-lg font-medium">{t("viralProd.noProducts")}</p>
+          <p className="text-sm mt-1">{t("viralProd.changeFilters")}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Stat({ label, value, icon, highlight }: { label: string; value: string; icon?: React.ReactNode; highlight?: boolean }) {
+  return (
+    <div className="rounded-lg bg-muted/50 px-3 py-2">
+      <p className="text-[10px] text-muted-foreground flex items-center gap-1">{icon} {label}</p>
+      <p className={`text-sm font-bold font-mono tabular-nums ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
+    </div>
+  );
+}
