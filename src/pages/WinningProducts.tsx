@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
-import { Filter, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { Filter, ChevronDown, ChevronUp, ExternalLink, BarChart3 } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 
@@ -16,6 +17,7 @@ const MARKETPLACE_SETTINGS = {
 };
 
 export default function WinningProducts() {
+  const navigate = useNavigate();
   const [platform, setPlatform] = useState("Tümü");
   const [category, setCategory] = useState("Tümü");
   const [marginFilter, setMarginFilter] = useState(0);
@@ -69,6 +71,18 @@ export default function WinningProducts() {
         netProfit: Math.round(netProfit),
         margin: margin,
       };
+    });
+  };
+
+  const handleAnalyzeProduct = (product: any) => {
+    navigate("/", {
+      state: {
+        analyzeProduct: {
+          name: product.name,
+          sellingPrice: product.estimatedSellingPrice,
+          supplierPrice: product.supplierPrice
+        }
+      }
     });
   };
   return (
@@ -178,9 +192,20 @@ export default function WinningProducts() {
                       <div className="text-[9px] text-muted-foreground text-center pt-1 border-t border-border/20 italic">
                         Kur 1$ = ₺46.15 · Giderler simüle edilmiştir.
                       </div>
-                      <button className="w-full mt-1 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1">
-                        Pazar Yerine Git <ExternalLink className="h-2.5 w-2.5" />
-                      </button>
+                      
+                      {/* İki buton alt alta olacak şekilde güncellendi */}
+                      <div className="space-y-1.5 mt-2">
+                        <button className="w-full py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1">
+                          Pazar Yerine Git <ExternalLink className="h-2.5 w-2.5" />
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleAnalyzeProduct(product)}
+                          className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1 shadow-sm"
+                        >
+                          Ürünü Otomatik Analiz Et <BarChart3 className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
