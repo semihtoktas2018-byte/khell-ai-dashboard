@@ -55,6 +55,7 @@ export default function LandingPage() {
       features: [t("landing.entF1"), t("landing.entF2"), t("landing.entF3"), t("landing.entF4"), t("landing.entF5")],
       cta: t("landing.entCta"),
       popular: false,
+      whatsapp: "https://wa.me/905446452430?text=KHELL%20AI%20Kurumsal%20plan%20hakk%C3%B4nda%20bilgi%20almak%20istiyorum",
     },
   ];
 
@@ -279,6 +280,15 @@ export default function LandingPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-primary"
+                  >
+                    {plan.cta}
+                  </a>
+                ) : plan.whatsapp ? (
+                  <a
+                    href={plan.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-ghost"
                   >
                     {plan.cta}
                   </a>
