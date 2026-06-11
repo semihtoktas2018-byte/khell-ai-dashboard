@@ -1,12 +1,20 @@
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
-import { Filter } from "lucide-react";
+import { Filter, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
+
+// Pazar yeri komisyon oranları ve sabit gider simülasyonu
+const MARKETPLACE_SETTINGS = {
+  Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol" },
+  Hepsiburada: { commissionRate: 0.16, kdvRate: 0.20, label: "Hepsiburada" },
+  AmazonTR: { commissionRate: 0.12, kdvRate: 0.20, label: "Amazon TR" },
+  N11: { commissionRate: 0.15, kdvRate: 0.20, label: "N11" },
+};
 
 export default function WinningProducts() {
   const [platform, setPlatform] = useState("Tümü");
@@ -14,6 +22,7 @@ export default function WinningProducts() {
   const [marginFilter, setMarginFilter] = useState(0);
   const [trendFilter, setTrendFilter] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const { t, currency, locale } = useLocale();
 
   const marginFilters = [
@@ -42,9 +51,33 @@ export default function WinningProducts() {
     });
   }, [platform, category, marginFilter, trendFilter]);
 
+  // Pazar yerlerine göre dinamik kâr hesaplama fonksiyonu
+  const calculateMarketplaceProfit = (sellingPrice: number, costPrice: number) => {
+    const dollarRate = 46.15; // Güncel dinamik dolar kuru simülasyonu
+    const priceInTL = sellingPrice * dollarRate;
+    const costInTL = costPrice * dollarRate;
+
+    return Object.entries(MARKETPLACE_SETTINGS).map(([key, config]) => {
+      const commission = priceInTL * config.commissionRate;
+      const kdv = priceInTL * (config.kdvRate / (1 + config.kdvRate)) * config.commissionRate; // Komisyon kdvsi simülasyonu
+      const netProfit = priceInTL - costInTL - commission - kdv;
+      const margin = Math.round((netProfit / priceInTL) * 100);
+
+      return {
+        name: config.label,
+        commission: Math.round(commission),
+        rate: Math.round(config.commissionRate * 100),
+        kdv: Math.round(kdv),
+        netProfit: Math.round(netProfit),
+        margin: margin,
+      };
+    });
+  };
+
   return (
     <div className="space-y-6">
       <SEO title="Kazanan Ürünler | KHELL AI" description="Yüksek kârlılık potansiyeli taşıyan kazanan ürünleri keşfet." />
+      
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2">
           {platforms.map((p) => (
@@ -93,40 +126,49 @@ export default function WinningProducts() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map((product, i) => {
           const verdict = getVerdict(product.profitMargin);
+          const isExpanded = expandedProduct === product.id;
+          const marketplaceData = calculateMarketplaceProfit(product.estimatedSellingPrice, product.supplierPrice);
+
           return (
-            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 cursor-default">
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{product.image}</span>
-                <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
+            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 cursor-default flex flex-col justify-between h-full bg-card border border-border">
+              <div>
+                <div className="flex items-start justify-between mb-3">
+                  <span className="text-3xl">{product.image}</span>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
+                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
+                <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
+                <div className="space-y-2 mb-4">
+                  <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
+                  <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
+                  <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
+                  <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
+                  <DataRow label={t("winning.competition")} value={product.competition} />
+                </div>
               </div>
-              <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
-              <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
-              <div className="space-y-2">
-                <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
-                <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
-                <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
-                <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
-                <DataRow label={t("winning.competition")} value={product.competition} />
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
 
-      {filtered.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-sm">{t("winning.noProducts")}</p>
-        </div>
-      )}
-    </div>
-  );
-}
+              {/* Eklediğiniz Pazar Yeri Analiz Genişleme Alanı */}
+              <div className="mt-auto pt-2 border-t border-border/60">
+                <button 
+                  onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
+                  className="w-full flex items-center justify-between py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors bg-accent/30 rounded-lg px-3 border border-border/40"
+                >
+                  <span className="flex items-center gap-1.5">📊 {isExpanded ? "Detayları Gizle" : "Pazar Yeri Komisyonu"}</span>
+                  {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
 
-function DataRow({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xs font-mono font-medium tabular-nums text-foreground" style={color ? { color } : undefined}>{value}</span>
-    </div>
-  );
-}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }} 
+                      animate={{ opacity: 1, height: "auto" }} 
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px]"
+                    >
+                      {marketplaceData.map((market) => (
+                        <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-1">
+                          <div className="flex justify-between font-medium text-foreground">
+                            <span>{market.name}</span>
+                            <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
+                          </div>
+                          <div className="flex justify-between text-[10px] text-muted-foreground">
