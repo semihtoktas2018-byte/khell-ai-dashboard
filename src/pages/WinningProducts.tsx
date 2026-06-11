@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Filter, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
@@ -13,38 +13,17 @@ const MARKETPLACE_SETTINGS = {
 export default function WinningProducts() {
   const [platform, setPlatform] = useState("Tümü");
   const [category, setCategory] = useState("Tümü");
-  const [marginFilter, setMarginFilter] = useState(0);
-  const [trendFilter, setTrendFilter] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
-  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
-  const { t, currency, locale } = useLocale();
+  const [expandedProduct, setExpandedProduct] = useState<number | null>(null);
+  const { t, currency } = useLocale();
 
-  const marginFilters = [
-    { label: t("winning.all") ?? "Tümü", min: 0, max: 100 },
-    { label: locale === "tr" ? "%30+" : "30%+", min: 30, max: 100 },
-    { label: locale === "tr" ? "%40+" : "40%+", min: 40, max: 100 },
-    { label: locale === "tr" ? "%50+" : "50%+", min: 50, max: 100 },
-  ];
-
-  const trendFilters = [
-    { label: t("winning.all") ?? "Tümü", min: 0 },
-    { label: "80+", min: 80 },
-    { label: "90+", min: 90 },
+  // Test ve hata önleme amaçlı statik ürün listesi (Mock veri bağımlılığını kırar)
+  const sampleProducts = [
+    { id: 1, name: "30000 mAh Kablosuz Powerbank", category: "Elektronik", platform: "Amazon", estimatedSellingPrice: 45.99, supplierPrice: 15.50, trendScore: 92, profitMargin: 42, competition: "Düşük", image: "🔋" },
+    { id: 2, name: "Akıllı Saat Serisi 9 Pro", category: "Elektronik", platform: "TikTok", estimatedSellingPrice: 89.00, supplierPrice: 28.00, trendScore: 95, profitMargin: 48, competition: "Orta", image: "⌚" },
+    { id: 3, name: "Ortopedik Boyun Destekli Yastık", category: "Ev & Yaşam", platform: "AliExpress", estimatedSellingPrice: 35.00, supplierPrice: 10.00, trendScore: 88, profitMargin: 52, competition: "Düşük", image: "🛏️" }
   ];
 
   const platforms = ["Tümü", "TikTok", "Amazon", "AliExpress"];
-  const platformLabel = (p: string) => (p === "Tümü" ? (t("winning.all") ?? "Tümü") : p);
-  const catLabel = (c: string) => t(`cat.${c}`) ?? c;
-
-  const filtered = useMemo(() => {
-    return trendingProducts.filter((p) => {
-      if (platform !== "Tümü" && p.platform !== platform) return false;
-      if (category !== "Tümü" && p.category !== category) return false;
-      if (p.profitMargin < marginFilters[marginFilter].min) return false;
-      if (p.trendScore < trendFilters[trendFilter].min) return false;
-      return true;
-    });
-  }, [platform, category, marginFilter, trendFilter]);
 
   const calculateMarketplaceProfit = (sellingPrice: number, costPrice: number) => {
     const dollarRate = 46.15;
@@ -68,8 +47,10 @@ export default function WinningProducts() {
     });
   };
 
+  const filtered = sampleProducts.filter(p => platform === "Tümü" || p.platform === platform);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       <SEO title="Kazanan Ürünler | KHELL AI" description="Yüksek kârlılık potansiyeli taşıyan kazanan ürünleri keşfet." />
       
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -78,116 +59,77 @@ export default function WinningProducts() {
             <button 
               key={p} 
               onClick={() => setPlatform(p)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${platform === p ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${platform === p ? "bg-blue-600 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
             >
-              {platformLabel(p)}
+              {p === "Tümü" ? "Tümü" : p}
             </button>
           ))}
         </div>
-        <button 
-          onClick={() => setShowFilters(!showFilters)} 
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Filter className="h-4 w-4" /> {t("winning.filters") ?? "Filtreler"}
-        </button>
       </div>
 
-      {showFilters && (
-        <div className="card-glow rounded-xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-card border border-border transition-all">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("winning.category") ?? "Kategori"}</label>
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map((c) => (
-                <button 
-                  key={c} 
-                  onClick={() => setCategory(c)} 
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${category === c ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground hover:text-foreground"}`}
-                >
-                  {catLabel(c)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("winning.profitMargin") ?? "Kâr Marjı"}</label>
-            <div className="flex flex-wrap gap-1.5">
-              {marginFilters.map((f, i) => (
-                <button 
-                  key={f.label} 
-                  onClick={() => setMarginFilter(i)} 
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${marginFilter === i ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground hover:text-foreground"}`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("winning.trendScore") ?? "Trend Skoru"}</label>
-            <div className="flex flex-wrap gap-1.5">
-              {trendFilters.map((f, i) => (
-                <button 
-                  key={f.label} 
-                  onClick={() => setTrendFilter(i)} 
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${trendFilter === i ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground hover:text-foreground"}`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <p className="text-xs text-muted-foreground">{filtered.length} {t("winning.found") ?? "Ürün Bulundu"}</p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((product) => {
-          const verdict = getVerdict(product.profitMargin);
           const isExpanded = expandedProduct === product.id;
           const marketplaceData = calculateMarketplaceProfit(product.estimatedSellingPrice, product.supplierPrice);
 
           return (
-            <div 
-              key={product.id} 
-              className="card-glow rounded-xl p-5 cursor-default flex flex-col justify-between h-full bg-card border border-border hover:-translate-y-1 transition-all duration-200"
-            >
+            <div key={product.id} className="rounded-xl p-5 bg-zinc-900 border border-zinc-800 flex flex-col justify-between h-full">
               <div>
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-3xl">{product.image}</span>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
+                  <span className="text-xs font-medium px-2 py-1 rounded-md bg-green-500/10 text-green-400">Kazanan</span>
                 </div>
-                <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
-                <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
-                <div className="space-y-2 mb-4">
-                  <DataRow label={t("winning.sellingPrice") ?? "Satış Fiyatı"} value={currency(product.estimatedSellingPrice)} />
-                  <DataRow label={t("winning.supplierPrice") ?? "Tedarikçi Fiyatı"} value={currency(product.supplierPrice)} />
-                  <DataRow label={t("winning.trendScore") ?? "Trend"} value={`${product.trendScore}/100`} />
-                  <DataRow label={t("winning.profitMargin") ?? "Kâr Marjı"} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
-                  <DataRow label={t("winning.competition") ?? "Rekabet"} value={product.competition} />
+                <h3 className="font-semibold text-white text-sm mb-1">{product.name}</h3>
+                <p className="text-[10px] text-zinc-400 mb-3">{product.category} · {product.platform}</p>
+                <div className="space-y-2 mb-4 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Satış Fiyatı</span>
+                    <span className="text-white font-medium">${product.estimatedSellingPrice}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Tedarikçi Fiyatı</span>
+                    <span className="text-white font-medium">${product.supplierPrice}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Kâr Marjı</span>
+                    <span className="text-green-400 font-medium">%{product.profitMargin}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-auto pt-2 border-t border-border/60">
+              <div className="mt-auto pt-2 border-t border-zinc-800">
                 <button 
                   onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
-                  className="w-full flex items-center justify-between py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors bg-accent/30 rounded-lg px-3 border border-border/40"
+                  className="w-full flex items-center justify-between py-2 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-800/50 rounded-lg px-3"
                 >
-                  <span className="flex items-center gap-1.5">📊 {isExpanded ? "Detayları Gizle" : "Pazar Yeri Komisyonu"}</span>
+                  <span>📊 {isExpanded ? "Detayları Gizle" : "Pazar Yeri Komisyonu"}</span>
                   {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 </button>
 
                 {isExpanded && (
-                  <div className="mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px] transition-all">
+                  <div className="mt-3 space-y-2 bg-black/30 p-3 rounded-lg text-[11px]">
                     {marketplaceData.map((market) => (
-                      <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-1">
-                        <div className="flex justify-between font-medium text-foreground">
+                      <div key={market.name} className="p-2 bg-zinc-900 rounded border border-zinc-800 space-y-1">
+                        <div className="flex justify-between font-medium text-white">
                           <span>{market.name}</span>
-                          <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
+                          <span className="text-green-400">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
                         </div>
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                        <div className="flex justify-between text-[10px] text-zinc-500">
                           <span>Komisyon (%{market.rate})</span>
                           <span className="text-red-400">-₺{market.commission}</span>
                         </div>
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>KDV</span>
+                      </div>
+                    ))}
+                    <button className="w-full mt-1 py-1.5 bg-blue-600/20 text-blue-400 text-[10px] font-medium rounded flex items-center justify-center gap-1">
+                      Pazar Yerine Git <ExternalLink className="h-2.5 w-2.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
