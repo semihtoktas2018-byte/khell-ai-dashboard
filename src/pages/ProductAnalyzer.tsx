@@ -13,6 +13,7 @@ import MoneyLayer from "@/components/MoneyLayer";
 import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import MarketplaceCalculator from "@/components/MarketplaceCalculator";
+import CompetitorAnalysis from "@/components/CompetitorAnalysis";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -372,6 +373,14 @@ export default function ProductAnalyzer() {
                   costUSD={input.product_cost}
                   salePriceUSD={input.selling_price}
                   exchangeRate={45}
+                />
+              )}
+
+              {productName.trim() && (
+                <CompetitorAnalysis
+                  productName={productName}
+                  googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
+                  googleCx="93c44c1933cf646eb"
                 />
               )}
 
