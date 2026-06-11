@@ -48,7 +48,6 @@ export default function CJProductSearch() {
     setLoading(true);
     setError(null);
     setResults([]);
-    setTrendyolPrices({});
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
@@ -60,7 +59,6 @@ export default function CJProductSearch() {
         throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
       setResults(data.data.list);
-    }
     } catch (e: any) {
       setError(e?.message || "Hata oluştu");
     } finally {
