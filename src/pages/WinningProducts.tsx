@@ -1,12 +1,7 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { trendingProducts, categories } from "@/lib/mock-data";
-import { getVerdict } from "@/lib/analyzer";
 import { Filter, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
-
-const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 const MARKETPLACE_SETTINGS = {
   Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol" },
@@ -98,12 +93,7 @@ export default function WinningProducts() {
       </div>
 
       {showFilters && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }} 
-          animate={{ opacity: 1, height: "auto" }} 
-          exit={{ opacity: 0, height: 0 }} 
-          className="card-glow rounded-xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
+        <div className="card-glow rounded-xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-card border border-border transition-all">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-2 block">{t("winning.category") ?? "Kategori"}</label>
             <div className="flex flex-wrap gap-1.5">
@@ -146,25 +136,21 @@ export default function WinningProducts() {
               ))}
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
 
       <p className="text-xs text-muted-foreground">{filtered.length} {t("winning.found") ?? "Ürün Bulundu"}</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filtered.map((product, i) => {
+        {filtered.map((product) => {
           const verdict = getVerdict(product.profitMargin);
           const isExpanded = expandedProduct === product.id;
           const marketplaceData = calculateMarketplaceProfit(product.estimatedSellingPrice, product.supplierPrice);
 
           return (
-            <motion.div 
+            <div 
               key={product.id} 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: i * 0.03, ...transition }} 
-              whileHover={{ y: -4 }} 
-              className="card-glow rounded-xl p-5 cursor-default flex flex-col justify-between h-full bg-card border border-border"
+              className="card-glow rounded-xl p-5 cursor-default flex flex-col justify-between h-full bg-card border border-border hover:-translate-y-1 transition-all duration-200"
             >
               <div>
                 <div className="flex items-start justify-between mb-3">
@@ -191,12 +177,17 @@ export default function WinningProducts() {
                   {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 </button>
 
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }} 
-                      animate={{ opacity: 1, height: "auto" }} 
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px]"
-                    >
-                      {marketplaceData.map((market) => (
+                {isExpanded && (
+                  <div className="mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px] transition-all">
+                    {marketplaceData.map((market) => (
+                      <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-1">
+                        <div className="flex justify-between font-medium text-foreground">
+                          <span>{market.name}</span>
+                          <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
+                        </div>
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>Komisyon (%{market.rate})</span>
+                          <span className="text-red-400">-₺{market.commission}</span>
+                        </div>
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>KDV</span>
