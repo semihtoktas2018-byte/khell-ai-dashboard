@@ -46,7 +46,7 @@ async function getAccessToken(): Promise<string> {
 
 async function fetchTrendyolPrices(productName: string): Promise<TrendyolPrice> {
   try {
-    const query = encodeURIComponent(`${productName} fiyat`);
+    const query = encodeURIComponent(`${productName} site:trendyol.com`);
     const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${query}&num=10`;
     const res = await fetch(url);
     const data = await res.json();
