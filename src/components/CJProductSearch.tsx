@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "";
+const GOOGLE_API_KEY = "AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ";
 const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || "93c44c1933cf646eb";
 
 interface CJProduct {
