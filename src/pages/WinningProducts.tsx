@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
@@ -8,7 +8,6 @@ import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-// Pazar yeri komisyon oranları ve sabit gider simülasyonu
 const MARKETPLACE_SETTINGS = {
   Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol" },
   Hepsiburada: { commissionRate: 0.16, kdvRate: 0.20, label: "Hepsiburada" },
@@ -51,15 +50,14 @@ export default function WinningProducts() {
     });
   }, [platform, category, marginFilter, trendFilter]);
 
-  // Pazar yerlerine göre dinamik kâr hesaplama fonksiyonu
   const calculateMarketplaceProfit = (sellingPrice: number, costPrice: number) => {
-    const dollarRate = 46.15; // Güncel dinamik dolar kuru simülasyonu
+    const dollarRate = 46.15;
     const priceInTL = sellingPrice * dollarRate;
     const costInTL = costPrice * dollarRate;
 
     return Object.entries(MARKETPLACE_SETTINGS).map(([key, config]) => {
       const commission = priceInTL * config.commissionRate;
-      const kdv = priceInTL * (config.kdvRate / (1 + config.kdvRate)) * config.commissionRate; // Komisyon kdvsi simülasyonu
+      const kdv = priceInTL * (config.kdvRate / (1 + config.kdvRate)) * config.commissionRate;
       const netProfit = priceInTL - costInTL - commission - kdv;
       const margin = Math.round((netProfit / priceInTL) * 100);
 
@@ -147,7 +145,6 @@ export default function WinningProducts() {
                 </div>
               </div>
 
-              {/* Eklediğiniz Pazar Yeri Analiz Genişleme Alanı */}
               <div className="mt-auto pt-2 border-t border-border/60">
                 <button 
                   onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
@@ -170,5 +167,9 @@ export default function WinningProducts() {
                           <div className="flex justify-between font-medium text-foreground">
                             <span>{market.name}</span>
                             <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
+                          </div>
+                          <div className="flex justify-between text-[10px] text-muted-foreground">
+                            <span>Komisyon (%{market.rate})</span>
+                            <span className="text-red-400">-₺{market.commission}</span>
                           </div>
                           <div className="flex justify-between text-[10px] text-muted-foreground">
