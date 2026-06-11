@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Loader2, Radio, BarChart3, FileText, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MarketplaceCalculator from "@/components/MarketplaceCalculator";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -165,6 +166,13 @@ export default function CJProductSearch() {
                       <span className="text-muted-foreground">Kâr Marjı</span>
                       <span className="font-mono font-bold text-winning">%{margin}</span>
                     </div>
+
+                    {/* Pazar Yeri Komisyon Hesaplayıcı */}
+                    <MarketplaceCalculator
+                      costUSD={cost}
+                      salePriceUSD={estSale}
+                      exchangeRate={45}
+                    />
 
                     {/* Trendyol Butonu */}
                     <a
