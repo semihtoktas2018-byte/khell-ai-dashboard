@@ -1,30 +1,22 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { trendingProducts, categories } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
-import { Filter, ChevronDown, ChevronUp, ExternalLink, BarChart3 } from "lucide-react";
+import { Filter, BarChart3 } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const MARKETPLACE_SETTINGS = {
-  Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol", searchUrl: "https://trendyol.com" },
-  Hepsiburada: { commissionRate: 0.16, kdvRate: 0.20, label: "Hepsiburada", searchUrl: "https://hepsiburada.com" },
-  AmazonTR: { commissionRate: 0.12, kdvRate: 0.20, label: "Amazon TR", searchUrl: "https://amazon.com.tr" },
-  N11: { commissionRate: 0.15, kdvRate: 0.20, label: "N11", searchUrl: "https://n11.com" },
-};
-
 export default function WinningProducts() {
-  const navigate = useNavigate();
   const [platform, setPlatform] = useState("Tümü");
   const [category, setCategory] = useState("Tümü");
   const [marginFilter, setMarginFilter] = useState(0);
   const [trendFilter, setTrendFilter] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const { t, currency, locale } = useLocale();
+  const navigate = useNavigate();
 
   const marginFilters = [
     { label: t("winning.all"), min: 0, max: 100 },
@@ -52,40 +44,6 @@ export default function WinningProducts() {
     });
   }, [platform, category, marginFilter, trendFilter]);
 
-  const calculateMarketplaceProfit = (sellingPrice: number, costPrice: number) => {
-    const dollarRate = 46.15;
-    const priceInTL = sellingPrice * dollarRate;
-    const costInTL = costPrice * dollarRate;
-
-    return Object.entries(MARKETPLACE_SETTINGS).map(([key, config]) => {
-      const commission = priceInTL * config.commissionRate;
-      const kdv = priceInTL * (config.kdvRate / (1 + config.kdvRate)) * config.commissionRate;
-      const netProfit = priceInTL - costInTL - commission - kdv;
-      const margin = Math.round((netProfit / priceInTL) * 100);
-
-      return {
-        name: config.label,
-        commission: Math.round(commission),
-        rate: Math.round(config.commissionRate * 100),
-        kdv: Math.round(kdv),
-        netProfit: Math.round(netProfit),
-        margin: margin,
-        searchUrl: config.searchUrl,
-      };
-    });
-  };
-
-  const handleAnalyzeProduct = (product: any) => {
-    navigate("/", {
-      state: {
-        analyzeProduct: {
-          name: product.name,
-          sellingPrice: product.estimatedSellingPrice,
-          supplierPrice: product.supplierPrice
-        }
-      }
-    });
-  };
   return (
     <div className="space-y-6">
       <SEO title="Kazanan Ürünler | KHELL AI" description="Yüksek kârlılık potansiyeli taşıyan kazanan ürünleri keşfet." />
@@ -137,84 +95,27 @@ export default function WinningProducts() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map((product, i) => {
           const verdict = getVerdict(product.profitMargin);
-          const isExpanded = expandedProduct === product.id;
-          const marketplaceData = calculateMarketplaceProfit(product.estimatedSellingPrice, product.supplierPrice);
           return (
-            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 cursor-default flex flex-col justify-between h-full bg-card border border-border">
-              <div>
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-3xl">{product.image}</span>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
-                </div>
-                <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
-                <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
-                <div className="space-y-2 mb-4">
-                  <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
-                  <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
-                  <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
-                  <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
-                  <DataRow label={t("winning.competition")} value={product.competition} />
-                </div>
+            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-5 flex flex-col">
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-3xl">{product.image}</span>
+                <span className={`text-xs font-medium px-2 py-1 rounded-md ${verdict.class}`}>{verdict.labelTr}</span>
               </div>
-
-              <div className="mt-auto pt-2 border-t border-border/60">
-                <button 
-                  onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
-                  className="w-full flex items-center justify-between py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors bg-accent/30 rounded-lg px-3 border border-border/40"
-                >
-                  <span className="flex items-center gap-1.5">📊 {isExpanded ? "Detayları Gizle" : "Pazar Yeri Komisyonu"}</span>
-                  {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                </button>
-
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }} 
-                      animate={{ opacity: 1, height: "auto" }} 
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px]"
-                    >
-                      {marketplaceData.map((market) => (
-                        <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-2">
-                          <div className="flex justify-between font-medium text-foreground">
-                            <span>{market.name}</span>
-                            <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
-                          </div>
-                          <div className="flex justify-between text-[10px] text-muted-foreground">
-                            <span>Komisyon (%{market.rate})</span>
-                            <span className="text-red-400">-₺{market.commission}</span>
-                          </div>
-                          <div className="flex justify-between text-[10px] text-muted-foreground">
-                            <span>KDV</span>
-                            <span className="text-red-400">-₺{market.kdv}</span>
-                          </div>
-                          
-                          {/* Boş dönen buton yerine dinamik arama linki bağlandı */}
-                          <a 
-                            href={`${market.searchUrl}${encodeURIComponent(product.name)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full mt-1 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-[9px] font-medium rounded transition-colors flex items-center justify-center gap-1"
-                          >
-                            {market.name}'de Ürünü Bul <ExternalLink className="h-2 w-2" />
-                          </a>
-                        </div>
-                      ))}
-                      
-                      <div className="text-[9px] text-muted-foreground text-center pt-1 border-t border-border/20 italic">
-                        Kur 1$ = ₺46.15 · Giderler simüle edilmiştir.
-                      </div>
-                      
-                      <button 
-                        onClick={() => handleAnalyzeProduct(product)}
-                        className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1 shadow-sm mt-1"
-                      >
-                        Ürünü Otomatik Analiz Et <BarChart3 className="h-2.5 w-2.5" />
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+              <h3 className="font-semibold text-foreground text-sm mb-1">{product.name}</h3>
+              <p className="text-[10px] text-muted-foreground mb-3">{catLabel(product.category)} · {product.platform}</p>
+              <div className="space-y-2 flex-1">
+                <DataRow label={t("winning.sellingPrice")} value={currency(product.estimatedSellingPrice)} />
+                <DataRow label={t("winning.supplierPrice")} value={currency(product.supplierPrice)} />
+                <DataRow label={t("winning.trendScore")} value={`${product.trendScore}/100`} />
+                <DataRow label={t("winning.profitMargin")} value={locale === "tr" ? `%${product.profitMargin}` : `${product.profitMargin}%`} color={verdict.color} />
+                <DataRow label={t("winning.competition")} value={product.competition} />
               </div>
+              <button
+                onClick={() => navigate(`/dashboard/analyzer?productName=${encodeURIComponent(product.name)}&selling_price=${product.estimatedSellingPrice}&product_cost=${product.supplierPrice}`)}
+                className="mt-3 w-full h-8 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
+              >
+                <BarChart3 className="h-3 w-3" /> Analiz Et
+              </button>
             </motion.div>
           );
         })}
