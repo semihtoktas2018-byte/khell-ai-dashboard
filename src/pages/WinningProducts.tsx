@@ -10,10 +10,10 @@ import SEO from "@/components/SEO";
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 const MARKETPLACE_SETTINGS = {
-  Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol" },
-  Hepsiburada: { commissionRate: 0.16, kdvRate: 0.20, label: "Hepsiburada" },
-  AmazonTR: { commissionRate: 0.12, kdvRate: 0.20, label: "Amazon TR" },
-  N11: { commissionRate: 0.15, kdvRate: 0.20, label: "N11" },
+  Trendyol: { commissionRate: 0.18, kdvRate: 0.20, label: "Trendyol", searchUrl: "https://trendyol.com" },
+  Hepsiburada: { commissionRate: 0.16, kdvRate: 0.20, label: "Hepsiburada", searchUrl: "https://hepsiburada.com" },
+  AmazonTR: { commissionRate: 0.12, kdvRate: 0.20, label: "Amazon TR", searchUrl: "https://amazon.com.tr" },
+  N11: { commissionRate: 0.15, kdvRate: 0.20, label: "N11", searchUrl: "https://n11.com" },
 };
 
 export default function WinningProducts() {
@@ -70,6 +70,7 @@ export default function WinningProducts() {
         kdv: Math.round(kdv),
         netProfit: Math.round(netProfit),
         margin: margin,
+        searchUrl: config.searchUrl,
       };
     });
   };
@@ -174,7 +175,7 @@ export default function WinningProducts() {
                       className="overflow-hidden mt-3 space-y-2 bg-background/50 p-3 rounded-lg border border-border/40 text-[11px]"
                     >
                       {marketplaceData.map((market) => (
-                        <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-1">
+                        <div key={market.name} className="p-2 bg-card rounded border border-border/30 space-y-2">
                           <div className="flex justify-between font-medium text-foreground">
                             <span>{market.name}</span>
                             <span className="text-green-500">Net: ₺{market.netProfit.toLocaleString()} (%{market.margin})</span>
@@ -187,25 +188,29 @@ export default function WinningProducts() {
                             <span>KDV</span>
                             <span className="text-red-400">-₺{market.kdv}</span>
                           </div>
+                          
+                          {/* Boş dönen buton yerine dinamik arama linki bağlandı */}
+                          <a 
+                            href={`${market.searchUrl}${encodeURIComponent(product.name)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full mt-1 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-[9px] font-medium rounded transition-colors flex items-center justify-center gap-1"
+                          >
+                            {market.name}'de Ürünü Bul <ExternalLink className="h-2 w-2" />
+                          </a>
                         </div>
                       ))}
+                      
                       <div className="text-[9px] text-muted-foreground text-center pt-1 border-t border-border/20 italic">
                         Kur 1$ = ₺46.15 · Giderler simüle edilmiştir.
                       </div>
                       
-                      {/* İki buton alt alta olacak şekilde güncellendi */}
-                      <div className="space-y-1.5 mt-2">
-                        <button className="w-full py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1">
-                          Pazar Yerine Git <ExternalLink className="h-2.5 w-2.5" />
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleAnalyzeProduct(product)}
-                          className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1 shadow-sm"
-                        >
-                          Ürünü Otomatik Analiz Et <BarChart3 className="h-2.5 w-2.5" />
-                        </button>
-                      </div>
+                      <button 
+                        onClick={() => handleAnalyzeProduct(product)}
+                        className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white text-[10px] font-medium rounded transition-colors flex items-center justify-center gap-1 shadow-sm mt-1"
+                      >
+                        Ürünü Otomatik Analiz Et <BarChart3 className="h-2.5 w-2.5" />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
