@@ -32,8 +32,8 @@ export default function LandingPage() {
 
   const plans = [
     {
-      name: t("landing.starter"),
-      price: t("landing.free"),
+      name: locale === "tr" ? "Başlangıç" : "Starter",
+      price: locale === "tr" ? "Ücretsiz" : "Free",
       period: "",
       features: [t("landing.starterF1"), t("landing.starterF2"), t("landing.starterF3"), t("landing.starterF4")],
       cta: t("landing.starterCta"),
@@ -41,7 +41,7 @@ export default function LandingPage() {
     },
     {
       name: "Pro",
-      price: "$9",
+      price: locale === "tr" ? "249 ₺" : "$9",
       period: locale === "tr" ? "/ay" : "/mo",
       features: [t("landing.proF1"), t("landing.proF2"), t("landing.proF3New"), t("landing.proF4"), t("landing.proF5")],
       cta: t("landing.proCta"),
@@ -49,8 +49,8 @@ export default function LandingPage() {
       href: "https://www.shopier.com/bamironlinestore/46009500",
     },
     {
-      name: "Enterprise",
-      price: "$99",
+      name: locale === "tr" ? "Kurumsal" : "Enterprise",
+      price: locale === "tr" ? "₺990" : "$99",
       period: locale === "tr" ? "/ay" : "/mo",
       features: [t("landing.entF1"), t("landing.entF2"), t("landing.entF3"), t("landing.entF4"), t("landing.entF5")],
       cta: t("landing.entCta"),
@@ -161,20 +161,20 @@ export default function LandingPage() {
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <Zap className="h-3.5 w-3.5 text-primary" /> Hook
               </div>
-              <p className="text-lg font-bold text-foreground">"This is not for everyone."</p>
+              <p className="text-lg font-bold text-foreground">"Bu herkes için değil."</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <Copy className="h-3.5 w-3.5 text-primary" /> Caption
+                <Copy className="h-3.5 w-3.5 text-primary" /> Açıklama
               </div>
-              <p className="text-sm text-foreground">"Only a few understand this design."</p>
+              <p className="text-sm text-foreground">"Bu tasarımı sadece birkaç kişi anlıyor."</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <Hash className="h-3.5 w-3.5 text-primary" /> Hashtags
+                <Hash className="h-3.5 w-3.5 text-primary" /> Hashtag'ler
               </div>
               <div className="flex flex-wrap gap-2">
-                {["#viral", "#tiktokshop", "#streetwear", "#fyp", "#trending"].map((tag) => (
+                {["#viral", "#tiktokshop", "#dropshipping", "#fyp", "#trending"].map((tag) => (
                   <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                     {tag}
                   </span>
