@@ -276,7 +276,40 @@ export default function ProductAnalyzer() {
             {remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
           </p>
         </motion.div>
+      </div>
 
+      {/* AKILLI ANALİZ PANELİ — her zaman görünür */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
+            🚀 Akıllı Analiz Paneli
+          </span>
+        </div>
+        <TrendScore
+          productName={productName}
+          googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
+          googleCx="93c44c1933cf646eb"
+        />
+        <CompetitorAnalysis
+          productName={productName}
+          googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
+          googleCx="93c44c1933cf646eb"
+        />
+        <MarketplaceCalculator
+          costUSD={input.product_cost}
+          salePriceUSD={input.selling_price}
+          exchangeRate={45}
+        />
+        <ProfitSimulator
+          profitPerUnit={result.gross_profit}
+          revenuePerUnit={input.selling_price}
+          costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
+          currency={currency}
+          initialOrders={input.monthly_orders_estimate || 50}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AnimatePresence mode="wait">
           {showResult && input.selling_price > 0 && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={transition} className="space-y-4">
@@ -369,38 +402,6 @@ export default function ProductAnalyzer() {
                   <Lock className="h-3.5 w-3.5" /> {t("analyzer.unlockMore")}
                 </button>
               </div>
-
-              {input.selling_price > 0 && input.product_cost > 0 && (
-                <MarketplaceCalculator
-                  costUSD={input.product_cost}
-                  salePriceUSD={input.selling_price}
-                  exchangeRate={45}
-                />
-              )}
-
-              {productName.trim() && (
-                <TrendScore
-                  productName={productName}
-                  googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
-                  googleCx="93c44c1933cf646eb"
-                />
-              )}
-
-              {productName.trim() && (
-                <CompetitorAnalysis
-                  productName={productName}
-                  googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
-                  googleCx="93c44c1933cf646eb"
-                />
-              )}
-
-              <ProfitSimulator
-                profitPerUnit={result.gross_profit}
-                revenuePerUnit={input.selling_price}
-                costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
-                currency={currency}
-                initialOrders={input.monthly_orders_estimate || 50}
-              />
 
               <MoneyLayer module="product" score={result.decision_score} dailyEstimate={Math.max(0, result.monthly_profit / 30)} />
               <AISuggestions
