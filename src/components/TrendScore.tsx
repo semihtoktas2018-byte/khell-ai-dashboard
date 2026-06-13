@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Flame, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface TrendScoreProps {
+  expandTrigger?: number;
   productName: string;
   googleApiKey: string;
   googleCx: string;
@@ -31,8 +32,12 @@ function scoreLabel(score: number): { label: string; color: string } {
   return { label: "Düşük Potansiyel", color: "text-red-400" };
 }
 
-export default function TrendScore({ productName, googleApiKey, googleCx }: TrendScoreProps) {
+export default function TrendScore({ productName, googleApiKey, googleCx , expandTrigger }: TrendScoreProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (expandTrigger && expandTrigger > 0) setOpen(true);
+  }, [expandTrigger]);
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [cjCount, setCjCount] = useState<number | null>(null);
