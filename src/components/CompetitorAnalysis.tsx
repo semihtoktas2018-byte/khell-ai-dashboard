@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Target, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface CompetitorAnalysisProps {
+  expandTrigger?: number;
   productName: string;
   googleApiKey: string;
   googleCx: string;
@@ -40,8 +41,12 @@ function getScore(results: MarketResult[]): number {
   return 25;
 }
 
-export default function CompetitorAnalysis({ productName, googleApiKey, googleCx }: CompetitorAnalysisProps) {
+export default function CompetitorAnalysis({ productName, googleApiKey, googleCx , expandTrigger }: CompetitorAnalysisProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (expandTrigger && expandTrigger > 0) setOpen(true);
+  }, [expandTrigger]);
   const [results, setResults] = useState<MarketResult[]>(
     MARKETS.map((m) => ({ ...m, count: null, loading: false, error: false }))
   );
