@@ -284,7 +284,17 @@ export default function ProductAnalyzer() {
           <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
             🚀 Akıllı Analiz Paneli
           </span>
+          <motion.span
+            animate={{ opacity: [1, 0.4, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity }}
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40"
+          >
+            ✨ YENİ
+          </motion.span>
         </div>
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör.
+        </p>
         <TrendScore
           productName={productName}
           googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
