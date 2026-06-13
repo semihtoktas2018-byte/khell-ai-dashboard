@@ -14,6 +14,7 @@ import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import MarketplaceCalculator from "@/components/MarketplaceCalculator";
 import CompetitorAnalysis from "@/components/CompetitorAnalysis";
+import ProfitSimulator from "@/components/ProfitSimulator";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -383,6 +384,14 @@ export default function ProductAnalyzer() {
                   googleCx="93c44c1933cf646eb"
                 />
               )}
+
+              <ProfitSimulator
+                profitPerUnit={result.gross_profit}
+                revenuePerUnit={input.selling_price}
+                costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
+                currency={currency}
+                initialOrders={input.monthly_orders_estimate || 50}
+              />
 
               <MoneyLayer module="product" score={result.decision_score} dailyEstimate={Math.max(0, result.monthly_profit / 30)} />
               <AISuggestions
