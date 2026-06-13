@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, Crosshair, Search, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package, Megaphone, Wallet,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -29,6 +29,8 @@ const navKeys = [
   { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain },
   { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video },
   { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
+  { labelKey: "Filo Analizi", path: "/fleet", icon: Wallet },
+  { labelKey: "Reklam Üretici", path: "/ad-analyzer", icon: Megaphone },
 ];
 
 function useChangelog() {
