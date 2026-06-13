@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Store } from "lucide-react";
 
 interface MarketplaceCalculatorProps {
+  expandTrigger?: number;
   costUSD: number;
   salePriceUSD: number;
   exchangeRate?: number;
@@ -42,8 +43,12 @@ function calculate(costUSD: number, salePriceUSD: number, exchangeRate: number, 
 const verdictColors = { iyi: "text-green-400", orta: "text-yellow-400", kötü: "text-red-400" };
 const verdictBg = { iyi: "bg-green-500/10 border-green-500/20", orta: "bg-yellow-500/10 border-yellow-500/20", kötü: "bg-red-500/10 border-red-500/20" };
 
-export default function MarketplaceCalculator({ costUSD, salePriceUSD, exchangeRate = 45 }: MarketplaceCalculatorProps) {
+export default function MarketplaceCalculator({ costUSD, salePriceUSD, exchangeRate = 45 , expandTrigger }: MarketplaceCalculatorProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (expandTrigger && expandTrigger > 0) setOpen(true);
+  }, [expandTrigger]);
   const hasData = costUSD > 0 && salePriceUSD > 0;
 
   const results = hasData ? MARKETPLACES.map((mp) => calculate(costUSD, salePriceUSD, exchangeRate, mp)) : [];
