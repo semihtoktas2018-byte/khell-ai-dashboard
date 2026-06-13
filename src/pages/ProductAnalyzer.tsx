@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2 } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
@@ -443,6 +443,24 @@ export default function ProductAnalyzer() {
                   ] as [string, string | number][]) : []),
                 ] as [string, string | number][]}
               />
+
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `🚀 KHELL AI Ürün Analizi\n\n` +
+                  `📦 Ürün: ${productName || "İsimsiz Ürün"}\n` +
+                  `⭐ Karar Skoru: ${result.decision_score}/100\n` +
+                  `💰 Kâr Marjı: %${result.profit_margin.toFixed(1)}\n` +
+                  `💵 Birim Kâr: ${currency(result.gross_profit)}\n` +
+                  `📈 Aylık Tahmini Kâr: ${currency(result.monthly_profit)}\n` +
+                  `⚠️ Risk: ${result.risk_level.toUpperCase()}\n\n` +
+                  `KHELL AI ile analiz edildi 🤖`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-green-500/15 hover:bg-green-500/25 text-green-400 border border-green-500/30 text-sm font-semibold py-2.5 transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp'tan Paylaş
+              </a>
             </motion.div>
           )}
         </AnimatePresence>
