@@ -14,6 +14,7 @@ import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
 import ReportActions from "@/components/ReportActions";
 import MarketplaceCalculator from "@/components/MarketplaceCalculator";
 import CompetitorAnalysis from "@/components/CompetitorAnalysis";
+import TrendScore from "@/components/TrendScore";
 import ProfitSimulator from "@/components/ProfitSimulator";
 import SEO from "@/components/SEO";
 
@@ -374,6 +375,14 @@ export default function ProductAnalyzer() {
                   costUSD={input.product_cost}
                   salePriceUSD={input.selling_price}
                   exchangeRate={45}
+                />
+              )}
+
+              {productName.trim() && (
+                <TrendScore
+                  productName={productName}
+                  googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
+                  googleCx="93c44c1933cf646eb"
                 />
               )}
 
