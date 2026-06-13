@@ -37,17 +37,16 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
   const [started, setStarted] = useState(false);
   const [cjCount, setCjCount] = useState<number | null>(null);
   const [marketCount, setMarketCount] = useState<number | null>(null);
-  const [error, setError] = useState(false);
+
+  const hasName = productName.trim().length > 0;
 
   const fetchData = async () => {
     if (!productName.trim()) return;
     setStarted(true);
     setLoading(true);
-    setError(false);
     setCjCount(null);
     setMarketCount(null);
 
-    // CJ Popularity
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&productNameEn=${encodeURIComponent(productName)}`;
@@ -59,7 +58,6 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
       setCjCount(null);
     }
 
-    // Market Saturation (tek sorgu, 4 site OR ile)
     if (googleApiKey) {
       try {
         const query = encodeURIComponent(
@@ -79,13 +77,11 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
   };
 
   useEffect(() => {
-    if (open && !started && productName.trim()) fetchData();
-  }, [open]);
+    if (open && hasName && !started) fetchData();
+    if (!hasName) { setStarted(false); setCjCount(null); setMarketCount(null); }
+  }, [open, productName]);
 
-  // CJ Popularity Score: 0-100 (daha çok tedarikçi = kategori aktif/trend)
   const cjScore = cjCount !== null ? Math.min(100, Math.round((cjCount / 50) * 100)) : null;
-
-  // Market Saturation Score: düşük rekabet = yüksek skor
   let satScore: number | null = null;
   if (marketCount !== null) {
     if (marketCount <= 15) satScore = 90;
@@ -102,17 +98,21 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
   const meta = trendScore !== null ? scoreLabel(trendScore) : null;
 
   return (
-    <div className="rounded-md border border-pink-500/20 bg-pink-500/5 text-[10px] overflow-hidden">
+    <div className="group rounded-xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 via-pink-500/5 to-transparent text-[11px] overflow-hidden transition-all duration-300 hover:border-pink-400/60 hover:shadow-[0_0_24px_rgba(236,72,153,0.35)]">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-2 py-1.5 hover:bg-pink-500/10 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-pink-500/10 transition-colors"
       >
-        <div className="flex items-center gap-1.5">
-          <Flame className="h-2.5 w-2.5 text-pink-400" />
-          <span className="font-semibold text-pink-400">Trend Skoru</span>
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-md bg-pink-500/15 group-hover:shadow-[0_0_10px_rgba(236,72,153,0.6)] transition-shadow">
+            <Flame className="h-3 w-3 text-pink-400" />
+          </div>
+          <span className="font-bold text-pink-400 tracking-wide">TREND SKORU</span>
         </div>
         <div className="flex items-center gap-2">
-          {!started ? (
+          {!hasName ? (
+            <span className="text-muted-foreground italic">Ürün adı girin →</span>
+          ) : !started ? (
             <span className="text-muted-foreground">Tıkla, hesaplansın</span>
           ) : loading ? (
             <span className="text-muted-foreground flex items-center gap-1">
@@ -132,26 +132,34 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
       </button>
 
       {open && (
-        <div className="px-2 pb-2 space-y-1.5 border-t border-pink-500/10 pt-1.5">
-          <div className="rounded bg-background/40 px-2 py-1.5 flex items-center justify-between">
-            <span className="text-muted-foreground">📦 CJ Tedarikçi Yoğunluğu</span>
-            {cjCount !== null ? (
-              <span className="text-foreground font-mono">{cjCount} ürün → {cjScore}/100</span>
-            ) : (
-              <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
-            )}
-          </div>
-          <div className="rounded bg-background/40 px-2 py-1.5 flex items-center justify-between">
-            <span className="text-muted-foreground">🛒 Pazar Doygunluğu</span>
-            {marketCount !== null ? (
-              <span className="text-foreground font-mono">{marketCount} sonuç → {satScore}/100</span>
-            ) : (
-              <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
-            )}
-          </div>
-          <p className="text-muted-foreground text-center pt-0.5">
-            CJ tedarikçi sayısı + pazar yeri doygunluğuna göre tahmini skor
-          </p>
+        <div className="px-3 pb-3 space-y-1.5 border-t border-pink-500/10 pt-2">
+          {!hasName ? (
+            <p className="text-muted-foreground text-center py-2">
+              Yukarıdaki kutuya ürün adını yaz, Trend Skoru otomatik hesaplanır 🚀
+            </p>
+          ) : (
+            <>
+              <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
+                <span className="text-muted-foreground">📦 CJ Tedarikçi Yoğunluğu</span>
+                {cjCount !== null ? (
+                  <span className="text-foreground font-mono">{cjCount} ürün → {cjScore}/100</span>
+                ) : (
+                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                )}
+              </div>
+              <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
+                <span className="text-muted-foreground">🛒 Pazar Doygunluğu</span>
+                {marketCount !== null ? (
+                  <span className="text-foreground font-mono">{marketCount} sonuç → {satScore}/100</span>
+                ) : (
+                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                )}
+              </div>
+              <p className="text-muted-foreground text-center pt-0.5">
+                CJ tedarikçi sayısı + pazar yeri doygunluğuna göre tahmini skor
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>
