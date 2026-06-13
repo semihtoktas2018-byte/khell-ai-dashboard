@@ -46,6 +46,7 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
     MARKETS.map((m) => ({ ...m, count: null, loading: false, error: false }))
   );
   const [started, setStarted] = useState(false);
+  const hasName = productName.trim().length > 0;
 
   const fetchAll = async () => {
     if (!productName.trim() || !googleApiKey) return;
@@ -60,19 +61,11 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
         const data = await res.json();
         const totalResults = parseInt(data?.searchInformation?.totalResults || "0");
         setResults((prev) =>
-          prev.map((r) =>
-            r.site === market.site
-              ? { ...r, count: totalResults, loading: false }
-              : r
-          )
+          prev.map((r) => (r.site === market.site ? { ...r, count: totalResults, loading: false } : r))
         );
       } catch {
         setResults((prev) =>
-          prev.map((r) =>
-            r.site === market.site
-              ? { ...r, error: true, loading: false }
-              : r
-          )
+          prev.map((r) => (r.site === market.site ? { ...r, error: true, loading: false } : r))
         );
       }
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -80,35 +73,37 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
   };
 
   useEffect(() => {
-    if (open && !started && productName.trim()) {
-      fetchAll();
+    if (open && hasName && !started) fetchAll();
+    if (!hasName) {
+      setStarted(false);
+      setResults(MARKETS.map((m) => ({ ...m, count: null, loading: false, error: false })));
     }
-  }, [open]);
+  }, [open, productName]);
 
   const score = getScore(results);
   const allDone = results.every((r) => !r.loading);
-  const bestMarket = results
-    .filter((r) => r.count !== null)
-    .sort((a, b) => (a.count || 0) - (b.count || 0))[0];
+  const bestMarket = results.filter((r) => r.count !== null).sort((a, b) => (a.count || 0) - (b.count || 0))[0];
 
   return (
-    <div className="rounded-md border border-blue-500/20 bg-blue-500/5 text-[10px] overflow-hidden">
-      {/* Başlık */}
+    <div className="group rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent text-[11px] overflow-hidden transition-all duration-300 hover:border-blue-400/60 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)]">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-2 py-1.5 hover:bg-blue-500/10 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-blue-500/10 transition-colors"
       >
-        <div className="flex items-center gap-1.5">
-          <Target className="h-2.5 w-2.5 text-blue-400" />
-          <span className="font-semibold text-blue-400">Rakip Analizi</span>
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-md bg-blue-500/15 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)] transition-shadow">
+            <Target className="h-3 w-3 text-blue-400" />
+          </div>
+          <span className="font-bold text-blue-400 tracking-wide">RAKİP ANALİZİ</span>
         </div>
         <div className="flex items-center gap-2">
-          {!started ? (
+          {!hasName ? (
+            <span className="text-muted-foreground italic">Ürün adı girin →</span>
+          ) : !started ? (
             <span className="text-muted-foreground">Tıkla, analiz başlasın</span>
           ) : allDone && bestMarket ? (
             <span className="text-muted-foreground">
-              En az rakip:{" "}
-              <span className="font-bold text-green-400">{bestMarket.name} ({bestMarket.count})</span>
+              En az rakip: <span className="font-bold text-green-400">{bestMarket.name} ({bestMarket.count})</span>
               {" · "}
               <span className={`font-bold ${score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
                 Fırsat Skoru: {score}
@@ -123,47 +118,54 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
         </div>
       </button>
 
-      {/* Detay */}
       {open && (
-        <div className="px-2 pb-2 space-y-1.5 border-t border-blue-500/10 pt-1.5">
-          {results.map((r) => {
-            const level = getLevel(r.count);
-            return (
-              <div key={r.site} className={`rounded border border-transparent px-2 py-1.5 ${level.bg}`}>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-foreground">{r.emoji} {r.name}</span>
-                  {r.loading ? (
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Loader2 className="h-2.5 w-2.5 animate-spin" /> Yükleniyor...
-                    </span>
-                  ) : r.error ? (
-                    <span className="text-muted-foreground">Veri alınamadı</span>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-foreground">{r.count?.toLocaleString()} sonuç</span>
-                      <span className={`font-semibold ${level.color}`}>{level.label}</span>
+        <div className="px-3 pb-3 space-y-1.5 border-t border-blue-500/10 pt-2">
+          {!hasName ? (
+            <p className="text-muted-foreground text-center py-2">
+              Yukarıdaki kutuya ürün adını yaz, 4 platformda rakip sayısı analiz edilsin 🎯
+            </p>
+          ) : (
+            <>
+              {results.map((r) => {
+                const level = getLevel(r.count);
+                return (
+                  <div key={r.site} className={`rounded-lg border border-transparent px-2.5 py-2 ${level.bg}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-foreground">{r.emoji} {r.name}</span>
+                      {r.loading ? (
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <Loader2 className="h-2.5 w-2.5 animate-spin" /> Yükleniyor...
+                        </span>
+                      ) : r.error ? (
+                        <span className="text-muted-foreground">Veri alınamadı</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-foreground">{r.count?.toLocaleString()} sonuç</span>
+                          <span className={`font-semibold ${level.color}`}>{level.label}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                );
+              })}
+
+              {allDone && (
+                <div className="mt-2 rounded-lg border border-blue-500/20 bg-blue-500/10 px-2.5 py-2 text-center">
+                  <span className="text-muted-foreground">Fırsat Skoru: </span>
+                  <span className={`font-bold text-sm ${score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
+                    {score}/100
+                  </span>
+                  <span className="text-muted-foreground ml-2">
+                    {score >= 70 ? "— Düşük rekabet, gir!" : score >= 50 ? "— Orta rekabet, dikkatli ol" : "— Yüksek rekabet, zorlu pazar"}
+                  </span>
                 </div>
-              </div>
-            );
-          })}
+              )}
 
-          {allDone && (
-            <div className="mt-2 rounded border border-blue-500/20 bg-blue-500/10 px-2 py-1.5 text-center">
-              <span className="text-muted-foreground">Fırsat Skoru: </span>
-              <span className={`font-bold text-sm ${score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
-                {score}/100
-              </span>
-              <span className="text-muted-foreground ml-2">
-                {score >= 70 ? "— Düşük rekabet, gir!" : score >= 50 ? "— Orta rekabet, dikkatli ol" : "— Yüksek rekabet, zorlu pazar"}
-              </span>
-            </div>
+              <p className="text-muted-foreground text-center pt-0.5">
+                Google arama sonuç sayısına göre tahmin · Gerçek zamanlı değil
+              </p>
+            </>
           )}
-
-          <p className="text-muted-foreground text-center pt-0.5">
-            Google arama sonuç sayısına göre tahmin · Gerçek zamanlı değil
-          </p>
         </div>
       )}
     </div>
