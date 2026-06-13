@@ -92,6 +92,7 @@ export default function ProductAnalyzer() {
   const [productName, setProductName] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [expandTrigger, setExpandTrigger] = useState(0);
   const [socialProofIndex, setSocialProofIndex] = useState(0);
   const [showSocialProof, setShowSocialProof] = useState(false);
   const [aliData, setAliData] = useState<AliProduct | null>(null);
@@ -284,13 +285,14 @@ export default function ProductAnalyzer() {
           <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
             🚀 Akıllı Analiz Paneli
           </span>
-          <motion.span
+          <motion.button
+            onClick={() => setExpandTrigger((v) => v + 1)}
             animate={{ opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.6, repeat: Infinity }}
-            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40"
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40 hover:bg-pink-500/30 cursor-pointer"
           >
-            ✨ YENİ
-          </motion.span>
+            ✨ Hepsini Aç
+          </motion.button>
         </div>
         <p className="text-[11px] text-muted-foreground -mt-1">
           Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör.
@@ -299,16 +301,19 @@ export default function ProductAnalyzer() {
           productName={productName}
           googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
           googleCx="93c44c1933cf646eb"
+          expandTrigger={expandTrigger}
         />
         <CompetitorAnalysis
           productName={productName}
           googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
           googleCx="93c44c1933cf646eb"
+          expandTrigger={expandTrigger}
         />
         <MarketplaceCalculator
           costUSD={input.product_cost}
           salePriceUSD={input.selling_price}
           exchangeRate={45}
+          expandTrigger={expandTrigger}
         />
         <ProfitSimulator
           profitPerUnit={result.gross_profit}
@@ -316,6 +321,7 @@ export default function ProductAnalyzer() {
           costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
           currency={currency}
           initialOrders={input.monthly_orders_estimate || 50}
+          expandTrigger={expandTrigger}
         />
       </div>
 
