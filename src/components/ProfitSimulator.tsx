@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TrendingUp, Target, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ProfitSimulatorProps {
+  expandTrigger?: number;
   profitPerUnit: number;
   revenuePerUnit: number;
   costPerUnit: number;
@@ -11,9 +12,13 @@ interface ProfitSimulatorProps {
 
 const MARKS = [10, 25, 50, 100, 250, 500, 1000];
 
-export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPerUnit, currency, initialOrders = 50 }: ProfitSimulatorProps) {
+export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPerUnit, currency, initialOrders = 50 , expandTrigger }: ProfitSimulatorProps) {
   const [orders, setOrders] = useState(initialOrders);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (expandTrigger && expandTrigger > 0) setOpen(true);
+  }, [expandTrigger]);
   const hasData = revenuePerUnit > 0;
 
   const monthlyProfit = profitPerUnit * orders;
