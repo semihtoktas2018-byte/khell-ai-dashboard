@@ -37,6 +37,7 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
   const [started, setStarted] = useState(false);
   const [cjCount, setCjCount] = useState<number | null>(null);
   const [marketCount, setMarketCount] = useState<number | null>(null);
+  const [redditCount, setRedditCount] = useState<number | null>(null);
 
   const hasName = productName.trim().length > 0;
 
@@ -46,7 +47,9 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
     setLoading(true);
     setCjCount(null);
     setMarketCount(null);
+    setRedditCount(null);
 
+    // 1) CJ Popularity
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&productNameEn=${encodeURIComponent(productName)}`;
@@ -58,6 +61,7 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
       setCjCount(null);
     }
 
+    // 2) Market Saturation (Google Custom Search)
     if (googleApiKey) {
       try {
         const query = encodeURIComponent(
@@ -73,15 +77,33 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
       }
     }
 
+    // 3) Reddit Mentions (public search JSON — CORS engellerse sessizce veri yok kalır)
+    try {
+      const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(productName)}&limit=25&sort=new&t=month`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const count = data?.data?.children?.length ?? null;
+        setRedditCount(count);
+      } else {
+        setRedditCount(null);
+      }
+    } catch {
+      setRedditCount(null);
+    }
+
     setLoading(false);
   };
 
   useEffect(() => {
     if (open && hasName && !started) fetchData();
-    if (!hasName) { setStarted(false); setCjCount(null); setMarketCount(null); }
+    if (!hasName) { setStarted(false); setCjCount(null); setMarketCount(null); setRedditCount(null); }
   }, [open, productName]);
 
+  // CJ Popularity Score: 0-100 (daha çok tedarikçi = kategori aktif)
   const cjScore = cjCount !== null ? Math.min(100, Math.round((cjCount / 50) * 100)) : null;
+
+  // Market Saturation Score: düşük rekabet = yüksek skor
   let satScore: number | null = null;
   if (marketCount !== null) {
     if (marketCount <= 15) satScore = 90;
@@ -90,7 +112,10 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
     else satScore = 20;
   }
 
-  const validScores = [cjScore, satScore].filter((s): s is number => s !== null);
+  // Reddit Mention Score: 0-100 (son 1 ayda kaç gönderide bahsediliyor)
+  const redditScore = redditCount !== null ? Math.min(100, Math.round((redditCount / 15) * 100)) : null;
+
+  const validScores = [cjScore, satScore, redditScore].filter((s): s is number => s !== null);
   const trendScore = validScores.length > 0
     ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
     : null;
@@ -155,8 +180,16 @@ export default function TrendScore({ productName, googleApiKey, googleCx }: Tren
                   <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
                 )}
               </div>
+              <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
+                <span className="text-muted-foreground">💬 Reddit Mention (30 gün)</span>
+                {redditCount !== null ? (
+                  <span className="text-foreground font-mono">{redditCount} gönderi → {redditScore}/100</span>
+                ) : (
+                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                )}
+              </div>
               <p className="text-muted-foreground text-center pt-0.5">
-                CJ tedarikçi sayısı + pazar yeri doygunluğuna göre tahmini skor
+                CJ tedarikçi + pazar doygunluğu + Reddit mention'a göre tahmini skor
               </p>
             </>
           )}
