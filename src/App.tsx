@@ -49,8 +49,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<ModuleSelect />} />
-              <Route path="/products" element={<LandingPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/products" element={<ModuleSelect />} />
               <Route path="/fleet" element={<FleetAnalysis />} />
               <Route path="/filo" element={<FleetAnalysis />} />
               <Route path="/ad-analyzer" element={<AdAnalyzer />} />
