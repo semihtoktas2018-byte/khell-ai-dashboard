@@ -1,17 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import LandingPage from "./pages/LandingPage";
-import ModuleSelect from "./pages/ModuleSelect";
-import FleetAnalysis from "./pages/FleetAnalysis";
-import AdAnalyzer from "./pages/AdAnalyzer";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -20,9 +17,6 @@ import WinningProducts from "./pages/WinningProducts";
 import Suppliers from "./pages/Suppliers";
 import SavedProducts from "./pages/SavedProducts";
 import RiskAnalysis from "./pages/RiskAnalysis";
-import ViralDiscovery from "./pages/ViralDiscovery";
-import AutoHunter from "./pages/AutoHunter";
-import ViralProducts from "./pages/ViralProducts";
 import ProductPageGenerator from "./pages/ProductPageGenerator";
 import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
@@ -41,43 +35,36 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
-      <LocaleProvider>
-      <AuthProvider>
-        <SavedProductsProvider>
-          <AnalysisHistoryProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/products" element={<ModuleSelect />} />
-              <Route path="/fleet" element={<FleetAnalysis />} />
-              <Route path="/filo" element={<FleetAnalysis />} />
-              <Route path="/ad-analyzer" element={<AdAnalyzer />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                <Route index element={<DashboardHome />} />
-                <Route path="analyzer" element={<ProductAnalyzer />} />
-                <Route path="winning" element={<WinningProducts />} />
-                <Route path="discovery" element={<ViralDiscovery />} />
-                <Route path="hunter" element={<AutoHunter />} />
-                <Route path="viral-products" element={<ViralProducts />} />
-                <Route path="suppliers" element={<Suppliers />} />
-                <Route path="saved" element={<SavedProducts />} />
-                <Route path="risk" element={<RiskAnalysis />} />
-                <Route path="product-page-generator" element={<ProductPageGenerator />} />
-                <Route path="sales-decision" element={<SalesDecisionEngine />} />
-                <Route path="content-engine" element={<ContentEngine />} />
-                <Route path="trending" element={<TrendingProducts />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <FloatingWhatsApp />
-          </BrowserRouter>
-          </AnalysisHistoryProvider>
-        </SavedProductsProvider>
-      </AuthProvider>
-      </LocaleProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <SavedProductsProvider>
+              <AnalysisHistoryProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                      <Route index element={<DashboardHome />} />
+                      <Route path="analyzer" element={<ProductAnalyzer />} />
+                      <Route path="winning" element={<WinningProducts />} />
+                      <Route path="trending" element={<TrendingProducts />} />
+                      <Route path="suppliers" element={<Suppliers />} />
+                      <Route path="saved" element={<SavedProducts />} />
+                      <Route path="risk" element={<RiskAnalysis />} />
+                      <Route path="product-page-generator" element={<ProductPageGenerator />} />
+                      <Route path="sales-decision" element={<SalesDecisionEngine />} />
+                      <Route path="content-engine" element={<ContentEngine />} />
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <FloatingWhatsApp />
+                </BrowserRouter>
+              </AnalysisHistoryProvider>
+            </SavedProductsProvider>
+          </AuthProvider>
+        </LocaleProvider>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
