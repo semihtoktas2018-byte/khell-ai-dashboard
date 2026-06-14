@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 type Locale = "tr" | "en";
 
@@ -12,27 +12,24 @@ interface LocaleContextType {
 
 const translations: Record<Locale, Record<string, string>> = {
   tr: {
-    // Nav
     "nav.dashboard": "Dashboard",
     "nav.analyzer": "Ürün Analizi",
     "nav.winning": "Kazanan Ürünler",
     "nav.discovery": "Viral Ürün Keşfi",
     "nav.trending": "Trend Ürünler 🔥",
     "nav.viral": "Viral Ürün Bulucu",
-    "nav.hunter": "Auto Product Hunter",
+    "nav.hunter": "Otomatik Ürün Avcısı",
     "nav.suppliers": "Tedarikçiler",
     "nav.risk": "Risk Analizi",
     "nav.pageGen": "Ürün Sayfası Oluşturucu",
-    "nav.salesDecision": "Sales Decision Engine",
+    "nav.salesDecision": "Satış Karar Motoru",
     "nav.saved": "Kaydedilenler",
-    "nav.contentEngine": "Content Engine",
+    "nav.contentEngine": "İçerik Motoru",
     "nav.proAccess": "🔥 PRO ACCESS",
     "nav.unlimited": "Sınırsız Analiz",
     "nav.findWinning": "Kazanan Ürünleri Bul",
-    "nav.upgradeNow": "Upgrade Now",
+    "nav.upgradeNow": "Yükselt",
     "nav.production": "A BAMİR Online Store's Production",
-
-    // Landing
     "landing.badge": "AI Video Reklam & Ürün Analiz Platformu",
     "landing.heroTitle": "Kazanan ürünü bul, viral reklam oluştur — saniyeler içinde.",
     "landing.heroSubtext": "Deneyim gerekmez. Düzenleme becerisi gerekmez.",
@@ -68,9 +65,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.feat6Desc": "Kazanan ürünleri tek bakışta belirleyin.",
     "landing.pricing": "Fiyatlandırma",
     "landing.pricingDesc": "İhtiyacınıza uygun planı seçin.",
-    "landing.starter": "Starter",
+    "landing.starter": "Başlangıç",
     "landing.free": "Ücretsiz",
-    "landing.starterF1": "Günde 5 analiz",
+    "landing.starterF1": "Günde 3 analiz",
     "landing.starterF2": "Trend ürün keşfi",
     "landing.starterF3": "Tedarikçi arama",
     "landing.starterF4": "Temel risk analizi",
@@ -93,8 +90,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.ctaDesc": "Binlerce e-ticaret girişimcisi KHELL AI ile kârlı ürünleri keşfediyor.",
     "landing.login": "Giriş Yap",
     "landing.start": "Hemen Başla",
-
-    // Analyzer
     "analyzer.productName": "Ürün adı girin...",
     "analyzer.costEntry": "Maliyet Girişi",
     "analyzer.sellingPrice": "Satış Fiyatı",
@@ -123,7 +118,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "analyzer.clearedDesc": "Analiz geçmişi silindi",
     "analyzer.noAnalysis": "Henüz analiz yapılmadı.",
     "analyzer.score": "Skor",
-    "analyzer.unlockMore": "Unlock More Winners 🔒",
+    "analyzer.unlockMore": "Daha Fazla Kazanan Ürün 🔒",
     "analyzer.scaleThis": "✅ Bu ürünü hızlıca büyütebilirsiniz",
     "analyzer.testBefore": "⚠️ Büyütmeden önce test edin",
     "analyzer.notRecommended": "❌ Önerilmez",
@@ -132,8 +127,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "analyzer.notRec": "Önerilmez",
     "analyzer.unnamedProduct": "İsimsiz Ürün",
     "analyzer.error": "Hata",
-
-    // Paywall
     "paywall.title": "Kötü bir üründen kurtuldunuz.",
     "paywall.subtitle1": "Çoğu yeni başlayan yanlış ürün seçerek para kaybeder.",
     "paywall.subtitle2": "KHELL sizi bundan kurtardı.",
@@ -142,11 +135,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "paywall.lowerRisk": "Daha düşük risk",
     "paywall.verifiedDemand": "Doğrulanmış talep",
     "paywall.cta": "Kazanan Ürünlerin Kilidini Aç",
-   "paywall.price": "Sınırlı erken erişim fiyatı: 249 TL/ay",
-
+    "paywall.price": "Sınırlı erken erişim fiyatı: 249 TL/ay",
     "paywall.later": "Belki sonra",
-
-    // Dashboard
     "dash.heroCta": "1 Ürün Bul → Analiz Et → Satışa Çıkar",
     "dash.heroDesc": "KHELL AI ile kazanan ürünleri saniyeler içinde bul.",
     "dash.startFinding": "Ürün Bulmaya Başla",
@@ -175,8 +165,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "dash.category": "Sağlık & Fitness",
     "dash.margin": "Marj",
     "dash.productName": "Akıllı Duruş Düzeltici Pro",
-
-    // Winning Products
     "winning.all": "Tümü",
     "winning.filters": "Filtreler",
     "winning.category": "Kategori",
@@ -187,8 +175,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "winning.supplierPrice": "Tedarikçi Fiyatı",
     "winning.competition": "Rekabet",
     "winning.noProducts": "Filtrelere uygun ürün bulunamadı.",
-
-    // Viral Products
     "viralProd.step": "Adım 1/3",
     "viralProd.stepDesc": "— Bir ürün seçin ve \"Analize Gönder\" butonuna tıklayın",
     "viralProd.title": "Viral Ürün Bulucu",
@@ -209,8 +195,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "viralProd.info": "Bilgi",
     "viralProd.alreadySaved": "Bu ürün zaten kayıtlı",
     "viralProd.savedMsg": "kaydedildi",
-
-    // Viral Discovery
     "viralDisc.title": "Viral Ürün Keşfi",
     "viralDisc.desc": "Trend kaynaklarından viral ürünleri keşfedin",
     "viralDisc.viralProduct": "Viral Ürün",
@@ -232,8 +216,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "viralDisc.price": "Fiyat",
     "viralDisc.cost": "Maliyet",
     "viralDisc.savedTo": "kaydedilen ürünlere eklendi",
-
-    // Suppliers
     "suppliers.search": "Tedarikçi veya ürün ara...",
     "suppliers.all": "Tümü",
     "suppliers.found": "tedarikçi bulundu",
@@ -249,8 +231,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "suppliers.best": "EN İYİ",
     "suppliers.free": "Ücretsiz",
     "suppliers.noSuppliers": "Filtrelere uygun tedarikçi bulunamadı.",
-
-    // Risk Analysis
     "risk.productInfo": "Ürün Bilgileri",
     "risk.sellingPrice": "Satış Fiyatı",
     "risk.productCost": "Ürün Maliyeti",
@@ -265,8 +245,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "risk.low": "Düşük",
     "risk.medium": "Orta",
     "risk.high": "Yüksek",
-
-    // Saved Products
     "savedProd.totalProducts": "Toplam Ürün",
     "savedProd.lowRisk": "Düşük Risk",
     "savedProd.medRisk": "Orta Risk",
@@ -289,9 +267,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "savedProd.deleted": "Silindi",
     "savedProd.deletedDesc": "listeden kaldırıldı",
     "savedProd.noFilter": "Filtrelere uygun ürün bulunamadı.",
-
-    // Auto Hunter
-    "hunter.title": "Auto Product Hunter",
+    "hunter.title": "Otomatik Ürün Avcısı",
     "hunter.desc": "Yapay zeka ile en yüksek potansiyelli ürünleri keşfedin",
     "hunter.scanned": "Taranan Ürün",
     "hunter.avgScore": "Ortalama Skor",
@@ -310,9 +286,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "hunter.save": "Kaydet",
     "hunter.saved": "Kaydedildi",
     "hunter.savedDesc": "ürün listenize eklendi",
-
-    // Sales Decision Engine
-    "sde.title": "Sales Decision Engine",
+    "sde.title": "Satış Karar Motoru",
     "sde.desc": "Ürün satacak mı yoksa batacak mı? — Anında karar.",
     "sde.productInfo": "Ürün Bilgileri",
     "sde.productName": "Ürün Adı *",
@@ -343,8 +317,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "sde.placeholder.name": "Örn: Lüks Kadife Koltuk",
     "sde.placeholder.link": "https://...",
     "sde.placeholder.desc": "Kısa ürün açıklaması",
-
-    // Product Page Generator
     "ppg.title": "Ürün Sayfası Oluşturucu",
     "ppg.desc": "Shopify ürün sayfası için hazır, yüksek dönüşümlü içerik bloğu oluşturun",
     "ppg.productInfo": "Ürün Bilgileri",
@@ -376,15 +348,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "ppg.trendViral": "Trend / Viral",
     "ppg.premium": "Premium",
     "ppg.budget": "Ucuz / Fırsat",
-
-    // Content Engine
-    "ce.title": "Content Engine — Video Ad Creator",
+    "ce.title": "İçerik Motoru — Video Reklam Üreticisi",
     "ce.desc": "Ürünü viral TikTok reklamına dönüştürün — tek tıkla",
     "ce.inputTitle": "Ürün Bilgileri",
     "ce.productName": "Ürün Adı",
     "ce.productNamePlaceholder": "Ürün adı girin...",
     "ce.niche": "Niş (opsiyonel)",
-    "ce.nichePlaceholder": "streetwear, tech, baby...",
+    "ce.nichePlaceholder": "streetwear, tech, bebek...",
     "ce.style": "Video Stili",
     "ce.productImage": "Ürün Görseli (zorunlu)",
     "ce.uploadHint": "Görsel yüklemek için tıklayın",
@@ -407,7 +377,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "ce.tabHooks": "Hook'lar",
     "ce.tabHashtags": "Hashtag'ler",
     "ce.tabVoiceover": "Seslendirme",
-    "ce.ctaLabel": "Call to Action",
+    "ce.ctaLabel": "Harekete Geçirici Mesaj",
     "ce.voiceoverScript": "Seslendirme Metni",
     "ce.onScreenTexts": "Ekran Üstü Yazılar",
     "ce.comingSoon": "Yakında",
@@ -415,16 +385,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "ce.targetAudience": "Hedef Kitle",
     "ce.priceSuggestion": "Fiyat Önerisi",
     "ce.salesAngle": "Satış Açısı",
-
-    // Months
     "month.jan": "Oca",
     "month.feb": "Şub",
     "month.mar": "Mar",
     "month.apr": "Nis",
     "month.may": "May",
     "month.jun": "Haz",
-
-    // Hero (Dashboard)
     "hero.badge": "Canlı AI Analiz Motoru",
     "hero.line1Highlight": "Kazancı",
     "hero.line1Rest": " analiz et,",
@@ -452,7 +418,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.stat.modulesSuffix": "+",
   },
   en: {
-    // Nav
     "nav.dashboard": "Dashboard",
     "nav.analyzer": "Product Analyzer",
     "nav.winning": "Winning Products",
@@ -471,8 +436,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.findWinning": "Find Winning Products",
     "nav.upgradeNow": "Upgrade Now",
     "nav.production": "A BAMİR Online Store's Production",
-
-    // Landing
     "landing.badge": "AI Video Ad & Product Analysis Platform",
     "landing.heroTitle": "Find a winning product and create viral ads in seconds.",
     "landing.heroSubtext": "No experience needed. No editing skills needed.",
@@ -510,7 +473,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.pricingDesc": "Choose the plan that fits your needs.",
     "landing.starter": "Starter",
     "landing.free": "Free",
-    "landing.starterF1": "5 analyses per day",
+    "landing.starterF1": "3 analyses per day",
     "landing.starterF2": "Trending product discovery",
     "landing.starterF3": "Supplier search",
     "landing.starterF4": "Basic risk analysis",
@@ -533,8 +496,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.ctaDesc": "Thousands of e-commerce entrepreneurs discover profitable products with KHELL AI.",
     "landing.login": "Login",
     "landing.start": "Get Started",
-
-    // Analyzer
     "analyzer.productName": "Enter product name...",
     "analyzer.costEntry": "Cost Entry",
     "analyzer.sellingPrice": "Selling Price",
@@ -572,8 +533,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "analyzer.notRec": "Not recommended",
     "analyzer.unnamedProduct": "Unnamed Product",
     "analyzer.error": "Error",
-
-    // Paywall
     "paywall.title": "You just avoided a bad product.",
     "paywall.subtitle1": "Most beginners lose money by picking the wrong product.",
     "paywall.subtitle2": "KHELL saved you from that.",
@@ -584,8 +543,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "paywall.cta": "Unlock Winning Products",
     "paywall.price": "Limited early access price: $9/mo",
     "paywall.later": "Maybe later",
-
-    // Dashboard
     "dash.heroCta": "Find 1 Product → Analyze → Launch",
     "dash.heroDesc": "Find winning products in seconds with KHELL AI.",
     "dash.startFinding": "Start Finding Products",
@@ -614,8 +571,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "dash.category": "Health & Fitness",
     "dash.margin": "Margin",
     "dash.productName": "Smart Posture Corrector Pro",
-
-    // Winning Products
     "winning.all": "All",
     "winning.filters": "Filters",
     "winning.category": "Category",
@@ -626,8 +581,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "winning.supplierPrice": "Supplier Price",
     "winning.competition": "Competition",
     "winning.noProducts": "No products matching filters.",
-
-    // Viral Products
     "viralProd.step": "Step 1/3",
     "viralProd.stepDesc": "— Pick a product and click \"Send to Analysis\"",
     "viralProd.title": "Viral Product Finder",
@@ -648,8 +601,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "viralProd.info": "Info",
     "viralProd.alreadySaved": "This product is already saved",
     "viralProd.savedMsg": "saved",
-
-    // Viral Discovery
     "viralDisc.title": "Viral Product Discovery",
     "viralDisc.desc": "Discover viral products from trend sources",
     "viralDisc.viralProduct": "Viral Product",
@@ -671,8 +622,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "viralDisc.price": "Price",
     "viralDisc.cost": "Cost",
     "viralDisc.savedTo": "added to saved products",
-
-    // Suppliers
     "suppliers.search": "Search supplier or product...",
     "suppliers.all": "All",
     "suppliers.found": "suppliers found",
@@ -688,8 +637,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "suppliers.best": "BEST",
     "suppliers.free": "Free",
     "suppliers.noSuppliers": "No suppliers matching filters.",
-
-    // Risk Analysis
     "risk.productInfo": "Product Info",
     "risk.sellingPrice": "Selling Price",
     "risk.productCost": "Product Cost",
@@ -704,8 +651,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "risk.low": "Low",
     "risk.medium": "Medium",
     "risk.high": "High",
-
-    // Saved Products
     "savedProd.totalProducts": "Total Products",
     "savedProd.lowRisk": "Low Risk",
     "savedProd.medRisk": "Medium Risk",
@@ -728,8 +673,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "savedProd.deleted": "Deleted",
     "savedProd.deletedDesc": "removed from list",
     "savedProd.noFilter": "No products matching filters.",
-
-    // Auto Hunter
     "hunter.title": "Auto Product Hunter",
     "hunter.desc": "Discover highest potential products with AI",
     "hunter.scanned": "Scanned Products",
@@ -749,8 +692,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "hunter.save": "Save",
     "hunter.saved": "Saved",
     "hunter.savedDesc": "added to your product list",
-
-    // Sales Decision Engine
     "sde.title": "Sales Decision Engine",
     "sde.desc": "Will it sell or will it fail? — Instant decision.",
     "sde.productInfo": "Product Info",
@@ -782,8 +723,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "sde.placeholder.name": "e.g. Luxury Velvet Sofa",
     "sde.placeholder.link": "https://...",
     "sde.placeholder.desc": "Short product description",
-
-    // Product Page Generator
     "ppg.title": "Product Page Generator",
     "ppg.desc": "Generate high-converting content blocks for your Shopify product page",
     "ppg.productInfo": "Product Info",
@@ -815,8 +754,6 @@ const translations: Record<Locale, Record<string, string>> = {
     "ppg.trendViral": "Trend / Viral",
     "ppg.premium": "Premium",
     "ppg.budget": "Budget / Deal",
-
-    // Content Engine
     "ce.title": "Content Engine — Video Ad Creator",
     "ce.desc": "Turn any product into a viral TikTok ad — one click",
     "ce.inputTitle": "Product Details",
@@ -854,16 +791,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "ce.targetAudience": "Target Audience",
     "ce.priceSuggestion": "Price Suggestion",
     "ce.salesAngle": "Sales Angle",
-
-    // Months
     "month.jan": "Jan",
     "month.feb": "Feb",
     "month.mar": "Mar",
     "month.apr": "Apr",
     "month.may": "May",
     "month.jun": "Jun",
-
-    // Hero (Dashboard)
     "hero.badge": "Live AI Analysis Engine",
     "hero.line1Highlight": "Analyze",
     "hero.line1Rest": " your profit,",
@@ -898,9 +831,7 @@ function detectCountry(): Locale {
     if (tz && tz.startsWith("Europe/Istanbul")) return "tr";
     const lang = navigator.language || "";
     if (lang.startsWith("tr")) return "tr";
-  } catch {
-    // fallback
-  }
+  } catch {}
   return "en";
 }
 
@@ -918,13 +849,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("khell_locale", l);
   };
 
-  const t = (key: string): string => {
-    return translations[locale][key] ?? key;
-  };
-
+  const t = (key: string): string => translations[locale][key] ?? key;
   const currencySymbol = locale === "tr" ? "₺" : "$";
-
-  // 1 USD = 45 TL sabit kur
   const USD_TO_TRY = 45;
 
   const currency = (val: number): string => {
