@@ -21,7 +21,10 @@ export interface DecisionOutput {
   pricing_strategy: string;
   quick_reason: string;
   action: "LAUNCH" | "TEST" | "REJECT";
+  ai_analysis?: string;
 }
+
+const ANTHROPIC_KEY = "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";
 
 const MIDDLE_EAST = ["turkey","türkiye","tr","saudi arabia","sa","uae","ae","qatar","qa","kuwait","kw","bahrain","oman","iraq","jordan","egypt"];
 const HIGH_VISUAL_CATS = ["furniture","home decor","luxury decor","home design","fashion","jewelry","watches","bags","shoes","lighting","decoration","aksesuar","mobilya","dekorasyon"];
@@ -39,11 +42,9 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
   const country = target_country.toLowerCase();
   const name = product_name.toLowerCase();
 
-  // 1. MARGIN
   const margin = product_price > 0 ? ((product_price - cost_price) / product_price) * 100 : 0;
   const marginScore = norm(margin, 0, 60);
 
-  // 2. EMOTIONAL TRIGGERS
   const triggers: string[] = [];
   if (LUXURY_CATS.some(c => cat.includes(c) || name.includes(c))) triggers.push("status", "luxury");
   if (cat.includes("sofa") || cat.includes("furniture") || cat.includes("mobilya") || name.includes("sofa")) triggers.push("comfort");
@@ -53,38 +54,31 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
   const uniqueTriggers = [...new Set(triggers)];
   const triggerScore = Math.min(uniqueTriggers.length * 20, 60);
 
-  // 3. MARKET FIT
   const isME = MIDDLE_EAST.some(c => country.includes(c));
   const meBias = isME && (cat.includes("furniture") || cat.includes("decor") || cat.includes("luxury") || cat.includes("mobilya") || cat.includes("dekorasyon")) ? 25 : 0;
   const highTicketBonus = product_price > 500 ? 10 : 0;
   const marketFit = Math.min(100, Math.round(40 + meBias + highTicketBonus + triggerScore * 0.3));
 
-  // 4. COMPETITION
   const isUnique = uniqueTriggers.includes("luxury") || uniqueTriggers.includes("status") || product_price > 300;
   const competitionLevel: "LOW" | "MEDIUM" | "HIGH" = isUnique ? "LOW" : margin < 30 ? "HIGH" : "MEDIUM";
   const compScore = competitionLevel === "LOW" ? 80 : competitionLevel === "MEDIUM" ? 50 : 20;
 
-  // 5. AD POTENTIAL
   const isVisual = HIGH_VISUAL_CATS.some(c => cat.includes(c) || name.includes(c));
   const adPotential = Math.min(100, Math.round((isVisual ? 70 : 40) + (uniqueTriggers.includes("trend") ? 15 : 0) + (margin > 40 ? 10 : 0)));
 
-  // 6. SATURATION PENALTY
   const isSaturated = SATURATED_KEYWORDS.some(k => name.includes(k) || cat.includes(k));
   const saturationPenalty = isSaturated ? 30 : 0;
 
-  // 7. PLATFORMS
   const platforms: string[] = [];
   if (uniqueTriggers.includes("trend") || isVisual) platforms.push("tiktok", "instagram");
   if (product_price > 100 || uniqueTriggers.includes("luxury")) platforms.push("facebook");
   if (product_price > 300) platforms.push("google");
   if (platforms.length === 0) platforms.push("facebook", "instagram");
 
-  // 8. FINAL SCORE
   const rawScore = Math.round(marginScore * 0.35 + marketFit * 0.25 + adPotential * 0.25 + compScore * 0.15);
   const totalScore = Math.max(0, rawScore - saturationPenalty);
   const confidence = Math.min(95, Math.max(15, totalScore + (triggerScore > 30 ? 5 : 0)));
 
-  // 9. STRICT DECISION RULES
   const canWin = margin > 35 && marketFit > 60 && competitionLevel !== "HIGH";
   let decision: "WINNER" | "LOSER";
   let action: "LAUNCH" | "TEST" | "REJECT";
@@ -100,46 +94,75 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
     action = "REJECT";
   }
 
-  // Force: market_fit < 50 → never WINNER
-  if (marketFit < 50) {
-    decision = "LOSER";
-    if (action === "LAUNCH") action = "TEST";
-  }
-
-  // Force: competition MEDIUM/HIGH + not unique → TEST or REJECT
+  if (marketFit < 50) { decision = "LOSER"; if (action === "LAUNCH") action = "TEST"; }
   if ((competitionLevel === "MEDIUM" || competitionLevel === "HIGH") && !isUnique) {
     if (decision === "WINNER") { decision = "LOSER"; action = "TEST"; }
   }
 
-  // 8. AUDIENCE
   const ageRange = product_price > 300 ? "30-55" : "18-35";
   const genderHint = (cat.includes("beauty") || cat.includes("kozmetik") || cat.includes("fashion")) ? "kadın ağırlıklı" : "genel";
   const target_audience = `${ageRange} yaş, ${genderHint}, ${isME ? "Orta Doğu" : "global"} pazarı, ${uniqueTriggers[0]} odaklı alıcılar`;
 
-  // 9. PRICING
   const pricing_strategy = margin > 50
     ? `Premium fiyatlandırma uygun — %${margin.toFixed(0)} marj ile agresif reklam bütçesi ayrılabilir.`
     : margin > 30
     ? `Orta segment fiyat — marj yeterli ama reklam maliyetlerine dikkat edilmeli.`
     : `Düşük marj — fiyat artırılmalı veya maliyet düşürülmeli, aksi halde kârsız.`;
 
-  // 10. REASON
   const quick_reason = decision === "WINNER"
     ? `%${margin.toFixed(0)} marj ve güçlü ${uniqueTriggers.join("+")} tetikleyicileri ile bu ürün satış potansiyeli yüksek.`
     : `%${margin.toFixed(0)} marj yetersiz ve rekabet seviyesi ${competitionLevel} — bu ürün riskli.`;
 
   return {
-    decision,
-    confidence_score: confidence,
+    decision, confidence_score: confidence,
     estimated_margin_percent: Math.round(margin * 10) / 10,
-    target_audience,
-    emotional_trigger: uniqueTriggers,
-    market_fit: marketFit,
-    competition_level: competitionLevel,
-    ad_potential: adPotential,
+    target_audience, emotional_trigger: uniqueTriggers, market_fit: marketFit,
+    competition_level: competitionLevel, ad_potential: adPotential,
     recommended_platform: [...new Set(platforms)],
-    pricing_strategy,
-    quick_reason,
-    action,
+    pricing_strategy, quick_reason, action,
   };
+}
+
+export async function runDecisionEngineAI(input: DecisionInput): Promise<string> {
+  const base = runDecisionEngine(input);
+  const prompt = `Sen bir e-ticaret ve dropshipping uzmanısın. Aşağıdaki ürün için kısa ve net bir AI değerlendirmesi yaz.
+
+ÜRÜN BİLGİLERİ:
+- Ürün: ${input.product_name}
+- Kategori: ${input.product_category}
+- Satış Fiyatı: ${input.product_price}
+- Maliyet: ${input.cost_price}
+- Kâr Marjı: %${base.estimated_margin_percent}
+- Hedef Ülke: ${input.target_country}
+- Algoritma Kararı: ${base.decision} (Skor: ${base.confidence_score}/100)
+- Aksiyon: ${base.action}
+${input.description ? `- Açıklama: ${input.description}` : ""}
+
+Türkçe olarak 3-4 cümle yaz:
+1. Bu ürünün gerçek pazar potansiyeli hakkında görüşün
+2. En büyük risk nedir?
+3. Eğer satacaksa hangi reklam stratejisini önerirsin?
+
+Kısa, direkt ve pratik ol. "AI olarak" gibi ifadeler kullanma.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5",
+        max_tokens: 300,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || "";
+  } catch {
+    return "";
+  }
 }
