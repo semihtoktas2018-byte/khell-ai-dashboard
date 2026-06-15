@@ -17,7 +17,7 @@ interface TrendResult {
   reason: string;
 }
 
-const ANTHROPIC_KEY = "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";
+const ANTHROPIC_KEY = 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
 
 
 async function analyzeProduct(name: string, isTr: boolean): Promise<TrendResult> {
