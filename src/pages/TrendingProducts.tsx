@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { translateProducts } from "@/lib/translate";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
 const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
@@ -52,6 +53,7 @@ export default function TrendingProducts() {
   const [items, setItems] = useState<CJProduct[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const fetchTrending = useCallback(async () => {
@@ -66,9 +68,14 @@ export default function TrendingProducts() {
       setItems(data.data.list);
       setLastUpdated(new Date());
       setCountdown(REFRESH_INTERVAL / 1000);
+      // Ürün adlarını Türkçeye çevir
+      const names = data.data.list.map((p: CJProduct) => getDisplayName(p)).filter(Boolean);
+      translateProducts(names).then(setTranslations).catch(() => {});
     } catch (e: any) {
       setError(e?.message || "Hata");
       setItems(MOCK);
+      const names = MOCK.map(getDisplayName);
+      translateProducts(names).then(setTranslations).catch(() => {});
     } finally {
       setLoading(false);
     }
@@ -159,7 +166,8 @@ export default function TrendingProducts() {
             const estSale = cost * 3;
             const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
             const img = p.productImage?.split(",")[0] || "";
-            const displayName = getDisplayName(p);
+            const rawName = getDisplayName(p);
+            const displayName = translations[rawName] || rawName;
             return (
               <motion.div
                 key={p.pid || i}
@@ -172,10 +180,7 @@ export default function TrendingProducts() {
                     <TrendingUp className="h-2.5 w-2.5" /> TOP {i + 1}
                   </span>
                 )}
-                <div
-                  onClick={() => openProduct(p)}
-                  className="block aspect-square bg-background overflow-hidden cursor-pointer"
-                >
+                <div onClick={() => openProduct(p)} className="block aspect-square bg-background overflow-hidden cursor-pointer">
                   {img ? (
                     <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   ) : (
@@ -202,13 +207,13 @@ export default function TrendingProducts() {
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
                     <button
-                      onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(displayName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
+                      onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(rawName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
                       className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
                     >
                       <BarChart3 className="h-3 w-3" /> Analiz Et
                     </button>
                     <button
-                      onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(displayName)}&image=${encodeURIComponent(img)}&price=${estSale.toFixed(2)}`)}
+                      onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(rawName)}&image=${encodeURIComponent(img)}&price=${estSale.toFixed(2)}`)}
                       className="h-7 rounded-md bg-orange-500/15 text-orange-500 text-[10px] font-semibold hover:bg-orange-500/25 transition-colors flex items-center justify-center gap-1"
                     >
                       <FileText className="h-3 w-3" /> Sayfa Oluştur
