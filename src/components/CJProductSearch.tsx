@@ -2,11 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Loader2, Radio, BarChart3, FileText, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import MarketplaceCalculator from "@/components/MarketplaceCalculator";
+import { translateProducts } from "@/lib/translate";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
-const GOOGLE_API_KEY = "AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ";
 
 interface CJProduct {
   pid: string;
@@ -35,13 +34,12 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.token;
 }
 
-
-
 export default function CJProductSearch() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CJProduct[]>([]);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const search = async () => {
@@ -49,17 +47,19 @@ export default function CJProductSearch() {
     setLoading(true);
     setError(null);
     setResults([]);
+    setTranslations({});
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
-      const res = await fetch(url, {
-        headers: { "CJ-Access-Token": token },
-      });
+      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
       const data = await res.json();
       if (!data?.data?.list) {
         throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
       setResults(data.data.list);
+      // Ürün adlarını Türkçeye çevir
+      const names = data.data.list.map((p: CJProduct) => p.productNameEn || p.productName).filter(Boolean);
+      translateProducts(names).then(setTranslations).catch(() => {});
     } catch (e: any) {
       setError(e?.message || "Hata oluştu");
     } finally {
@@ -123,6 +123,9 @@ export default function CJProductSearch() {
               const cost = parseFloat(p.sellPrice || "0") || 0;
               const estSale = cost * 3;
               const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
+              const rawName = p.productNameEn || p.productName;
+              const displayName = translations[rawName] || rawName;
+
               return (
                 <motion.div
                   key={p.pid || i}
@@ -138,7 +141,7 @@ export default function CJProductSearch() {
                     {p.productImage ? (
                       <img
                         src={p.productImage.split(",")[0]}
-                        alt={p.productName}
+                        alt={displayName}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
@@ -149,7 +152,7 @@ export default function CJProductSearch() {
                     )}
                   </a>
                   <div className="p-3 space-y-2 flex-1 flex flex-col">
-                    <p className="text-x5 font-medium text-foreground line-clamp-2 min-h-[2rem]">{p.productNameEn || p.productName}</p>
+                    <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
 
                     <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                       <div className="rounded bg-background/60 px-2 py-1">
@@ -161,22 +164,14 @@ export default function CJProductSearch() {
                         <p className="font-mono font-bold text-orange-500">${estSale.toFixed(2)}</p>
                       </div>
                     </div>
-
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-muted-foreground">Kâr Marjı</span>
                       <span className="font-mono font-bold text-winning">%{margin}</span>
                     </div>
 
-                    {/* Pazar Yeri Komisyon Hesaplayıcı */}
-                    <MarketplaceCalculator
-                      costUSD={cost}
-                      salePriceUSD={estSale}
-                      exchangeRate={45}
-                    />
-
                     {/* Trendyol Butonu */}
                     <a
-                      href={`https://www.trendyol.com/sr?q=${encodeURIComponent(p.productName)}`}
+                      href={`https://www.trendyol.com/sr?q=${encodeURIComponent(rawName)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center justify-center gap-1.5 w-full h-7 rounded-md bg-[#FF6000]/15 text-[#FF6000] text-[10px] font-semibold hover:bg-[#FF6000]/30 transition-colors border border-[#FF6000]/20"
@@ -184,15 +179,15 @@ export default function CJProductSearch() {
                       <ShoppingCart className="h-3 w-3" /> Trendyol'da Gör
                     </a>
 
-                    <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <button
-                        onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(p.productName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
+                        onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(rawName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
                         className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
                       >
                         <BarChart3 className="h-3 w-3" /> Analiz Et
                       </button>
                       <button
-                        onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(p.productName)}&image=${encodeURIComponent(p.productImage?.split(",")[0] || "")}&price=${estSale.toFixed(2)}`)}
+                        onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(rawName)}&image=${encodeURIComponent(p.productImage?.split(",")[0] || "")}&price=${estSale.toFixed(2)}`)}
                         className="h-7 rounded-md bg-orange-500/15 text-orange-500 text-[10px] font-semibold hover:bg-orange-500/25 transition-colors flex items-center justify-center gap-1"
                       >
                         <FileText className="h-3 w-3" /> Sayfa Oluştur
