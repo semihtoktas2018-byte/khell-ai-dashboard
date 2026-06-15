@@ -24,7 +24,7 @@ export interface DecisionOutput {
   ai_analysis?: string;
 }
 
-const ANTHROPIC_KEY = "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";
+const ANTHROPIC_KEY = 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
 
 const MIDDLE_EAST = ["turkey","türkiye","tr","saudi arabia","sa","uae","ae","qatar","qa","kuwait","kw","bahrain","oman","iraq","jordan","egypt"];
 const HIGH_VISUAL_CATS = ["furniture","home decor","luxury decor","home design","fashion","jewelry","watches","bags","shoes","lighting","decoration","aksesuar","mobilya","dekorasyon"];
