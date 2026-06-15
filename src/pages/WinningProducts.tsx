@@ -4,6 +4,7 @@ import { Package, Loader2, Radio, BarChart3, RefreshCw, TrendingUp, Filter } fro
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
+import { translateProducts } from "@/lib/translate";
 
 const CJ_EMAIL = "bamir.global@gmail.com";
 const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
@@ -61,6 +62,7 @@ export default function WinningProducts() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
   const [marginFilter, setMarginFilter] = useState(0);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { currency } = useLocale();
 
@@ -101,6 +103,9 @@ export default function WinningProducts() {
 
       setItems(withMargin as any);
       setLastUpdated(new Date());
+      // Ürün adlarını Türkçeye çevir
+      const names = withMargin.map((p: any) => p.productNameEn || p.productName).filter(Boolean);
+      translateProducts(names).then(setTranslations).catch(() => {});
       setCountdown(REFRESH_INTERVAL / 1000);
     } catch (e: any) {
       setError(e?.message || "Hata");
@@ -205,7 +210,8 @@ export default function WinningProducts() {
           {filteredItems.map((p: any, i: number) => {
             const marginMeta = getMarginLabel(p._margin);
             const img = p.productImage?.split(",")[0] || "";
-            const displayName = getDisplayName(p);
+            const rawName = getDisplayName(p);
+              const displayName = translations[rawName] || rawName;
             return (
               <motion.div
                 key={p.pid || i}
