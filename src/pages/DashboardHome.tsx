@@ -1,8 +1,7 @@
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap, Star, ArrowRight } from "lucide-react";
+import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap, Star } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
-import { trendingProducts } from "@/lib/mock-data";
 import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
@@ -24,24 +23,6 @@ export default function DashboardHome() {
   const { history: analysisHistory } = useAnalysisHistory();
   const navigate = useNavigate();
   const { t, currency, locale } = useLocale();
-  const topTrending = trendingProducts.slice(0, 4);
-
-  const demoProduct = {
-    name: t("dash.productName"),
-    decisionScore: 84,
-    monthlyProfit: 1240,
-    riskLevel: "low" as const,
-    profitMargin: 62,
-    category: t("dash.category"),
-  };
-
-  useEffect(() => {
-    const hasOnboarded = localStorage.getItem("khell_onboarded");
-    if (!hasOnboarded) {
-      localStorage.setItem("khell_onboarded", "1");
-      navigate("/dashboard/viral-products", { replace: true });
-    }
-  }, [navigate]);
 
   const metrics = useMemo(() => {
     const totalAnalyzed = analysisHistory.length;
@@ -102,25 +83,21 @@ export default function DashboardHome() {
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <SEO title="Dashboard | KHELL AI" description="Kârlılık metrikleri, kazanan ürünler ve risk dağılımının canlı görünümü." />
 
-      {/* ── YENİ PREMIUM HERO ── */}
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
       </motion.div>
 
-      {/* ── Anlık Trend Skoru Widget ── */}
       <motion.div variants={fadeUp}>
         <TrendScoreWidget />
       </motion.div>
 
-      {/* ── CJdropshipping Ürün Arama ── */}
       <motion.div variants={fadeUp}>
         <CJProductSearch />
       </motion.div>
 
-      {/* ── Buradan itibaren mevcut içerik ── */}
       <div id="dashboard-modules" className="space-y-6">
 
-        {/* Stats */}
+        {/* Kullanıcının gerçek istatistikleri */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((s) => (
             <motion.div key={s.label} variants={fadeUp} className="card-glow rounded-xl p-5">
@@ -133,39 +110,19 @@ export default function DashboardHome() {
           ))}
         </div>
 
-        {/* Demo Product Card */}
-        <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" /> {t("dash.sampleWinning")}
-            </h3>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("dash.demo")}</span>
-          </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg bg-accent/30 p-4">
-            <div className="space-y-1">
-              <p className="text-base font-semibold text-foreground">{demoProduct.name}</p>
-              <p className="text-xs text-muted-foreground">{demoProduct.category} · {t("dash.margin")}: %{demoProduct.profitMargin}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold font-mono text-primary tabular-nums">{demoProduct.decisionScore}</p>
-                <p className="text-[10px] text-muted-foreground">{t("dash.decisionScore")}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-bold font-mono text-winning tabular-nums">{currency(demoProduct.monthlyProfit)}</p>
-                <p className="text-[10px] text-muted-foreground">{t("dash.monthlyProfitLabel")}</p>
-              </div>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-winning/10 text-winning">{t("dash.lowRisk")}</span>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <motion.div variants={fadeUp} className="card-glow rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.profitTrend")}</h3>
             {profitData.length === 0 ? (
-              <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">{t("dash.noDataYet")}</div>
+              <div className="flex flex-col items-center justify-center h-[220px] gap-3 text-muted-foreground">
+                <BarChart3 className="h-10 w-10 opacity-20" />
+                <p className="text-sm">{t("dash.noDataYet")}</p>
+                <button onClick={() => navigate("/dashboard/analyzer")}
+                  className="text-xs text-primary hover:underline flex items-center gap-1">
+                  Ürün analiz et →
+                </button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={profitData}>
@@ -206,49 +163,30 @@ export default function DashboardHome() {
           </motion.div>
         </div>
 
-        {/* Score Chart & Trending Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.decisionScores")}</h3>
-            {scoreData.length === 0 ? (
-              <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">{t("dash.noData")}</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={scoreData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} domain={[0, 100]} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="score" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </motion.div>
-
-          <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">{t("dash.trendProducts")}</h3>
-              <button onClick={() => navigate("/dashboard/winning")} className="text-xs text-primary hover:underline">{t("dash.seeAll")}</button>
+        {/* Score Chart */}
+        <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">{t("dash.decisionScores")}</h3>
+          {scoreData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[200px] gap-3 text-muted-foreground">
+              <TrendingUp className="h-10 w-10 opacity-20" />
+              <p className="text-sm">{t("dash.noData")}</p>
+              <button onClick={() => navigate("/dashboard/analyzer")}
+                className="text-xs text-primary hover:underline">
+                İlk ürününü analiz et →
+              </button>
             </div>
-            <div className="space-y-3">
-              {topTrending.map((p) => {
-                const v = getVerdict(p.profitMargin);
-                return (
-                  <div key={p.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">{p.image}</span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{p.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{p.platform} · {p.category}</p>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${v.class}`}>%{p.profitMargin}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-        </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={scoreData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 32% 17%)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 10 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(215 20% 55%)", fontSize: 11 }} domain={[0, 100]} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="score" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </motion.div>
 
         {/* Saved Products Preview */}
         {savedProducts.length > 0 && (
@@ -271,7 +209,7 @@ export default function DashboardHome() {
           </motion.div>
         )}
 
-        {/* Trust Block */}
+        {/* Trust Block - gerçek analiz sayısı */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
             <div className="flex items-center gap-2">
@@ -285,7 +223,7 @@ export default function DashboardHome() {
             <div className="h-4 w-px bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground">10,000+</span>
+              <span className="text-sm font-semibold text-foreground">{metrics.analyzed > 0 ? `${metrics.analyzed}` : "0"}</span>
               <span className="text-xs text-muted-foreground">{t("dash.analysisDone")}</span>
             </div>
           </div>
