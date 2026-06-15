@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Copy, Target, TrendingUp, ShieldAlert, Megaphone, Check, MessageCircle, Bookmark } from "lucide-react";
+import { Zap, Copy, Target, TrendingUp, ShieldAlert, Megaphone, Check, MessageCircle, Bookmark, Sparkles, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { runDecisionEngine, type DecisionInput, type DecisionOutput } from "@/lib/sales-decision-engine";
+import { runDecisionEngine, runDecisionEngineAI, type DecisionInput, type DecisionOutput } from "@/lib/sales-decision-engine";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
@@ -45,19 +45,30 @@ export default function SalesDecisionEngine() {
   });
   const [result, setResult] = useState<DecisionOutput | null>(null);
   const [copied, setCopied] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string>("");
   const { saveProduct, isProductSaved } = useSavedProducts();
 
-  const handleRun = () => {
+  const handleRun = async () => {
     if (!form.product_name || form.product_price <= 0 || form.cost_price <= 0) {
       toast.error(t("sde.required"));
       return;
     }
-    setResult(runDecisionEngine(form));
+    const baseResult = runDecisionEngine(form);
+    setResult(baseResult);
+    setAiAnalysis("");
+
+    // AI analizi arka planda çek
+    setAiLoading(true);
+    runDecisionEngineAI(form).then((analysis) => {
+      setAiAnalysis(analysis);
+      setAiLoading(false);
+    }).catch(() => setAiLoading(false));
   };
 
   const handleCopy = () => {
     if (!result) return;
-    navigator.clipboard.writeText(JSON.stringify(result, null, 2));
+    navigator.clipboard.writeText(JSON.stringify({ ...result, ai_analysis: aiAnalysis }, null, 2));
     setCopied(true);
     toast.success(t("sde.jsonCopied"));
     setTimeout(() => setCopied(false), 2000);
@@ -65,7 +76,7 @@ export default function SalesDecisionEngine() {
 
   const handleWhatsApp = () => {
     if (!result) return;
-    const msg = encodeURIComponent(`Hello, I want to order this product:\n\n${form.product_name}\n\nTarget country: ${form.target_country}\n\nLink: ${form.product_link || "N/A"}`);
+    const msg = encodeURIComponent(`Merhaba, bu ürünü incelemek istiyorum:\n\n${form.product_name}\n\nHedef Ülke: ${form.target_country}\n\nLink: ${form.product_link || "N/A"}`);
     window.open(`https://wa.me/905446452430?text=${msg}`, "_blank");
   };
 
@@ -78,7 +89,6 @@ export default function SalesDecisionEngine() {
       riskLevel: result.confidence_score >= 70 ? "low" : result.confidence_score >= 45 ? "medium" : "high",
       decisionScore: result.confidence_score,
       monthlyProfit: Math.round((form.product_price - form.cost_price) * 30),
-      platform: "Sales Decision Engine",
     });
     toast.success(t("sde.productSaved"));
   };
@@ -161,6 +171,22 @@ export default function SalesDecisionEngine() {
                 <p className={`text-4xl font-black tracking-tight ${decisionColor(result.decision)}`}>{result.decision}</p>
                 <div className={`inline-flex rounded-full border px-4 py-1.5 text-xs font-bold ${actionColor(result.action)}`}>{result.action}</div>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">{result.quick_reason}</p>
+              </div>
+
+              {/* AI Analizi */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                  <Sparkles className="h-3.5 w-3.5" /> AI Değerlendirmesi
+                </div>
+                {aiLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Analiz ediliyor...
+                  </div>
+                ) : aiAnalysis ? (
+                  <p className="text-xs text-foreground leading-relaxed">{aiAnalysis}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">AI analizi yüklenemedi.</p>
+                )}
               </div>
 
               <div className="rounded-xl border border-border bg-card p-5 space-y-4">
