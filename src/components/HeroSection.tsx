@@ -1,145 +1,116 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Zap, BarChart2, TrendingUp, ShieldCheck, Cpu, FileSpreadsheet, FileText, Sparkles } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
-/* ─── Sayı animasyonu hook'u ─── */
-function useCountUp(target: number, duration = 2000, start = false) {
-  const [value, setValue] = useState(0);
+/* ─── Ürün Açığa Çıkarma Demosu (sağ panel) ───
+   Jenerik soyut grafikler yerine aracın asıl yaptığı şeyi gösteriyor:
+   bir ürün taranır, sonra KAZANAN/KAYBEDEN diye karar açılır. */
+function ProductRevealDemo() {
+  const demoItems = [
+    { name: "Manyetik Telefon Tutucu", verdict: "WINNER" as const, score: 92, margin: 58, risk: "Düşük" },
+    { name: "Plastik Kulaklık Standı", verdict: "LOSER" as const, score: 24, margin: 11, risk: "Yüksek" },
+    { name: "LED Gün Batımı Lambası", verdict: "WINNER" as const, score: 81, margin: 47, risk: "Orta" },
+  ];
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<"scan" | "reveal">("scan");
+
   useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.floor(ease * target));
-      if (progress < 1) requestAnimationFrame(step);
+    setPhase("scan");
+    const toReveal = setTimeout(() => setPhase("reveal"), 1300);
+    const toNext = setTimeout(() => setIndex((i) => (i + 1) % demoItems.length), 4200);
+    return () => {
+      clearTimeout(toReveal);
+      clearTimeout(toNext);
     };
-    requestAnimationFrame(step);
-  }, [target, duration, start]);
-  return value;
-}
+  }, [index]);
 
-/* ─── Fake AI Dashboard (sağ panel) ─── */
-function FakeAIDashboard() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1800);
-    return () => clearInterval(id);
-  }, []);
-
-  const bars = [62, 78, 55, 90, 71, 84, 67, 95, 58, 88];
-  const line = [30, 45, 38, 62, 55, 74, 68, 85, 79, 94];
+  const item = demoItems[index];
+  const isWinner = item.verdict === "WINNER";
+  const accent = isWinner ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)";
 
   return (
-    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10"
-      style={{ background: "hsl(222 47% 5%)", boxShadow: "0 0 60px hsl(217 91% 60% / 0.15), inset 0 1px 0 hsl(217 91% 60% / 0.1)" }}>
-
-      {/* Header bar */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
-        <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-        </div>
-        <div className="flex-1 mx-3 h-5 rounded-md bg-white/5 flex items-center px-2">
-          <span className="text-[9px] text-white/30 font-mono">khell.ai/dashboard/analyzer</span>
-        </div>
-        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+    <div
+      className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 flex flex-col"
+      style={{ background: "hsl(222 47% 5%)", boxShadow: "0 0 60px hsl(217 91% 60% / 0.15), inset 0 1px 0 hsl(217 91% 60% / 0.1)" }}
+    >
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-wide" style={{ color: "hsl(217 91% 70%)" }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+          CANLI AI ANALİZ MOTORU
+        </span>
+        <span className="text-[9px] font-mono text-white/30">khell.ai</span>
       </div>
 
-      <div className="p-4 space-y-3">
-        {/* KPI row */}
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: "Karar Skoru", value: "94", color: "hsl(217 91% 60%)", suffix: "/100" },
-            { label: "Kâr Marjı", value: "61", color: "hsl(142 71% 45%)", suffix: "%" },
-            { label: "Risk", value: "Düşük", color: "hsl(142 71% 45%)", suffix: "" },
-          ].map((kpi) => (
-            <div key={kpi.label} className="rounded-xl p-2.5" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
-              <p className="text-[8px] text-white/40 mb-1">{kpi.label}</p>
-              <p className="text-sm font-bold font-mono tabular-nums" style={{ color: kpi.color }}>
-                {kpi.value}<span className="text-[9px] opacity-60">{kpi.suffix}</span>
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Bar chart */}
-        <div className="rounded-xl p-3" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] text-white/40 font-mono">ÜRÜN TREND ANALİZİ</span>
-            <span className="text-[8px] text-green-400">▲ +12.4%</span>
-          </div>
-          <div className="flex items-end gap-1 h-16">
-            {bars.map((h, i) => (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <AnimatePresence mode="wait">
+          {phase === "scan" ? (
+            <motion.div
+              key={`scan-${index}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center space-y-4"
+            >
               <motion.div
-                key={i}
-                className="flex-1 rounded-sm"
-                style={{ background: `hsl(217 91% ${50 + h * 0.15}% / ${0.5 + h * 0.005})` }}
-                animate={{ height: `${(tick % 2 === 0 ? h : h * (0.85 + Math.random() * 0.3))}%` }}
-                transition={{ duration: 0.8, ease: "easeInOut", delay: i * 0.05 }}
-                initial={{ height: "20%" }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Line chart fake */}
-        <div className="rounded-xl p-3" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] text-white/40 font-mono">AYLIK KÂR TAHMİNİ</span>
-            <span className="text-[9px] text-white/50 font-mono">₺18.4K</span>
-          </div>
-          <svg viewBox="0 0 100 30" className="w-full h-10" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(142 71% 45%)" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="hsl(142 71% 45%)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path
-              d={`M ${line.map((v, i) => `${i * 11},${30 - v * 0.28}`).join(" L ")}`}
-              fill="none" stroke="hsl(142 71% 45%)" strokeWidth="1.5"
-            />
-            <path
-              d={`M 0,30 L ${line.map((v, i) => `${i * 11},${30 - v * 0.28}`).join(" L ")} L 99,30 Z`}
-              fill="url(#lineGrad)"
-            />
-          </svg>
-        </div>
-
-        {/* AI analiz satırı */}
-        <div className="rounded-xl px-3 py-2.5 flex items-center gap-2"
-          style={{ background: "hsl(217 91% 60% / 0.08)", border: "1px solid hsl(217 91% 60% / 0.2)" }}>
-          <Sparkles className="h-3 w-3 shrink-0" style={{ color: "hsl(217 91% 60%)" }} />
-          <p className="text-[9px] leading-relaxed" style={{ color: "hsl(217 91% 70%)" }}>
-            <span className="font-semibold">AI Öneri:</span> Bu ürün düşük rekabetle %61 marj sunuyor. Hemen listele.
-          </p>
-        </div>
-
-        {/* Ürün listesi */}
-        <div className="space-y-1.5">
-          {[
-            { name: "Manyetik Duruş Kemeri", score: 94, margin: 61, color: "hsl(142 71% 45%)" },
-            { name: "LED Gün Batımı Lambası", score: 88, margin: 55, color: "hsl(142 71% 45%)" },
-            { name: "Kedi Lazer Oyuncağı", score: 82, margin: 48, color: "hsl(217 91% 60%)" },
-          ].map((p) => (
-            <div key={p.name} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5"
-              style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 14%)" }}>
-              <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-medium text-white/80 truncate">{p.name}</p>
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
+                className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold"
+                style={{ background: "hsl(217 32% 10%)", border: "1px dashed hsl(217 91% 60% / 0.5)", color: "hsl(217 91% 65%)" }}
+              >
+                ?
+              </motion.div>
+              <p className="text-sm font-medium text-white/70">{item.name}</p>
+              <p className="text-[11px] text-white/40">AI analiz ediyor...</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`reveal-${index}`}
+              initial={{ opacity: 0, scale: 0.85, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="text-center space-y-3 w-full max-w-[260px]"
+            >
+              <p className="text-sm font-medium text-white/70 truncate">{item.name}</p>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-base font-extrabold tracking-tight"
+                style={{
+                  background: isWinner ? "hsl(142 71% 45% / 0.15)" : "hsl(0 84% 60% / 0.15)",
+                  border: `1px solid ${isWinner ? "hsl(142 71% 45% / 0.5)" : "hsl(0 84% 60% / 0.5)"}`,
+                  color: accent,
+                }}
+              >
+                {isWinner ? "✓ KAZANAN" : "✗ KAYBEDEN"}
               </div>
-              <span className="text-[8px] font-mono" style={{ color: p.color }}>%{p.margin}</span>
-              <div className="w-8 h-1 rounded-full bg-white/10">
-                <div className="h-full rounded-full" style={{ width: `${p.score}%`, background: p.color }} />
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                  <p className="text-[8px] text-white/40">Skor</p>
+                  <p className="text-sm font-bold font-mono" style={{ color: accent }}>{item.score}</p>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                  <p className="text-[8px] text-white/40">Marj</p>
+                  <p className="text-sm font-bold font-mono text-white/80">%{item.margin}</p>
+                </div>
+                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                  <p className="text-[8px] text-white/40">Risk</p>
+                  <p className="text-sm font-bold text-white/80">{item.risk}</p>
+                </div>
               </div>
-              <span className="text-[8px] font-mono font-bold text-white/60">{p.score}</span>
-            </div>
-          ))}
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5 pb-4">
+        {demoItems.map((_, i) => (
+          <span
+            key={i}
+            className="h-1 rounded-full transition-all"
+            style={{ width: i === index ? 18 : 6, background: i === index ? "hsl(217 91% 60%)" : "hsl(217 32% 20%)" }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -170,10 +141,6 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
     if (statsRef.current) observer.observe(statsRef.current);
     return () => observer.disconnect();
   }, []);
-
-  const rev = useCountUp(2400000, 2200, statsVisible);
-  const analyses = useCountUp(12847, 2000, statsVisible);
-  const speed = useCountUp(87, 1800, statsVisible);
 
   const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
   const fadeUp = {
@@ -341,41 +308,44 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
             </motion.div>
           </motion.div>
 
-          {/* ── SAĞ: Fake Dashboard ── */}
+          {/* ── SAĞ: Ürün açığa çıkarma demosu ── */}
           <motion.div
             initial={{ opacity: 0, x: 30, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
             className="hidden lg:block h-[440px]"
           >
-            <FakeAIDashboard />
+            <ProductRevealDemo />
           </motion.div>
         </div>
 
-        {/* ── İstatistikler ── */}
+        {/* ── Dürüst, sade kapanış satırı (uydurma sayılar yerine) ── */}
         <motion.div
           ref={statsRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: statsVisible ? 1 : 0, y: statsVisible ? 0 : 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 pt-6"
+          className="mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderTop: "1px solid hsl(217 32% 15%)" }}
         >
-          {[
-            { label: t("hero.stat.revenue"), value: `${locale === "tr" ? "₺" : "$"}${(rev / 1000000).toFixed(1)}M+`, suffix: "" },
-            { label: t("hero.stat.completed"), value: analyses.toLocaleString(locale === "tr" ? "tr-TR" : "en-US"), suffix: "" },
-            { label: t("hero.stat.faster"), value: locale === "tr" ? `%${speed}` : `${speed}%`, suffix: "" },
-            { label: t("hero.stat.modules"), value: "3", suffix: t("hero.stat.modulesSuffix") },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center p-4 rounded-xl"
-              style={{ background: "hsl(217 32% 8%)", border: "1px solid hsl(217 32% 15%)" }}>
-              <p className="text-xl md:text-2xl font-extrabold font-mono tabular-nums"
-                style={{ color: "hsl(217 91% 65%)" }}>
-                {stat.value}{stat.suffix}
-              </p>
-              <p className="text-xs mt-1" style={{ color: "hsl(215 20% 50%)" }}>{stat.label}</p>
-            </div>
-          ))}
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" style={{ color: "hsl(142 71% 50%)" }} />
+            <p className="text-sm font-medium text-white/80">
+              {locale === "tr" ? "Yeni başladık — ilk kullanıcılarımız arasına katıl." : "Just launched — be one of our first users."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            {[
+              locale === "tr" ? "Gerçek CJ Dropshipping verisi" : "Real CJ Dropshipping data",
+              locale === "tr" ? "AI destekli karar skoru" : "AI-powered decision score",
+              locale === "tr" ? "Saniyeler içinde sonuç" : "Results in seconds",
+            ].map((txt) => (
+              <span key={txt} className="flex items-center gap-1.5 text-xs" style={{ color: "hsl(215 20% 60%)" }}>
+                <ShieldCheck className="h-3 w-3" style={{ color: "hsl(142 71% 45%)" }} />
+                {txt}
+              </span>
+            ))}
+          </div>
         </motion.div>
       </div>
     </div>
