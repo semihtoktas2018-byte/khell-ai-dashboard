@@ -4,6 +4,7 @@ import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, 
 import { useLocale } from "@/contexts/LocaleContext";
 import heroImg from "@/assets/hero-dashboard.png";
 import BackButton from "@/components/BackButton";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -61,6 +62,19 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      <SEO
+        title={
+          locale === "tr"
+            ? "KHELL AI — Kazanan Ürünü Bul, AI ile Analiz Et"
+            : "KHELL AI — Find Winning Products, Analyze with AI"
+        }
+        description={
+          locale === "tr"
+            ? "AI destekli dropshipping analiz platformu. Gerçek CJ Dropshipping verileriyle kazanan ürünleri bul, kâr ve risk skorunu saniyeler içinde gör."
+            : "AI-powered dropshipping analytics platform. Find winning products with real CJ Dropshipping data and instant profit & risk scores."
+        }
+      />
+
       {/* CJ Entegrasyon Banner */}
       <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
         <Package className="h-3 w-3 text-primary shrink-0" />
@@ -236,6 +250,25 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Detailed Features Banner (full visual overview) */}
+      <section className="py-12 px-6">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-xl overflow-hidden border border-border shadow-2xl"
+          >
+            <img
+              src="/features-section.png"
+              alt="KHELL AI özellikleri: AI destekli ürün analizi, gerçek CJ Dropshipping verileri, kâr ve risk skoru, canlı trend takibi, AI ürün sayfası ve içerik üretimi"
+              className="w-full h-auto"
+              loading="lazy"
+            />
+          </motion.div>
         </div>
       </section>
 
