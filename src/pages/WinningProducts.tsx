@@ -6,8 +6,8 @@ import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 import { translateProducts } from "@/lib/translate";
 
-const CJ_EMAIL = "bamir.global@gmail.com";
-const CJ_API_KEY = "26689fbeeb5045f89ec8764c32aaada0";
+const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
+const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 
 interface CJProduct {
