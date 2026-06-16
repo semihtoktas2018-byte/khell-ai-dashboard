@@ -28,6 +28,7 @@ interface AnalysisHistoryContextType {
 }
 
 const STORAGE_KEY = "khell_analysis_history";
+const USAGE_KEY = "khell_daily_usage"; // geçmişten ayrı, "Geçmişi Temizle" bunu etkilemez
 const DAILY_LIMIT = 3;
 
 function getTodayKey() {
@@ -43,9 +44,25 @@ function loadHistory(): AnalysisRecord[] {
   }
 }
 
-function countToday(history: AnalysisRecord[]): number {
-  const today = getTodayKey();
-  return history.filter((r) => r.createdAt.slice(0, 10) === today).length;
+function loadUsage(): { date: string; count: number } {
+  try {
+    const raw = localStorage.getItem(USAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.date === getTodayKey()) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return { date: getTodayKey(), count: 0 };
+}
+
+function saveUsage(usage: { date: string; count: number }) {
+  try {
+    localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+  } catch {
+    // ignore
+  }
 }
 
 const AnalysisHistoryContext = createContext<AnalysisHistoryContextType | null>(null);
@@ -53,13 +70,10 @@ const AnalysisHistoryContext = createContext<AnalysisHistoryContextType | null>(
 export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AnalysisRecord[]>(loadHistory);
   const [isPro, setIsPro] = useState<boolean>(isProUnlocked());
-  const todayCount = countToday(history);
-  const canAnalyze = isPro || todayCount < DAILY_LIMIT;
+  const [usage, setUsage] = useState(loadUsage);
 
-  const persist = (items: AnalysisRecord[]) => {
-    setHistory(items);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  };
+  const todayCount = usage.count;
+  const canAnalyze = isPro || todayCount < DAILY_LIMIT;
 
   const addAnalysis = useCallback((record: Omit<AnalysisRecord, "id" | "createdAt">) => {
     const newRecord: AnalysisRecord = {
@@ -72,10 +86,18 @@ export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return next;
     });
+    setUsage((prev) => {
+      const today = getTodayKey();
+      const next = prev.date === today ? { date: today, count: prev.count + 1 } : { date: today, count: 1 };
+      saveUsage(next);
+      return next;
+    });
   }, []);
 
   const clearHistory = useCallback(() => {
-    persist([]);
+    // Sadece görüntülenen listeyi temizler — günlük hak sayacına dokunmaz.
+    setHistory([]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
   }, []);
 
   const activatePro = useCallback((code: string) => {
