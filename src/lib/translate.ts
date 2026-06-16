@@ -1,7 +1,8 @@
 const cache = new Map<string, string>();
 
 export async function translateProducts(names: string[]): Promise<Record<string, string>> {
-  const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
+  const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || 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
+
   
   if (!ANTHROPIC_KEY) {
     return Object.fromEntries(names.map((n) => [n, n]));
