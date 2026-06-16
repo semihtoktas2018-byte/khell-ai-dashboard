@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Zap, BarChart2, TrendingUp, ShieldCheck, Cpu, FileSpreadsheet, FileText, Sparkles } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -32,11 +32,16 @@ function ProductRevealDemo() {
 
   return (
     <div
-      className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 flex flex-col"
-      style={{ background: "hsl(222 47% 5%)", boxShadow: "0 0 60px hsl(217 91% 60% / 0.15), inset 0 1px 0 hsl(217 91% 60% / 0.1)" }}
+      className="relative w-full h-full rounded-2xl overflow-hidden flex flex-col"
+      style={{
+        background: "linear-gradient(160deg, hsl(222 47% 7% / 0.9), hsl(222 47% 4% / 0.95))",
+        backdropFilter: "blur(20px)",
+        border: "1px solid hsl(217 60% 70% / 0.18)",
+        boxShadow: "0 0 80px hsl(217 91% 60% / 0.18), 0 1px 0 hsl(217 91% 70% / 0.15) inset, 0 -1px 0 hsl(0 0% 0% / 0.4) inset",
+      }}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-wide" style={{ color: "hsl(217 91% 70%)" }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "hsl(217 60% 70% / 0.1)" }}>
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-wide" style={{ color: "hsl(217 91% 75%)" }}>
           <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
           CANLI AI ANALİZ MOTORU
         </span>
@@ -57,7 +62,12 @@ function ProductRevealDemo() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
                 className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold"
-                style={{ background: "hsl(217 32% 10%)", border: "1px dashed hsl(217 91% 60% / 0.5)", color: "hsl(217 91% 65%)" }}
+                style={{
+                  background: "linear-gradient(145deg, hsl(217 32% 13% / 0.9), hsl(217 32% 8% / 0.9))",
+                  border: "1px dashed hsl(217 91% 65% / 0.55)",
+                  color: "hsl(217 91% 68%)",
+                  boxShadow: "0 8px 24px hsl(217 91% 60% / 0.25), 0 1px 0 hsl(217 91% 80% / 0.2) inset",
+                }}
               >
                 ?
               </motion.div>
@@ -77,23 +87,26 @@ function ProductRevealDemo() {
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-base font-extrabold tracking-tight"
                 style={{
-                  background: isWinner ? "hsl(142 71% 45% / 0.15)" : "hsl(0 84% 60% / 0.15)",
-                  border: `1px solid ${isWinner ? "hsl(142 71% 45% / 0.5)" : "hsl(0 84% 60% / 0.5)"}`,
+                  background: isWinner
+                    ? "linear-gradient(135deg, hsl(142 71% 45% / 0.22), hsl(166 80% 45% / 0.12))"
+                    : "linear-gradient(135deg, hsl(0 84% 60% / 0.22), hsl(14 80% 50% / 0.12))",
+                  border: `1px solid ${isWinner ? "hsl(142 71% 50% / 0.55)" : "hsl(0 84% 62% / 0.55)"}`,
                   color: accent,
+                  boxShadow: `0 6px 20px ${isWinner ? "hsl(142 71% 45% / 0.25)" : "hsl(0 84% 60% / 0.25)"}, 0 1px 0 hsl(0 0% 100% / 0.08) inset`,
                 }}
               >
                 {isWinner ? "✓ KAZANAN" : "✗ KAYBEDEN"}
               </div>
               <div className="grid grid-cols-3 gap-2 pt-1">
-                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                <div className="rounded-lg p-2" style={{ background: "hsl(217 32% 10% / 0.7)", backdropFilter: "blur(6px)", border: "1px solid hsl(217 60% 70% / 0.12)" }}>
                   <p className="text-[8px] text-white/40">Skor</p>
                   <p className="text-sm font-bold font-mono" style={{ color: accent }}>{item.score}</p>
                 </div>
-                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                <div className="rounded-lg p-2" style={{ background: "hsl(217 32% 10% / 0.7)", backdropFilter: "blur(6px)", border: "1px solid hsl(217 60% 70% / 0.12)" }}>
                   <p className="text-[8px] text-white/40">Marj</p>
                   <p className="text-sm font-bold font-mono text-white/80">%{item.margin}</p>
                 </div>
-                <div className="rounded-lg p-2" style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                <div className="rounded-lg p-2" style={{ background: "hsl(217 32% 10% / 0.7)", backdropFilter: "blur(6px)", border: "1px solid hsl(217 60% 70% / 0.12)" }}>
                   <p className="text-[8px] text-white/40">Risk</p>
                   <p className="text-sm font-bold text-white/80">{item.risk}</p>
                 </div>
@@ -125,6 +138,54 @@ const featureDefs = [
   { icon: Sparkles, key: "hero.feat.ai" },
   { icon: FileText, key: "hero.feat.pdf" },
 ];
+
+/* ─── 3D Eğilme Sarmalayıcı (premium mikro-etkileşim) ─── */
+function Tilt3D({ children }: { children: React.ReactNode }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 150, damping: 18 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 150, damping: 18 });
+  const glowX = useTransform(x, [-0.5, 0.5], [0, 100]);
+  const glowY = useTransform(y, [-0.5, 0.5], [0, 100]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 30, scale: 0.97 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+      className="hidden lg:block h-[440px]"
+      style={{ perspective: 1200 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <motion.div
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d", position: "relative", width: "100%", height: "100%" }}
+      >
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute -inset-px rounded-2xl z-10"
+          style={{
+            background: useTransform(
+              [glowX, glowY],
+              ([gx, gy]: number[]) => `radial-gradient(circle at ${gx}% ${gy}%, hsl(217 91% 65% / 0.18), transparent 60%)`
+            ),
+          }}
+        />
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
 
 /* ─── Ana Hero ─── */
 export default function HeroSection({ onStart }: { onStart: () => void }) {
@@ -165,11 +226,19 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
           </defs>
           <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
-        {/* Glow blobs */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, hsl(217 91% 60%), transparent 70%)" }} />
-        <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full opacity-8"
-          style={{ background: "radial-gradient(circle, hsl(142 71% 45%), transparent 70%)" }} />
+        {/* Glow blobs — yavaşça nefes alır */}
+        <motion.div
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full"
+          style={{ background: "radial-gradient(circle, hsl(217 91% 60%), transparent 70%)" }}
+          animate={{ opacity: [0.08, 0.16, 0.08], scale: [1, 1.08, 1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full"
+          style={{ background: "radial-gradient(circle, hsl(142 71% 45%), transparent 70%)" }}
+          animate={{ opacity: [0.06, 0.14, 0.06], scale: [1, 1.12, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        />
       </div>
 
       <div className="relative z-10 p-6 md:p-10 lg:p-12">
@@ -309,14 +378,9 @@ export default function HeroSection({ onStart }: { onStart: () => void }) {
           </motion.div>
 
           {/* ── SAĞ: Ürün açığa çıkarma demosu ── */}
-          <motion.div
-            initial={{ opacity: 0, x: 30, scale: 0.97 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
-            className="hidden lg:block h-[440px]"
-          >
+          <Tilt3D>
             <ProductRevealDemo />
-          </motion.div>
+          </Tilt3D>
         </div>
 
         {/* ── Dürüst, sade kapanış satırı (uydurma sayılar yerine) ── */}
