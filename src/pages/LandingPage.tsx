@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
-import heroImg from "@/assets/hero-dashboard.png";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
 
@@ -156,7 +155,7 @@ export default function LandingPage() {
 
             <motion.div variants={fadeUp} className="relative mx-auto max-w-5xl">
               <div className="relative rounded-xl overflow-hidden border border-border shadow-2xl">
-                <img src={heroImg} alt="KHELL AI Dashboard" className="w-full h-auto" loading="eager" />
+                <img src="/og-image.png" alt="KHELL AI — Ürün senden, analiz Khell'den" className="w-full h-auto" loading="eager" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
               </div>
             </motion.div>
