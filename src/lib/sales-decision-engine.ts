@@ -122,8 +122,13 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
 }
 
 export async function runDecisionEngineAI(input: DecisionInput): Promise<string> {
-  const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "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";
+  const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
   const base = runDecisionEngine(input);
+
+  if (!ANTHROPIC_KEY) {
+    return "";
+  }
+
   const prompt = `Sen bir e-ticaret ve dropshipping uzmanısın. Aşağıdaki ürün için kısa ve net bir AI değerlendirmesi yaz.
 
 ÜRÜN BİLGİLERİ:
