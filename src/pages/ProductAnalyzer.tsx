@@ -20,7 +20,9 @@ import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const RAPIDAPI_KEY = "0ff10b71d3msh3f8b4edd825040fp100f8djsn435e5bc57335";
+const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "0ff10b71d3msh3f8b4edd825040fp100f8djsn435e5bc57335";
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ";
+const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || "93c44c1933cf646eb";
 
 const defaultInput: AnalyzerInput = {
   product_cost: 0,
@@ -47,6 +49,7 @@ interface AliProduct {
 }
 
 async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> {
+  if (!RAPIDAPI_KEY) return null;
   try {
     const res = await fetch(
       `https://aliexpress-business-api.p.rapidapi.com/textsearch.php?keyWord=${encodeURIComponent(keyword)}&pageSize=20&pageIndex=1&country=TR&currency=USD&lang=en&filter=orders&sortBy=asc`,
@@ -299,14 +302,14 @@ export default function ProductAnalyzer() {
         </p>
         <TrendScore
           productName={productName}
-          googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
-          googleCx="93c44c1933cf646eb"
+          googleApiKey={GOOGLE_API_KEY}
+          googleCx={GOOGLE_CX}
           expandTrigger={expandTrigger}
         />
         <CompetitorAnalysis
           productName={productName}
-          googleApiKey="AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ"
-          googleCx="93c44c1933cf646eb"
+          googleApiKey={GOOGLE_API_KEY}
+          googleCx={GOOGLE_CX}
           expandTrigger={expandTrigger}
         />
         <MarketplaceCalculator
