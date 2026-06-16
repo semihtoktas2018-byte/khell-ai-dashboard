@@ -57,7 +57,7 @@ export default function ProductPageGenerator() {
   useEffect(() => {
     if (hasAutoFilled.current) return;
     const name = searchParams.get("name");
-    const sp = parseFloat(searchParams.get("sellingPrice") || "0");
+    const sp = parseFloat(searchParams.get("sellingPrice") || searchParams.get("price") || "0");
     if (name && sp > 0) {
       hasAutoFilled.current = true;
       const cost = parseFloat(searchParams.get("cost") || "0");
