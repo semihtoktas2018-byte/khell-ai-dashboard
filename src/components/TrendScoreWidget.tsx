@@ -17,8 +17,7 @@ interface TrendResult {
   reason: string;
 }
 
-const ANTHROPIC_KEY = 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
-
+const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
 
 async function analyzeProduct(name: string, isTr: boolean): Promise<TrendResult> {
   const prompt = isTr
@@ -40,6 +39,10 @@ async function analyzeProduct(name: string, isTr: boolean): Promise<TrendResult>
   "bestPlatform": "Best platform (TikTok Shop / Instagram / Shopify / Amazon / Etsy)",
   "reason": "Reason for verdict (1 sentence)"
 }`;
+
+  if (!ANTHROPIC_KEY) {
+    throw new Error("Missing API key");
+  }
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
