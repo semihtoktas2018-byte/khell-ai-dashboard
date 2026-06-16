@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { isProUnlocked, redeemCode } from "@/lib/proAccess";
 
 export interface AnalysisRecord {
   id: string;
@@ -22,6 +23,8 @@ interface AnalysisHistoryContextType {
   todayCount: number;
   canAnalyze: boolean;
   dailyLimit: number;
+  isPro: boolean;
+  activatePro: (code: string) => boolean;
 }
 
 const STORAGE_KEY = "khell_analysis_history";
@@ -49,9 +52,9 @@ const AnalysisHistoryContext = createContext<AnalysisHistoryContextType | null>(
 
 export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AnalysisRecord[]>(loadHistory);
-
+  const [isPro, setIsPro] = useState<boolean>(isProUnlocked());
   const todayCount = countToday(history);
-  const canAnalyze = todayCount < DAILY_LIMIT;
+  const canAnalyze = isPro || todayCount < DAILY_LIMIT;
 
   const persist = (items: AnalysisRecord[]) => {
     setHistory(items);
@@ -75,8 +78,16 @@ export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
     persist([]);
   }, []);
 
+  const activatePro = useCallback((code: string) => {
+    const ok = redeemCode(code);
+    if (ok) setIsPro(true);
+    return ok;
+  }, []);
+
   return (
-    <AnalysisHistoryContext.Provider value={{ history, addAnalysis, clearHistory, todayCount, canAnalyze, dailyLimit: DAILY_LIMIT }}>
+    <AnalysisHistoryContext.Provider
+      value={{ history, addAnalysis, clearHistory, todayCount, canAnalyze, dailyLimit: DAILY_LIMIT, isPro, activatePro }}
+    >
       {children}
     </AnalysisHistoryContext.Provider>
   );
