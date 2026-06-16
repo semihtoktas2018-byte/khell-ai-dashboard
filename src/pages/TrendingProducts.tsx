@@ -105,7 +105,14 @@ export default function TrendingProducts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-orange-500/10">
+          <div
+            className="p-2.5 rounded-xl"
+            style={{
+              background: "linear-gradient(145deg, hsl(24 95% 53% / 0.18), hsl(24 95% 53% / 0.06))",
+              border: "1px solid hsl(24 95% 53% / 0.3)",
+              boxShadow: "0 4px 16px hsl(24 95% 53% / 0.15)",
+            }}
+          >
             <Flame className="h-5 w-5 text-orange-500" />
           </div>
           <div>
@@ -119,7 +126,13 @@ export default function TrendingProducts() {
           <motion.span
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-orange-500/15 text-orange-500 border border-orange-500/30"
+            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md"
+            style={{
+              background: "linear-gradient(135deg, hsl(24 95% 53% / 0.18), hsl(24 95% 53% / 0.08))",
+              color: "hsl(24 95% 58%)",
+              border: "1px solid hsl(24 95% 53% / 0.35)",
+              boxShadow: "0 2px 12px hsl(24 95% 53% / 0.15)",
+            }}
           >
             <Radio className="h-2.5 w-2.5" /> CANLI VERİ
           </motion.span>
@@ -160,7 +173,7 @@ export default function TrendingProducts() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((p, i) => {
             const cost = parseFloat(p.sellPrice || "0") || 0;
             const estSale = cost * 3;
@@ -168,21 +181,36 @@ export default function TrendingProducts() {
             const img = p.productImage?.split(",")[0] || "";
             const rawName = getDisplayName(p);
             const displayName = translations[rawName] || rawName;
+            const marginAccent = margin >= 60 ? "hsl(142 71% 50%)" : margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
             return (
               <motion.div
                 key={p.pid || i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
-                className="group relative rounded-lg bg-accent/30 border border-border/50 overflow-hidden hover:border-orange-500/50 transition-colors flex flex-col"
+                whileHover={{ y: -3 }}
+                className="group relative rounded-xl overflow-hidden flex flex-col transition-shadow duration-300"
+                style={{
+                  background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid hsl(217 32% 22% / 0.7)",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.border = `1px solid ${marginAccent}55`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 12px 32px ${marginAccent}22`; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
               >
                 {i < 3 && (
-                  <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-orange-500 text-white">
+                  <span
+                    className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 rounded-md text-white"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(24 95% 58%), hsl(38 92% 50%))",
+                      boxShadow: "0 4px 12px hsl(24 95% 53% / 0.4)",
+                    }}
+                  >
                     <TrendingUp className="h-2.5 w-2.5" /> TOP {i + 1}
                   </span>
                 )}
                 <div onClick={() => openProduct(p)} className="block aspect-square bg-background overflow-hidden cursor-pointer">
                   {img ? (
-                    <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Package className="h-8 w-8" />
@@ -192,18 +220,21 @@ export default function TrendingProducts() {
                 <div className="p-3 space-y-2 flex-1 flex flex-col">
                   <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                    <div className="rounded bg-background/60 px-2 py-1">
+                    <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}>
                       <p className="text-muted-foreground">Maliyet</p>
                       <p className="font-mono font-bold text-foreground">${cost.toFixed(2)}</p>
                     </div>
-                    <div className="rounded bg-orange-500/10 px-2 py-1">
+                    <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(24 95% 53% / 0.1)", border: "1px solid hsl(24 95% 53% / 0.25)" }}>
                       <p className="text-muted-foreground">Satış</p>
                       <p className="font-mono font-bold text-orange-500">${estSale.toFixed(2)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div
+                    className="flex items-center justify-between text-[10px] rounded-lg px-2 py-1.5"
+                    style={{ background: `${marginAccent}14`, border: `1px solid ${marginAccent}33` }}
+                  >
                     <span className="text-muted-foreground">Kâr Marjı</span>
-                    <span className="font-mono font-bold text-winning">%{margin}</span>
+                    <span className="font-mono font-bold" style={{ color: marginAccent }}>%{margin}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-auto pt-1">
                     <button
