@@ -100,10 +100,13 @@ export default function ProductAnalyzer() {
   const [showSocialProof, setShowSocialProof] = useState(false);
   const [aliData, setAliData] = useState<AliProduct | null>(null);
   const [aliLoading, setAliLoading] = useState(false);
+  const [showUnlockInput, setShowUnlockInput] = useState(false);
+  const [unlockCode, setUnlockCode] = useState("");
+  const [unlockError, setUnlockError] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
-  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory } = useAnalysisHistory();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, activatePro } = useAnalysisHistory();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale } = useLocale();
   const fromOnboarding = searchParams.get("onboarding") === "1";
@@ -201,6 +204,19 @@ export default function ProductAnalyzer() {
     setShowResult(true);
   };
 
+  const handleRedeem = () => {
+    const ok = activatePro(unlockCode);
+    if (ok) {
+      setUnlockError(false);
+      setUnlockCode("");
+      setShowUnlockInput(false);
+      setShowPaywall(false);
+      toast({ title: locale === "tr" ? "PRO açıldı 🎉" : "PRO unlocked 🎉", description: locale === "tr" ? "Artık sınırsız analiz yapabilirsin." : "You now have unlimited analyses." });
+    } else {
+      setUnlockError(true);
+    }
+  };
+
   const handleSave = () => {
     const trimmed = productName.trim();
     if (!trimmed) {
@@ -276,8 +292,8 @@ export default function ProductAnalyzer() {
             </button>
           </div>
 
-          <p className={`text-xs font-medium mt-2 text-center ${remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
-            {remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
+          <p className={`text-xs font-medium mt-2 text-center ${isPro ? "text-winning" : remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
+            {isPro ? (locale === "tr" ? "PRO ✓ Sınırsız analiz" : "PRO ✓ Unlimited analyses") : remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
           </p>
         </motion.div>
       </div>
@@ -568,6 +584,37 @@ export default function ProductAnalyzer() {
                 {t("paywall.cta")}
               </a>
               <p className="text-[11px] text-muted-foreground mt-3">{t("paywall.price")}</p>
+
+              {!showUnlockInput ? (
+                <button
+                  onClick={() => setShowUnlockInput(true)}
+                  className="text-xs text-primary hover:underline mt-4 block w-full"
+                >
+                  {locale === "tr" ? "Zaten ödedim, kodum var" : "I already paid, I have a code"}
+                </button>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={unlockCode}
+                      onChange={(e) => { setUnlockCode(e.target.value); setUnlockError(false); }}
+                      onKeyDown={(e) => e.key === "Enter" && handleRedeem()}
+                      placeholder={locale === "tr" ? "Erişim kodun" : "Your access code"}
+                      className="input-dark flex-1 text-sm text-center uppercase"
+                    />
+                    <button onClick={handleRedeem} className="btn-primary text-sm px-4">
+                      {locale === "tr" ? "Aç" : "Unlock"}
+                    </button>
+                  </div>
+                  {unlockError && (
+                    <p className="text-xs text-destructive">
+                      {locale === "tr" ? "Kod geçersiz. Kodu Shopier ödeme sonrası WhatsApp'tan alıyorsun." : "Invalid code. You receive it via WhatsApp after Shopier payment."}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4">{t("paywall.later")}</button>
             </motion.div>
           </motion.div>
