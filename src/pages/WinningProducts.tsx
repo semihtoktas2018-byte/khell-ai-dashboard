@@ -138,7 +138,14 @@ export default function WinningProducts() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10">
+          <div
+            className="p-2.5 rounded-xl"
+            style={{
+              background: "linear-gradient(145deg, hsl(142 71% 45% / 0.18), hsl(142 71% 45% / 0.06))",
+              border: "1px solid hsl(142 71% 45% / 0.3)",
+              boxShadow: "0 4px 16px hsl(142 71% 45% / 0.15)",
+            }}
+          >
             <TrendingUp className="h-5 w-5 text-emerald-500" />
           </div>
           <div>
@@ -147,7 +154,13 @@ export default function WinningProducts() {
               <motion.span
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                style={{
+                  background: "linear-gradient(135deg, hsl(142 71% 45% / 0.18), hsl(142 71% 45% / 0.08))",
+                  color: "hsl(142 71% 50%)",
+                  border: "1px solid hsl(142 71% 45% / 0.35)",
+                  boxShadow: "0 2px 12px hsl(142 71% 45% / 0.15)",
+                }}
               >
                 <Radio className="h-2.5 w-2.5" /> CANLI VERİ
               </motion.span>
@@ -211,7 +224,8 @@ export default function WinningProducts() {
             const marginMeta = getMarginLabel(p._margin);
             const img = p.productImage?.split(",")[0] || "";
             const rawName = getDisplayName(p);
-              const displayName = translations[rawName] || rawName;
+            const displayName = translations[rawName] || rawName;
+            const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
             return (
               <motion.div
                 key={p.pid || i}
@@ -219,7 +233,14 @@ export default function WinningProducts() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03, ...transition }}
                 whileHover={{ y: -4 }}
-                className="card-glow rounded-xl overflow-hidden flex flex-col group"
+                className="rounded-xl overflow-hidden flex flex-col group transition-shadow duration-300"
+                style={{
+                  background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid hsl(217 32% 22% / 0.7)",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.border = `1px solid ${marginAccent}55`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 14px 36px ${marginAccent}22`; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
               >
                 {/* Görsel */}
                 <a
@@ -229,13 +250,21 @@ export default function WinningProducts() {
                   className="block aspect-square bg-background overflow-hidden relative"
                 >
                   {img ? (
-                    <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Package className="h-8 w-8" />
                     </div>
                   )}
-                  <span className={`absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-md border ${marginMeta.bg} ${marginMeta.color}`}>
+                  <span
+                    className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md"
+                    style={{
+                      background: "hsl(222 47% 6% / 0.85)",
+                      backdropFilter: "blur(6px)",
+                      border: `1px solid ${marginAccent}55`,
+                      color: marginAccent,
+                    }}
+                  >
                     {marginMeta.label}
                   </span>
                 </a>
@@ -245,19 +274,22 @@ export default function WinningProducts() {
                   <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
 
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                    <div className="rounded bg-background/60 px-2 py-1.5">
+                    <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}>
                       <p className="text-muted-foreground">Tedarikçi</p>
                       <p className="font-mono font-bold text-foreground">${p._cost.toFixed(2)}</p>
                     </div>
-                    <div className="rounded bg-emerald-500/10 px-2 py-1.5">
+                    <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(142 71% 45% / 0.1)", border: "1px solid hsl(142 71% 45% / 0.25)" }}>
                       <p className="text-muted-foreground">Tahmini Satış</p>
                       <p className="font-mono font-bold text-emerald-400">${p._sale.toFixed(2)}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div
+                    className="flex items-center justify-between text-[10px] rounded-lg px-2 py-1.5"
+                    style={{ background: `${marginAccent}14`, border: `1px solid ${marginAccent}33` }}
+                  >
                     <span className="text-muted-foreground">Kâr Marjı</span>
-                    <span className={`font-mono font-bold ${marginMeta.color}`}>%{p._margin}</span>
+                    <span className="font-mono font-bold" style={{ color: marginAccent }}>%{p._margin}</span>
                   </div>
 
                   <button
