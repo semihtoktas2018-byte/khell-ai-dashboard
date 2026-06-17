@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 import { translateProducts } from "@/lib/translate";
+import { isEditorPick } from "@/lib/editorPicks";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -226,6 +227,7 @@ export default function WinningProducts() {
             const rawName = getDisplayName(p);
             const displayName = translations[rawName] || rawName;
             const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
+            const isPick = isEditorPick(rawName);
             return (
               <motion.div
                 key={p.pid || i}
@@ -255,6 +257,17 @@ export default function WinningProducts() {
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Package className="h-8 w-8" />
                     </div>
+                  )}
+                  {isPick && (
+                    <span
+                      className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white"
+                      style={{
+                        background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))",
+                        boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)",
+                      }}
+                    >
+                      ⭐ Editör Seçimi
+                    </span>
                   )}
                   <span
                     className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md"
