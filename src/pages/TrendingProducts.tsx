@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translateProducts } from "@/lib/translate";
+import { isEditorPick } from "@/lib/editorPicks";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -182,6 +183,7 @@ export default function TrendingProducts() {
             const rawName = getDisplayName(p);
             const displayName = translations[rawName] || rawName;
             const marginAccent = margin >= 60 ? "hsl(142 71% 50%)" : margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
+            const isPick = isEditorPick(rawName);
             return (
               <motion.div
                 key={p.pid || i}
@@ -206,6 +208,17 @@ export default function TrendingProducts() {
                     }}
                   >
                     <TrendingUp className="h-2.5 w-2.5" /> TOP {i + 1}
+                  </span>
+                )}
+                {isPick && (
+                  <span
+                    className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))",
+                      boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)",
+                    }}
+                  >
+                    ⭐ Editör Seçimi
                   </span>
                 )}
                 <div onClick={() => openProduct(p)} className="block aspect-square bg-background overflow-hidden cursor-pointer">
