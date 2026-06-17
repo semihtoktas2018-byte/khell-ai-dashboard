@@ -277,6 +277,15 @@ export default function LandingPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">{t("landing.pricing")}</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.pricingDesc")}</p>
+            <div className="mt-6 inline-flex flex-col sm:flex-row items-center gap-2 rounded-xl border border-winning/30 bg-winning/10 px-5 py-3 text-sm">
+              <span className="font-semibold text-winning">
+                {locale === "tr" ? "🚀 İlk 100 kullanıcıya 1 ay ücretsiz Pro" : "🚀 First 100 users get 1 month of Pro free"}
+              </span>
+              <span className="text-muted-foreground">
+                {locale === "tr" ? "— kod: " : "— code: "}
+                <span className="font-mono font-bold text-foreground">LAUNCH100</span>
+              </span>
+            </div>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan, i) => (
