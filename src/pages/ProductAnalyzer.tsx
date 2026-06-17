@@ -265,7 +265,18 @@ export default function ProductAnalyzer() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="card-glow rounded-xl p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={transition}
+          className="rounded-xl p-6"
+          style={{
+            background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))",
+            backdropFilter: "blur(12px)",
+            border: "1px solid hsl(217 91% 60% / 0.18)",
+            boxShadow: "0 0 40px hsl(217 91% 60% / 0.08)",
+          }}
+        >
           <h3 className="text-lg font-semibold text-foreground mb-6">{t("analyzer.costEntry")}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {fields.map((f) => (
@@ -348,13 +359,30 @@ export default function ProductAnalyzer() {
         <AnimatePresence mode="wait">
           {showResult && input.selling_price > 0 && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={transition} className="space-y-4">
-              <div className={`card-glow rounded-xl p-6 border-2 ${result.decision_score >= 80 ? "border-winning/40" : result.decision_score >= 60 ? "border-risky/40" : "border-destructive/40"}`}>
+              <div
+                className="rounded-xl p-6"
+                style={{
+                  background: "linear-gradient(160deg, hsl(222 47% 9% / 0.75), hsl(222 47% 6% / 0.9))",
+                  backdropFilter: "blur(14px)",
+                  border: `1px solid ${result.decision_score >= 80 ? "hsl(142 71% 50% / 0.4)" : result.decision_score >= 60 ? "hsl(38 92% 55% / 0.4)" : "hsl(0 84% 62% / 0.4)"}`,
+                  boxShadow: `0 0 50px ${result.decision_score >= 80 ? "hsl(142 71% 50% / 0.12)" : result.decision_score >= 60 ? "hsl(38 92% 55% / 0.12)" : "hsl(0 84% 62% / 0.12)"}`,
+                }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className={`text-base font-bold ${scoreLabel.color}`}>{scoreLabel.text}</h3>
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold tracking-tight"
+                    style={{
+                      background: result.decision_score >= 80 ? "hsl(142 71% 45% / 0.15)" : result.decision_score >= 60 ? "hsl(38 92% 50% / 0.15)" : "hsl(0 84% 60% / 0.15)",
+                      color: result.decision_score >= 80 ? "hsl(142 71% 55%)" : result.decision_score >= 60 ? "hsl(38 92% 60%)" : "hsl(0 84% 65%)",
+                    }}
+                  >
+                    {result.decision_score >= 80 ? "✓ KAZANAN" : result.decision_score >= 60 ? "⚠ TEST ET" : "✗ KAYBEDEN"}
+                  </span>
                   <button onClick={handleSave} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
                     <Save className="h-3.5 w-3.5" /> {t("analyzer.save")}
                   </button>
                 </div>
+                <h3 className={`text-base font-bold mb-3 ${scoreLabel.color}`}>{scoreLabel.text}</h3>
                 <div className="text-center mb-4">
                   <div className={`text-6xl font-black font-mono tabular-nums mb-1 ${result.decision_score >= 80 ? "text-winning" : result.decision_score >= 60 ? "text-risky" : "text-destructive"}`}>{result.decision_score}</div>
                   <div className="text-xs uppercase tracking-widest text-muted-foreground">{t("analyzer.score")} / 100</div>
