@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Loader2, Radio, BarChart3, FileText, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translateProducts } from "@/lib/translate";
+import { isEditorPick } from "@/lib/editorPicks";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -149,6 +150,7 @@ export default function CJProductSearch() {
               const rawName = p.productNameEn || p.productName;
               const displayName = translations[rawName] || rawName;
               const marginAccent = margin >= 60 ? "hsl(142 71% 50%)" : margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
+              const isPick = isEditorPick(rawName);
 
               return (
                 <motion.div
@@ -167,7 +169,7 @@ export default function CJProductSearch() {
                   <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                     target="_blank"
                     rel="noreferrer"
-                    className="block aspect-square bg-background overflow-hidden"
+                    className="block aspect-square bg-background overflow-hidden relative"
                   >
                     {p.productImage ? (
                       <img
@@ -180,6 +182,17 @@ export default function CJProductSearch() {
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <Package className="h-8 w-8" />
                       </div>
+                    )}
+                    {isPick && (
+                      <span
+                        className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white"
+                        style={{
+                          background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))",
+                          boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)",
+                        }}
+                      >
+                        ⭐ Editör Seçimi
+                      </span>
                     )}
                   </a>
                   <div className="p-3 space-y-2 flex-1 flex flex-col">
