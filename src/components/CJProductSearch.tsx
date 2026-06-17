@@ -214,6 +214,27 @@ export default function CJProductSearch() {
                     </a>
 
                     <div className="grid grid-cols-2 gap-1.5">
+                      <a
+                        href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1"
+                        style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}
+                      >
+                        📘 Reklamda Ara
+                      </a>
+                      <a
+                        href={`https://www.tiktok.com/search?q=${encodeURIComponent(rawName)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1"
+                        style={{ background: "hsl(0 0% 100% / 0.06)", color: "hsl(215 20% 70%)", border: "1px solid hsl(217 32% 30% / 0.4)" }}
+                      >
+                        🎵 TikTok'ta Ara
+                      </a>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5">
                       <button
                         onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(rawName)}&cost=${cost}&price=${estSale.toFixed(2)}`)}
                         className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"
