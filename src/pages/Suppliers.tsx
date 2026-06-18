@@ -94,11 +94,16 @@ const TIPS = [
   { icon: "🔄", title: "Stok Takibi", desc: "CJ entegrasyonu sayesinde KHELL stok durumunu anlık takip eder. Stok biten ürün satmaktan kaçın." },
 ];
 
+// Not: Bu istatistikler KHELL AI'nin kendi kullanıcı performansı hakkında bir
+// iddia değil — sadece platformlar hakkında genel, doğrulanabilir bilgiler
+// (CJ'nin kendi katalog büyüklüğü ve teslimat süresi gibi) ya da bu sayfanın
+// kendi içeriğinden hesaplanan gerçek sayılardır (örnek: kaç platform
+// karşılaştırılıyor). Uydurma "kullanıcı başarı oranı" gibi şeyler yok.
 const STATS = [
-  { value: "1M+", label: "CJ'de Aktif Ürün", icon: Package },
-  { value: "%67", label: "Ortalama Kâr Marjı", icon: TrendingUp },
-  { value: "7-15", label: "Gün Ortalama Teslimat", icon: Clock },
-  { value: "%99", label: "Sipariş Başarı Oranı", icon: Shield },
+  { value: "1M+", label: "CJ Katalogunda Ürün", icon: Package },
+  { value: `${PLATFORMS.length}`, label: "Karşılaştırılan Platform", icon: TrendingUp },
+  { value: "7-15", label: "CJ Gün Ortalama Teslimat", icon: Clock },
+  { value: "%0", label: "CJ Komisyon Ücreti", icon: Shield },
 ];
 
 export default function Suppliers() {
@@ -264,7 +269,7 @@ export default function Suppliers() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold text-foreground">💡 Uzman İpuçları</h2>
-          <span className="text-[11px] text-muted-foreground">KHELL AI'ın 10.000+ analiz sonuçlarından</span>
+          <span className="text-[11px] text-muted-foreground">Dropshipping'de en sık karşılaşılan hatalardan</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {TIPS.map((tip, i) => (
