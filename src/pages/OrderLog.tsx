@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wallet, Plus, Trash2, TrendingUp, DollarSign, Package, X } from "lucide-react";
+import { Wallet, Plus, Trash2, TrendingUp, DollarSign, Package, X, Download, Upload } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { useOrderLog } from "@/contexts/OrderLogContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -18,11 +18,39 @@ const emptyForm = {
   otherCosts: "0",
 };
 
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ",") {
+        result.push(cur);
+        cur = "";
+      } else cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
 export default function OrderLog() {
   const { orders, addOrder, deleteOrder, totals } = useOrderLog();
   const { currency, locale } = useLocale();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const chartData = useMemo(() => {
     if (orders.length === 0) return [];
@@ -49,6 +77,55 @@ export default function OrderLog() {
     setShowForm(false);
   };
 
+  const handleExport = () => {
+    const header = ["Urun Adi", "Adet", "Birim Satis Fiyati", "Birim Maliyet", "Diger Maliyet", "Tarih"];
+    const rows = orders.map((o) =>
+      [
+        `"${o.productName.replace(/"/g, '""')}"`,
+        o.quantity,
+        o.unitSellingPrice,
+        o.unitCost,
+        o.otherCosts,
+        o.date,
+      ].join(",")
+    );
+    const csv = [header.join(","), ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `khell-satis-defteri-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "").replace(/^\uFEFF/, "");
+      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      lines.slice(1).forEach((line) => {
+        const cols = parseCsvLine(line);
+        const [productName, quantity, unitSellingPrice, unitCost, otherCosts, date] = cols;
+        if (!productName) return;
+        addOrder({
+          productName,
+          quantity: parseInt(quantity) || 0,
+          unitSellingPrice: parseFloat(unitSellingPrice) || 0,
+          unitCost: parseFloat(unitCost) || 0,
+          otherCosts: parseFloat(otherCosts) || 0,
+          date: date || undefined,
+        });
+      });
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   return (
     <div className="space-y-6">
       <SEO title="Satış Defteri | KHELL AI" description="Gerçek siparişlerini kaydet, gerçek kâr-zarar durumunu takip et." />
@@ -66,13 +143,36 @@ export default function OrderLog() {
             <p className="text-xs text-muted-foreground">Tahmin değil — gerçekten sattığın ürünleri kaydet, gerçek kârını gör.</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
-          style={{ background: "hsl(142 71% 45%)" }}
-        >
-          <Plus className="h-4 w-4" /> Sipariş Ekle
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <input ref={fileInputRef} type="file" accept=".csv" onChange={handleImportFile} className="hidden" />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Upload className="h-3.5 w-3.5" /> Yedekten Geri Yükle
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={orders.length === 0}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+          >
+            <Download className="h-3.5 w-3.5" /> Dışa Aktar (CSV)
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
+            style={{ background: "hsl(142 71% 45%)" }}
+          >
+            <Plus className="h-4 w-4" /> Sipariş Ekle
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="rounded-lg px-4 py-2.5 text-xs flex items-center gap-2"
+        style={{ background: "hsl(38 92% 50% / 0.1)", border: "1px solid hsl(38 92% 50% / 0.25)", color: "hsl(38 92% 55%)" }}
+      >
+        💡 Bu kayıtlar sadece bu tarayıcıda saklanıyor. Telefon/tarayıcı değiştirirsen önce <strong>"Dışa Aktar"</strong> ile yedek al, yeni cihazda <strong>"Yedekten Geri Yükle"</strong> ile devam et.
       </div>
 
       {/* Özet kartları */}
