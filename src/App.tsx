@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
+import { OrderLogProvider } from "@/contexts/OrderLogContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import LandingPage from "./pages/LandingPage";
@@ -23,6 +24,7 @@ import ProductPageGenerator from "./pages/ProductPageGenerator";
 import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
 import TrendingProducts from "./pages/TrendingProducts";
+import OrderLog from "./pages/OrderLog";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
@@ -60,31 +62,34 @@ const App = () => {
             <AuthProvider>
               <SavedProductsProvider>
                 <AnalysisHistoryProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AnimatePresence>
-                    {showSplash && <SplashScreen onDone={dismissSplash} />}
-                  </AnimatePresence>
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="/auth" element={<AuthPage />} />
-                      <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                        <Route index element={<DashboardHome />} />
-                        <Route path="analyzer" element={<ProductAnalyzer />} />
-                        <Route path="winning" element={<WinningProducts />} />
-                        <Route path="trending" element={<TrendingProducts />} />
-                        <Route path="suppliers" element={<Suppliers />} />
-                        <Route path="saved" element={<SavedProducts />} />
-                        <Route path="risk" element={<RiskAnalysis />} />
-                        <Route path="product-page-generator" element={<ProductPageGenerator />} />
-                        <Route path="sales-decision" element={<SalesDecisionEngine />} />
-                        <Route path="content-engine" element={<ContentEngine />} />
-                      </Route>
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    <FloatingWhatsApp />
-                  </BrowserRouter>
+                  <OrderLogProvider>
+                    <Toaster />
+                    <Sonner />
+                    <AnimatePresence>
+                      {showSplash && <SplashScreen onDone={dismissSplash} />}
+                    </AnimatePresence>
+                    <BrowserRouter>
+                      <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/auth" element={<AuthPage />} />
+                        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                          <Route index element={<DashboardHome />} />
+                          <Route path="analyzer" element={<ProductAnalyzer />} />
+                          <Route path="winning" element={<WinningProducts />} />
+                          <Route path="trending" element={<TrendingProducts />} />
+                          <Route path="suppliers" element={<Suppliers />} />
+                          <Route path="saved" element={<SavedProducts />} />
+                          <Route path="order-log" element={<OrderLog />} />
+                          <Route path="risk" element={<RiskAnalysis />} />
+                          <Route path="product-page-generator" element={<ProductPageGenerator />} />
+                          <Route path="sales-decision" element={<SalesDecisionEngine />} />
+                          <Route path="content-engine" element={<ContentEngine />} />
+                        </Route>
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                      <FloatingWhatsApp />
+                    </BrowserRouter>
+                  </OrderLogProvider>
                 </AnalysisHistoryProvider>
               </SavedProductsProvider>
             </AuthProvider>
