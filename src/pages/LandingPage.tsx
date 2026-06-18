@@ -4,6 +4,7 @@ import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, 
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
+import FeatureShowcase from "@/components/FeatureShowcase";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -159,6 +160,18 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
               </div>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Özellik Vitrini — dönen, kendini tekrar eden tanıtım */}
+      <section className="py-12 px-6">
+        <div className="container mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
+            <h2 className="text-xl font-bold text-foreground">Gerçek Entegrasyonlar, Gerçek Veri</h2>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <FeatureShowcase />
           </motion.div>
         </div>
       </section>
