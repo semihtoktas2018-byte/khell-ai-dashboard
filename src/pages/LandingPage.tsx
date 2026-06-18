@@ -5,6 +5,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
 import FeatureShowcase from "@/components/FeatureShowcase";
+import ProductRevealDemo from "@/components/ProductRevealDemo";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -112,8 +113,20 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      {/* Özellik Vitrini — dönen, kendini tekrar eden tanıtım (en üstte, Hero'dan önce) */}
+      <section className="pt-32 pb-4 px-6">
+        <div className="container mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-center mb-6">
+            <h2 className="text-xl font-bold text-foreground">Gerçek Entegrasyonlar, Gerçek Veri</h2>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <FeatureShowcase />
+          </motion.div>
+        </div>
+      </section>
+
       {/* Hero */}
-      <section className="relative pt-40 pb-20 px-6">
+      <section className="relative pt-8 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
@@ -154,24 +167,48 @@ export default function LandingPage() {
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="relative mx-auto max-w-5xl">
-              <div className="relative rounded-xl overflow-hidden border border-border shadow-2xl">
-                <img src="/og-image.png" alt="KHELL AI — Ürün senden, analiz Khell'den" className="w-full h-auto" loading="eager" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+            <motion.div variants={fadeUp} className="relative mx-auto max-w-3xl">
+              <div
+                className="relative rounded-2xl overflow-hidden p-8 sm:p-10"
+                style={{
+                  background: "linear-gradient(160deg, hsl(222 47% 7% / 0.85), hsl(222 47% 4% / 0.95))",
+                  backdropFilter: "blur(16px)",
+                  border: "1px solid hsl(217 60% 70% / 0.18)",
+                  boxShadow: "0 0 70px hsl(217 91% 60% / 0.12)",
+                }}
+              >
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-1">
+                  <span style={{ background: "linear-gradient(90deg, hsl(217 91% 60%), hsl(166 76% 50%), hsl(48 96% 55%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    KHELL AI
+                  </span>
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground mb-5">
+                  <span style={{ color: "hsl(215 20% 75%)" }}>Ürün senden, </span>
+                  <span style={{ color: "hsl(142 71% 55%)", fontWeight: 700 }}>analiz Khell'den.</span>
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 mb-6 max-w-md">
+                  {[
+                    { label: "AI Destekli Analiz", color: "hsl(199 89% 60%)" },
+                    { label: "Gerçek CJ Verileri", color: "hsl(142 71% 50%)" },
+                    { label: "Kâr & Risk Skoru", color: "hsl(38 92% 55%)" },
+                    { label: "Canlı Trend Takibi", color: "hsl(24 95% 58%)" },
+                  ].map((b) => (
+                    <span
+                      key={b.label}
+                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-center"
+                      style={{ background: `${b.color}1a`, color: b.color, border: `1px solid ${b.color}40` }}
+                    >
+                      {b.label}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="h-[380px] max-w-md mx-auto">
+                  <ProductRevealDemo />
+                </div>
               </div>
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Özellik Vitrini — dönen, kendini tekrar eden tanıtım */}
-      <section className="py-12 px-6">
-        <div className="container mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
-            <h2 className="text-xl font-bold text-foreground">Gerçek Entegrasyonlar, Gerçek Veri</h2>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <FeatureShowcase />
           </motion.div>
         </div>
       </section>
