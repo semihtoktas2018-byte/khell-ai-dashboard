@@ -6,6 +6,7 @@ import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
+import { getNewPids, markSeen } from "@/lib/newProductTracker";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -64,6 +65,7 @@ export default function WinningProducts() {
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
   const [marginFilter, setMarginFilter] = useState(0);
   const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [newPids, setNewPids] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { currency } = useLocale();
 
@@ -103,6 +105,9 @@ export default function WinningProducts() {
         .sort((a, b) => b._margin - a._margin);
 
       setItems(withMargin as any);
+      const pids = withMargin.map((p: any) => p.pid);
+      setNewPids(getNewPids("winning", pids));
+      markSeen("winning", pids);
       setLastUpdated(new Date());
       // Ürün adlarını Türkçeye çevir
       const names = withMargin.map((p: any) => p.productNameEn || p.productName).filter(Boolean);
@@ -169,14 +174,25 @@ export default function WinningProducts() {
             <p className="text-xs text-muted-foreground">CJ'den en çok sipariş alan, yüksek kârlı ürünler</p>
           </div>
         </div>
-        <button
-          onClick={fetchWinning}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md border border-border bg-card hover:bg-accent text-muted-foreground transition-colors"
-        >
-          <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-          {formatCountdown(countdown)}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`https://wa.me/905446452430?text=${encodeURIComponent("Merhaba! KHELL AI'da yeni kazanan ürünler çıktığında beni haberdar eder misiniz? 🔔")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-colors"
+            style={{ background: "hsl(142 71% 45% / 0.12)", color: "hsl(142 71% 55%)", border: "1px solid hsl(142 71% 45% / 0.3)" }}
+          >
+            🔔 Yeni Ürünlerden Haberdar Ol
+          </a>
+          <button
+            onClick={fetchWinning}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md border border-border bg-card hover:bg-accent text-muted-foreground transition-colors"
+          >
+            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            {formatCountdown(countdown)}
+          </button>
+        </div>
       </div>
 
       {/* Margin Filters */}
@@ -284,7 +300,17 @@ export default function WinningProducts() {
 
                 {/* İçerik */}
                 <div className="p-4 space-y-2 flex-1 flex flex-col">
-                  <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
+                  <div className="flex items-center gap-1.5">
+                    {newPids.has(p.pid) && (
+                      <span
+                        className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0"
+                        style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}
+                      >
+                        🆕 Yeni
+                      </span>
+                    )}
+                    <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                     <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}>
