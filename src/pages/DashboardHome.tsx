@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap, Star } from "lucide-react";
+import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
@@ -11,6 +11,7 @@ import HeroSection from "@/components/HeroSection";
 import SEO from "@/components/SEO";
 import TrendScoreWidget from "@/components/TrendScoreWidget";
 import CJProductSearch from "@/components/CJProductSearch";
+import WelcomeTour from "@/components/WelcomeTour";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -82,6 +83,8 @@ export default function DashboardHome() {
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <SEO title="Dashboard | KHELL AI" description="Kârlılık metrikleri, kazanan ürünler ve risk dağılımının canlı görünümü." />
+
+      <WelcomeTour />
 
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
@@ -209,23 +212,12 @@ export default function DashboardHome() {
           </motion.div>
         )}
 
-        {/* Trust Block - gerçek analiz sayısı */}
+        {/* Trust Block - sadece gerçek analiz sayısı */}
         <motion.div variants={fadeUp} className="card-glow rounded-xl p-5">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-            <div className="flex items-center gap-2">
-              <div className="flex">
-                {[1,2,3,4].map(i => <Star key={i} className="h-4 w-4 fill-primary text-primary" />)}
-                <Star className="h-4 w-4 fill-primary/40 text-primary/40" />
-              </div>
-              <span className="text-sm font-semibold text-foreground">4.7 / 5</span>
-              <span className="text-xs text-muted-foreground">{t("dash.userRating")}</span>
-            </div>
-            <div className="h-4 w-px bg-border hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground">{metrics.analyzed > 0 ? `${metrics.analyzed}` : "0"}</span>
-              <span className="text-xs text-muted-foreground">{t("dash.analysisDone")}</span>
-            </div>
+          <div className="flex items-center justify-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground">{metrics.analyzed > 0 ? `${metrics.analyzed}` : "0"}</span>
+            <span className="text-xs text-muted-foreground">{t("dash.analysisDone")}</span>
           </div>
         </motion.div>
 
