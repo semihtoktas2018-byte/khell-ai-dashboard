@@ -4,6 +4,7 @@ import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, Refres
 import { useNavigate } from "react-router-dom";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
+import { getNewPids, markSeen } from "@/lib/newProductTracker";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -55,6 +56,7 @@ export default function TrendingProducts() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
   const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [newPids, setNewPids] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   const fetchTrending = useCallback(async () => {
@@ -67,6 +69,9 @@ export default function TrendingProducts() {
       const data = await res.json();
       if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
       setItems(data.data.list);
+      const pids = data.data.list.map((p: CJProduct) => p.pid);
+      setNewPids(getNewPids("trending", pids));
+      markSeen("trending", pids);
       setLastUpdated(new Date());
       setCountdown(REFRESH_INTERVAL / 1000);
       // Ürün adlarını Türkçeye çevir
@@ -231,7 +236,17 @@ export default function TrendingProducts() {
                   )}
                 </div>
                 <div className="p-3 space-y-2 flex-1 flex flex-col">
-                  <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
+                  <div className="flex items-center gap-1.5">
+                    {newPids.has(p.pid) && (
+                      <span
+                        className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0"
+                        style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}
+                      >
+                        🆕 Yeni
+                      </span>
+                    )}
+                    <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
+                  </div>
                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                     <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}>
                       <p className="text-muted-foreground">Maliyet</p>
