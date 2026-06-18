@@ -7,6 +7,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import OnboardingTour from "@/components/OnboardingTour";
 
 const CHANGELOG_VERSION = "v1.3.0";
 
@@ -17,9 +18,9 @@ const changelog = [
 
 const navKeys = [
   { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator },
-  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp },
-  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame },
+  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer" },
+  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning" },
+  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending" },
   { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck },
   { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield },
   { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText },
@@ -51,6 +52,8 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      <OnboardingTour />
+
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -81,6 +84,7 @@ export default function DashboardLayout() {
             const active = location.pathname === item.path;
             return (
               <button key={item.path} onClick={() => { navigate(item.path); setMobileOpen(false); }}
+                data-tour={item.tourId}
                 className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
@@ -96,6 +100,7 @@ export default function DashboardLayout() {
               href="https://www.shopier.com/bamironlinestore/46009500"
               target="_blank"
               rel="noopener noreferrer"
+              data-tour="pro-access"
               className="flex flex-col items-center w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white py-3 px-3 transition-all shadow-lg shadow-amber-500/20"
             >
               <span className="text-xs font-bold flex items-center gap-1.5">🔥 PRO ACCESS</span>
