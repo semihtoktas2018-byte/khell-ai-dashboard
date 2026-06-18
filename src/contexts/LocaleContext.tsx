@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
 type Locale = "tr" | "en";
 
@@ -78,7 +78,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.proF3": "Tedarikçi karşılaştırma",
     "landing.proF4": "Ürün kaydetme",
     "landing.proF5": "Öncelikli destek",
-    "landing.proCta": "Premium Ol",
+    "landing.proCta": "Pro'ya Geç",
     "landing.popular": "Popüler",
     "landing.entF1": "Tüm Pro özellikleri",
     "landing.entF2": "API erişimi",
@@ -484,7 +484,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "landing.proF3": "Supplier comparison",
     "landing.proF4": "Save products",
     "landing.proF5": "Priority support",
-    "landing.proCta": "Go Premium",
+    "landing.proCta": "Go Pro",
     "landing.popular": "Popular",
     "landing.entF1": "All Pro features",
     "landing.entF2": "API access",
@@ -844,6 +844,51 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     return detectCountry();
   });
 
+  // Döviz kuru: önce tarayıcı hafızasındaki son bilinen kuru kullan,
+  // arka planda güncel kuru çekmeye çalış. İnternet/servis sorunu olursa
+  // hiçbir şey kırılmaz, sessizce eski (veya varsayılan 45) kurda kalır.
+  const RATE_CACHE_KEY = "khell_usd_try_rate";
+  const RATE_CACHE_TIME_KEY = "khell_usd_try_rate_time";
+  const FALLBACK_RATE = 45;
+  const CACHE_DURATION = 1000 * 60 * 60 * 12; // 12 saat
+
+  const [usdToTry, setUsdToTry] = useState<number>(() => {
+    try {
+      const cached = localStorage.getItem(RATE_CACHE_KEY);
+      return cached ? parseFloat(cached) : FALLBACK_RATE;
+    } catch {
+      return FALLBACK_RATE;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const cachedTime = localStorage.getItem(RATE_CACHE_TIME_KEY);
+      const isStale = !cachedTime || Date.now() - Number(cachedTime) > CACHE_DURATION;
+      if (!isStale) return;
+    } catch {
+      // sorun olursa yine de güncel kuru çekmeyi dene
+    }
+
+    fetch("https://api.frankfurter.app/latest?from=USD&to=TRY")
+      .then((res) => res.json())
+      .then((data) => {
+        const rate = data?.rates?.TRY;
+        if (typeof rate === "number" && rate > 0) {
+          setUsdToTry(rate);
+          try {
+            localStorage.setItem(RATE_CACHE_KEY, String(rate));
+            localStorage.setItem(RATE_CACHE_TIME_KEY, String(Date.now()));
+          } catch {
+            // ignore
+          }
+        }
+      })
+      .catch(() => {
+        // İnternet/servis sorunu olursa sessizce eski kuru kullan
+      });
+  }, []);
+
   const setLocale = (l: Locale) => {
     setLocaleState(l);
     localStorage.setItem("khell_locale", l);
@@ -851,11 +896,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string): string => translations[locale][key] ?? key;
   const currencySymbol = locale === "tr" ? "₺" : "$";
-  const USD_TO_TRY = 45;
 
   const currency = (val: number): string => {
     if (locale === "tr") {
-      const tryVal = val * USD_TO_TRY;
+      const tryVal = val * usdToTry;
       return `₺${tryVal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     return `$${val.toFixed(2)}`;
