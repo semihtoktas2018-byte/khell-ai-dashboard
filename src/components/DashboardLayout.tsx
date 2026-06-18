@@ -2,16 +2,17 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package, Wallet,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import OnboardingTour from "@/components/OnboardingTour";
 
-const CHANGELOG_VERSION = "v1.3.0";
+const CHANGELOG_VERSION = "v1.4.0";
 
 const changelog = [
+  { version: "v1.4.0", date: "18 Haziran 2026", items: ["Satış Defteri eklendi — gerçek siparişlerini kaydet, gerçek kâr/zarar takip et", "Ürün kartlarına Facebook & TikTok'ta arama linkleri eklendi", "Editör Seçimi rozeti eklendi", "Yeni eklenen ürünler için 🆕 Yeni etiketi eklendi", "Güncel döviz kuru otomatik takip ediliyor", "Marka açılış animasyonu eklendi"] },
   { version: "v1.3.0", date: "14 Haziran 2026", items: ["Trend Skoru eklendi", "Rakip Analizi eklendi", "Kâr Simülatörü eklendi", "Pazar Yeri Komisyon hesaplayıcı eklendi", "WhatsApp paylaşım eklendi"] },
   { version: "v1.2.0", date: "08 Haziran 2026", items: ["CJdropshipping ürün arama entegrasyonu eklendi", "Dashboard performansı iyileştirildi"] },
 ];
@@ -27,6 +28,7 @@ const navKeys = [
   { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain },
   { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video },
   { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
+  { labelKey: "nav.orderLog", path: "/dashboard/order-log", icon: Wallet },
 ];
 
 function useChangelog() {
