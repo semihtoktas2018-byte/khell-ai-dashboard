@@ -11,7 +11,6 @@ import HeroSection from "@/components/HeroSection";
 import SEO from "@/components/SEO";
 import TrendScoreWidget from "@/components/TrendScoreWidget";
 import CJProductSearch from "@/components/CJProductSearch";
-import WelcomeTour from "@/components/WelcomeTour";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -83,8 +82,6 @@ export default function DashboardHome() {
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <SEO title="Dashboard | KHELL AI" description="Kârlılık metrikleri, kazanan ürünler ve risk dağılımının canlı görünümü." />
-
-      <WelcomeTour />
 
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
