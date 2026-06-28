@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package, Star } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
@@ -16,6 +16,7 @@ const featureIcons = [BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target];
 export default function LandingPage() {
   const navigate = useNavigate();
   const { t, locale, setLocale } = useLocale();
+  const isTr = locale === "tr";
 
   const features = [
     { icon: featureIcons[0], title: t("landing.feat1"), desc: t("landing.feat1Desc") },
@@ -34,8 +35,8 @@ export default function LandingPage() {
 
   const plans = [
     {
-      name: locale === "tr" ? "Başlangıç" : "Starter",
-      price: locale === "tr" ? "Ücretsiz" : "Free",
+      name: isTr ? "Başlangıç" : "Starter",
+      price: isTr ? "Ücretsiz" : "Free",
       period: "",
       features: [t("landing.starterF1"), t("landing.starterF2"), t("landing.starterF3"), t("landing.starterF4")],
       cta: t("landing.starterCta"),
@@ -43,17 +44,17 @@ export default function LandingPage() {
     },
     {
       name: "Pro",
-      price: locale === "tr" ? "249 ₺" : "$9",
-      period: locale === "tr" ? "/ay" : "/mo",
+      price: isTr ? "249 ₺" : "$9",
+      period: isTr ? "/ay" : "/mo",
       features: [t("landing.proF1"), t("landing.proF2"), t("landing.proF3New"), t("landing.proF4"), t("landing.proF5")],
       cta: t("landing.proCta"),
       popular: true,
       href: "https://www.shopier.com/bamironlinestore/46009500",
     },
     {
-      name: locale === "tr" ? "Kurumsal" : "Enterprise",
-      price: locale === "tr" ? "₺990" : "$99",
-      period: locale === "tr" ? "/ay" : "/mo",
+      name: isTr ? "Kurumsal" : "Enterprise",
+      price: isTr ? "₺990" : "$99",
+      period: isTr ? "/ay" : "/mo",
       features: [t("landing.entF1"), t("landing.entF2"), t("landing.entF3"), t("landing.entF4"), t("landing.entF5")],
       cta: t("landing.entCta"),
       popular: false,
@@ -61,26 +62,36 @@ export default function LandingPage() {
     },
   ];
 
+  const whyKhell = isTr ? [
+    { icon: "🎯", title: "Gerçek CJ Dropshipping Verisi", desc: "Uydurma değil, canlı tedarikçi fiyatları ve stok bilgisi" },
+    { icon: "🤖", title: "AI Karar Skoru", desc: "Her ürün için 0-100 arası karar skoru — sat mı satma mı?" },
+    { icon: "📦", title: "Hepsi Bir Arada", desc: "Analiz, içerik üretimi, risk skoru — tek platformda" },
+    { icon: "⚡", title: "Saniyeler İçinde Sonuç", desc: "Ürün adını gir, 3 saniyede karar skoru ve kâr marjı" },
+    { icon: "💰", title: "En Uygun Fiyat", desc: "Ayda 249₺ — tam özellikli profesyonel araç" },
+    { icon: "🌍", title: "TR & Global Destek", desc: "Türkçe/İngilizce, TL/USD — her pazara hazır" },
+  ] : [
+    { icon: "🎯", title: "Real CJ Dropshipping Data", desc: "Live supplier prices and stock info — no fake numbers" },
+    { icon: "🤖", title: "AI Decision Score", desc: "0-100 score for every product — sell or skip?" },
+    { icon: "📦", title: "All-in-One Platform", desc: "Analysis, content creation, risk score — one platform" },
+    { icon: "⚡", title: "Results in Seconds", desc: "Enter product name, get decision score and profit margin in 3 seconds" },
+    { icon: "💰", title: "Best Value", desc: "$9/mo — full-featured professional tool" },
+    { icon: "🌍", title: "TR & Global Support", desc: "Turkish/English, TRY/USD — ready for any market" },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <SEO
-        title={
-          locale === "tr"
-            ? "KHELL AI — Kazanan Ürünü Bul, AI ile Analiz Et"
-            : "KHELL AI — Find Winning Products, Analyze with AI"
-        }
-        description={
-          locale === "tr"
-            ? "AI destekli dropshipping analiz platformu. Gerçek CJ Dropshipping verileriyle kazanan ürünleri bul, kâr ve risk skorunu saniyeler içinde gör."
-            : "AI-powered dropshipping analytics platform. Find winning products with real CJ Dropshipping data and instant profit & risk scores."
-        }
+        title={isTr ? "KHELL AI — Kazanan Ürünü Bul, AI ile Analiz Et" : "KHELL AI — Find Winning Products, Analyze with AI"}
+        description={isTr
+          ? "AI destekli dropshipping analiz platformu. Gerçek CJ Dropshipping verileriyle kazanan ürünleri bul, kâr ve risk skorunu saniyeler içinde gör."
+          : "AI-powered dropshipping analytics platform. Find winning products with real CJ Dropshipping data and instant profit & risk scores."}
       />
 
       {/* CJ Entegrasyon Banner */}
       <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
         <Package className="h-3 w-3 text-primary shrink-0" />
         <p className="text-[11px] text-primary font-medium">
-          CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif
+          {isTr ? "CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif" : "Integrated with CJdropshipping — real-time product data active"}
         </p>
         <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
       </div>
@@ -97,11 +108,11 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+              onClick={() => setLocale(isTr ? "en" : "tr")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
             >
               <Globe className="h-3.5 w-3.5" />
-              {locale === "tr" ? "TR" : "EN"}
+              {isTr ? "TR" : "EN"}
             </button>
             <button onClick={() => navigate("/dashboard/analyzer")} className="btn-ghost text-sm py-2 px-4">
               {t("landing.login")}
@@ -113,11 +124,13 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Özellik Vitrini — dönen, kendini tekrar eden tanıtım (en üstte, Hero'dan önce) */}
+      {/* Feature Showcase */}
       <section className="pt-32 pb-4 px-6">
         <div className="container mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-center mb-6">
-            <h2 className="text-xl font-bold text-foreground">Gerçek Entegrasyonlar, Gerçek Veri</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              {isTr ? "Gerçek Entegrasyonlar, Gerçek Veri" : "Real Integrations, Real Data"}
+            </h2>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <FeatureShowcase />
@@ -137,12 +150,9 @@ export default function LandingPage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
                 {t("landing.badge")}
               </span>
-              <a
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
-              >
+              <a href="/dashboard" className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors">
                 <Package className="h-3 w-3" />
-                CJdropshipping entegrasyonu aktif — gerçek ürün verisi
+                {isTr ? "CJdropshipping entegrasyonu aktif — gerçek ürün verisi" : "CJdropshipping integration active — real product data"}
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
               </a>
             </motion.div>
@@ -183,22 +193,19 @@ export default function LandingPage() {
                   </span>
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground mb-5">
-                  <span style={{ color: "hsl(215 20% 75%)" }}>Ürün senden, </span>
-                  <span style={{ color: "hsl(142 71% 55%)", fontWeight: 700 }}>analiz Khell'den.</span>
+                  <span style={{ color: "hsl(215 20% 75%)" }}>{isTr ? "Ürün senden, " : "Your product, "}</span>
+                  <span style={{ color: "hsl(142 71% 55%)", fontWeight: 700 }}>{isTr ? "analiz Khell'den." : "KHELL's analysis."}</span>
                 </p>
 
                 <div className="grid grid-cols-2 gap-2 mb-6 max-w-md">
                   {[
-                    { label: "AI Destekli Analiz", color: "hsl(199 89% 60%)" },
-                    { label: "Gerçek CJ Verileri", color: "hsl(142 71% 50%)" },
-                    { label: "Kâr & Risk Skoru", color: "hsl(38 92% 55%)" },
-                    { label: "Canlı Trend Takibi", color: "hsl(24 95% 58%)" },
+                    { label: isTr ? "AI Destekli Analiz" : "AI-Powered Analysis", color: "hsl(199 89% 60%)" },
+                    { label: isTr ? "Gerçek CJ Verileri" : "Real CJ Data", color: "hsl(142 71% 50%)" },
+                    { label: isTr ? "Kâr & Risk Skoru" : "Profit & Risk Score", color: "hsl(38 92% 55%)" },
+                    { label: isTr ? "Canlı Trend Takibi" : "Live Trend Tracking", color: "hsl(24 95% 58%)" },
                   ].map((b) => (
-                    <span
-                      key={b.label}
-                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-center"
-                      style={{ background: `${b.color}1a`, color: b.color, border: `1px solid ${b.color}40` }}
-                    >
+                    <span key={b.label} className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-center"
+                      style={{ background: `${b.color}1a`, color: b.color, border: `1px solid ${b.color}40` }}>
                       {b.label}
                     </span>
                   ))}
@@ -225,17 +232,17 @@ export default function LandingPage() {
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <Zap className="h-3.5 w-3.5 text-primary" /> Hook
               </div>
-              <p className="text-lg font-bold text-foreground">"Bu herkes için değil."</p>
+              <p className="text-lg font-bold text-foreground">{isTr ? '"Bu herkes için değil."' : '"This is not for everyone."'}</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <Copy className="h-3.5 w-3.5 text-primary" /> Açıklama
+                <Copy className="h-3.5 w-3.5 text-primary" /> {isTr ? "Açıklama" : "Caption"}
               </div>
-              <p className="text-sm text-foreground">"Bu tasarımı sadece birkaç kişi anlıyor."</p>
+              <p className="text-sm text-foreground">{isTr ? '"Bu tasarımı sadece birkaç kişi anlıyor."' : '"Only a few people understand this design."'}</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <Hash className="h-3.5 w-3.5 text-primary" /> Hashtag'ler
+                <Hash className="h-3.5 w-3.5 text-primary" /> Hashtags
               </div>
               <div className="flex flex-wrap gap-2">
                 {["#viral", "#tiktokshop", "#dropshipping", "#fyp", "#trending"].map((tag) => (
@@ -282,15 +289,7 @@ export default function LandingPage() {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, ...transition }}
-                whileHover={{ y: -4 }}
-                className="card-glow rounded-xl p-6 cursor-default"
-              >
+              <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05, ...transition }} whileHover={{ y: -4 }} className="card-glow rounded-xl p-6 cursor-default">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <f.icon className="h-5 w-5 text-primary" />
                 </div>
@@ -302,22 +301,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Detailed Features Banner (full visual overview) */}
+      {/* Features Banner */}
       <section className="py-12 px-6">
         <div className="container mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="rounded-xl overflow-hidden border border-border shadow-2xl"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-xl overflow-hidden border border-border shadow-2xl">
             <img
               src="/features-section.png"
-              alt="KHELL AI özellikleri: AI destekli ürün analizi, gerçek CJ Dropshipping verileri, kâr ve risk skoru, canlı trend takibi, AI ürün sayfası ve içerik üretimi"
+              alt="KHELL AI features"
               className="w-full h-auto"
               loading="lazy"
             />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Why KHELL AI */}
+      <section className="py-20 px-6">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4"
+              style={{ background: "hsl(142 71% 45% / 0.12)", border: "1px solid hsl(142 71% 45% / 0.35)", color: "hsl(142 71% 55%)" }}>
+              <Star className="h-3 w-3" />
+              {isTr ? "Neden KHELL AI?" : "Why KHELL AI?"}
+            </span>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
+              {isTr ? "Sadece Analiz Değil — Karar" : "Not Just Analysis — Decisions"}
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              {isTr
+                ? "KHELL AI sana sayı değil, karar verir. Ürünü sat mı satma mı — saniyeler içinde."
+                : "KHELL AI doesn't just give you numbers — it gives you decisions. Sell or skip — in seconds."}
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {whyKhell.map((item, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05, ...transition }}
+                className="rounded-xl p-5"
+                style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+                <div className="text-2xl mb-3">{item.icon}</div>
+                <h4 className="text-sm font-bold text-white mb-1">{item.title}</h4>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -329,24 +355,18 @@ export default function LandingPage() {
             <p className="text-muted-foreground max-w-xl mx-auto">{t("landing.pricingDesc")}</p>
             <div className="mt-6 inline-flex flex-col sm:flex-row items-center gap-2 rounded-xl border border-winning/30 bg-winning/10 px-5 py-3 text-sm">
               <span className="font-semibold text-winning">
-                {locale === "tr" ? "🚀 İlk 100 kullanıcıya 1 ay ücretsiz Pro" : "🚀 First 100 users get 1 month of Pro free"}
+                {isTr ? "🚀 İlk 100 kullanıcıya 1 ay ücretsiz Pro" : "🚀 First 100 users get 1 month of Pro free"}
               </span>
               <span className="text-muted-foreground">
-                {locale === "tr" ? "— kod: " : "— code: "}
+                {isTr ? "— kod: " : "— code: "}
                 <span className="font-mono font-bold text-foreground">LAUNCH100</span>
               </span>
             </div>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, ...transition }}
-                className={`card-glow rounded-xl p-8 relative ${plan.popular ? "ring-2 ring-primary" : ""}`}
-              >
+              <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, ...transition }}
+                className={`card-glow rounded-xl p-8 relative ${plan.popular ? "ring-2 ring-primary" : ""}`}>
                 {plan.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full">
                     {t("landing.popular")}
@@ -366,28 +386,15 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 {plan.href ? (
-                  <a
-                    href={plan.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-primary"
-                  >
+                  <a href={plan.href} target="_blank" rel="noopener noreferrer" className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-primary">
                     {plan.cta}
                   </a>
                 ) : plan.whatsapp ? (
-                  <a
-                    href={plan.whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-ghost"
-                  >
+                  <a href={plan.whatsapp} target="_blank" rel="noopener noreferrer" className="block w-full py-3 rounded-lg font-semibold text-sm text-center transition-all btn-ghost">
                     {plan.cta}
                   </a>
                 ) : (
-                  <button
-                    onClick={() => navigate("/dashboard/analyzer")}
-                    className="w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost"
-                  >
+                  <button onClick={() => navigate("/dashboard/analyzer")} className="w-full py-3 rounded-lg font-semibold text-sm transition-all btn-ghost">
                     {plan.cta}
                   </button>
                 )}
@@ -400,12 +407,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="py-20 px-6">
         <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="card-glow rounded-2xl p-12 text-center max-w-3xl mx-auto"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card-glow rounded-2xl p-12 text-center max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-foreground mb-4">{t("landing.ctaTitle")}</h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t("landing.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
