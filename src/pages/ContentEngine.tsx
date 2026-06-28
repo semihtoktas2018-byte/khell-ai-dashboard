@@ -16,10 +16,9 @@ import { generateContent, type ContentEngineOutput } from "@/lib/content-engine"
 import SEO from "@/components/SEO";
 
 export default function ContentEngine() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const [productName, setProductName] = useState("");
   const [niche, setNiche] = useState("");
@@ -34,7 +33,7 @@ export default function ContentEngine() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    const newFiles = [...imageFiles, ...files].slice(0, 10); // max 10 görsel
+    const newFiles = [...imageFiles, ...files].slice(0, 10);
     const newPreviews = newFiles.map(f => URL.createObjectURL(f));
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
@@ -60,7 +59,13 @@ export default function ContentEngine() {
     setError(false);
     setResult(null);
     try {
-      const output = await generateContent({ productName: productName.trim(), imageFile: imageFiles[0], style, niche: niche.trim() || undefined });
+      const output = await generateContent({
+        productName: productName.trim(),
+        imageFile: imageFiles[0],
+        style,
+        niche: niche.trim() || undefined,
+        locale,
+      });
       setResult(output);
     } catch (err) {
       console.error("Content generation failed:", err);
@@ -75,13 +80,8 @@ export default function ContentEngine() {
     toast({ title: t("ce.copied"), description: t("ce.copiedDesc") });
   };
 
-  // Video preview oynatıcı — canvas ile görsel slideshow
   const handlePlayVideo = (idx: number) => {
-    if (playingIdx === idx) {
-      setPlayingIdx(null);
-    } else {
-      setPlayingIdx(idx);
-    }
+    setPlayingIdx(playingIdx === idx ? null : idx);
   };
 
   const priceColors: Record<string, string> = {
@@ -90,7 +90,6 @@ export default function ContentEngine() {
     premium: "text-orange-400",
   };
 
-  // Video preview kartı — görselleri slideshow olarak oynatır
   const VideoPreviewCard = ({ idx, hook, label, description }: { idx: number; hook: string; label: string; description: string }) => {
     const isPlaying = playingIdx === idx;
     const previewImg = imagePreviews[idx % imagePreviews.length] || imagePreviews[0];
@@ -101,7 +100,6 @@ export default function ContentEngine() {
         style={{ aspectRatio: "9/16" }}
         onClick={() => handlePlayVideo(idx)}
       >
-        {/* Arka plan görseli */}
         {previewImg && (
           <img
             src={previewImg}
@@ -109,35 +107,18 @@ export default function ContentEngine() {
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${isPlaying ? "opacity-60 scale-105" : "opacity-40"}`}
           />
         )}
-
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/60" />
-
-        {/* Hook text */}
         <div className={`absolute top-5 left-0 right-0 text-center px-4 transition-all duration-300 ${isPlaying ? "opacity-100 translate-y-0" : "opacity-80 translate-y-1"}`}>
-          <p className="text-white font-extrabold text-base drop-shadow-lg leading-tight">
-            {hook}
-          </p>
+          <p className="text-white font-extrabold text-base drop-shadow-lg leading-tight">{hook}</p>
         </div>
-
-        {/* Oynatma animasyonu — ses dalgası efekti */}
         {isPlaying && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-end gap-1 h-12">
             {[3, 6, 9, 6, 4, 8, 5, 9, 3, 7].map((h, i) => (
-              <div
-                key={i}
-                className="w-1 rounded-full bg-amber-400"
-                style={{
-                  height: `${h * 4}px`,
-                  animation: `pulse 0.${4 + i}s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.08}s`,
-                }}
-              />
+              <div key={i} className="w-1 rounded-full bg-amber-400"
+                style={{ height: `${h * 4}px`, animation: `pulse 0.${4 + i}s ease-in-out infinite alternate`, animationDelay: `${i * 0.08}s` }} />
             ))}
           </div>
         )}
-
-        {/* Play/Pause butonu */}
         {!isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-all group-hover:scale-110">
@@ -145,8 +126,6 @@ export default function ContentEngine() {
             </div>
           </div>
         )}
-
-        {/* Çoklu görsel göstergesi */}
         {imagePreviews.length > 1 && (
           <div className="absolute top-3 right-3 flex gap-1">
             {imagePreviews.slice(0, 5).map((_, i) => (
@@ -154,14 +133,10 @@ export default function ContentEngine() {
             ))}
           </div>
         )}
-
-        {/* Alt etiket */}
         <div className="absolute bottom-4 left-0 right-0 text-center px-3">
           <span className="text-xs font-bold text-white bg-black/40 backdrop-blur-sm rounded-full px-3 py-1">{label}</span>
           <p className="text-[10px] text-white/60 mt-1.5 line-clamp-2">{description}</p>
         </div>
-
-        {/* Pause göstergesi */}
         {isPlaying && (
           <div className="absolute top-3 left-3">
             <div className="flex gap-0.5">
@@ -178,7 +153,6 @@ export default function ContentEngine() {
     <div className="space-y-6 max-w-6xl mx-auto">
       <SEO title="İçerik Motoru | KHELL AI" description="TikTok kancaları, başlık varyasyonları ve ürün konumlandırma metinleri üret." />
 
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Video className="h-6 w-6 text-amber-500" />
@@ -187,7 +161,6 @@ export default function ContentEngine() {
         <p className="text-sm text-muted-foreground mt-1">{t("ce.desc")}</p>
       </div>
 
-      {/* Input Section */}
       <Card className="border-border bg-card">
         <CardHeader>
           <CardTitle className="text-base">{t("ce.inputTitle")}</CardTitle>
@@ -215,16 +188,14 @@ export default function ContentEngine() {
             </div>
           </div>
 
-          {/* Çoklu görsel upload */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>{t("ce.productImage")} <span className="text-muted-foreground text-xs ml-1">(sınırsız — max 10)</span></Label>
+              <Label>{t("ce.productImage")} <span className="text-muted-foreground text-xs ml-1">(max 10)</span></Label>
               {imageFiles.length > 0 && (
-                <span className="text-xs text-amber-500">{imageFiles.length} görsel seçildi</span>
+                <span className="text-xs text-amber-500">{imageFiles.length} {locale === "tr" ? "görsel seçildi" : locale === "fr" ? "images sélectionnées" : "images selected"}</span>
               )}
             </div>
 
-            {/* Yüklenen görseller grid */}
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {imagePreviews.map((preview, i) => (
@@ -237,24 +208,24 @@ export default function ContentEngine() {
                       <X className="h-3 w-3 text-white" />
                     </button>
                     {i === 0 && (
-                      <div className="absolute bottom-1 left-1 text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold">ANA</div>
+                      <div className="absolute bottom-1 left-1 text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold">
+                        {locale === "tr" ? "ANA" : locale === "fr" ? "MAIN" : "MAIN"}
+                      </div>
                     )}
                   </div>
                 ))}
-                {/* Ekle butonu */}
                 {imageFiles.length < 10 && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="aspect-square rounded-lg border-2 border-dashed border-border hover:border-amber-500/50 flex flex-col items-center justify-center gap-1 transition-colors"
                   >
                     <Plus className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground">Ekle</span>
+                    <span className="text-[10px] text-muted-foreground">{locale === "tr" ? "Ekle" : locale === "fr" ? "Ajouter" : "Add"}</span>
                   </button>
                 )}
               </div>
             )}
 
-            {/* İlk upload alanı */}
             {imagePreviews.length === 0 && (
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -267,20 +238,13 @@ export default function ContentEngine() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{t("ce.uploadHint")}</p>
-                    <p className="text-xs mt-1 text-muted-foreground/60">JPG, PNG, WEBP — sınırsız yükle (max 10)</p>
+                    <p className="text-xs mt-1 text-muted-foreground/60">JPG, PNG, WEBP</p>
                   </div>
                 </div>
               </div>
             )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-              className="hidden"
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
           </div>
 
           <Button
@@ -322,55 +286,31 @@ export default function ContentEngine() {
         </CardContent>
       </Card>
 
-      {/* Results */}
       {result && (
         <div className="space-y-6">
-
-          {/* Video Preview */}
           <Card className="border-border bg-card overflow-hidden">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Film className="h-4 w-4 text-amber-500" />
                 {t("ce.videoPreview")}
-                <span className="text-xs text-muted-foreground ml-2">— Önizlemeye tıkla, oyna</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {result.videoPlaceholders.map((v, i) => (
-                  <VideoPreviewCard
-                    key={i}
-                    idx={i}
-                    hook={result.hooks[i] || result.hooks[0]}
-                    label={v.label}
-                    description={v.description}
-                  />
+                  <VideoPreviewCard key={i} idx={i} hook={result.hooks[i] || result.hooks[0]} label={v.label} description={v.description} />
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                💡 Görseline tıkla — video efekti başlar. Gerçek video için hook metnini kopyalayıp CapCut/TikTok'a yapıştır.
-              </p>
             </CardContent>
           </Card>
 
-          {/* Tabs */}
           <Tabs defaultValue="script" className="w-full">
             <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="script" className="gap-1.5 text-xs">
-                <FileText className="h-3.5 w-3.5" /> {t("ce.tabScript")}
-              </TabsTrigger>
-              <TabsTrigger value="captions" className="gap-1.5 text-xs">
-                <MessageSquare className="h-3.5 w-3.5" /> {t("ce.tabCaptions")}
-              </TabsTrigger>
-              <TabsTrigger value="hooks" className="gap-1.5 text-xs">
-                <Anchor className="h-3.5 w-3.5" /> {t("ce.tabHooks")}
-              </TabsTrigger>
-              <TabsTrigger value="hashtags" className="gap-1.5 text-xs">
-                <Hash className="h-3.5 w-3.5" /> {t("ce.tabHashtags")}
-              </TabsTrigger>
-              <TabsTrigger value="voiceover" className="gap-1.5 text-xs">
-                <Mic className="h-3.5 w-3.5" /> {t("ce.tabVoiceover")}
-              </TabsTrigger>
+              <TabsTrigger value="script" className="gap-1.5 text-xs"><FileText className="h-3.5 w-3.5" /> {t("ce.tabScript")}</TabsTrigger>
+              <TabsTrigger value="captions" className="gap-1.5 text-xs"><MessageSquare className="h-3.5 w-3.5" /> {t("ce.tabCaptions")}</TabsTrigger>
+              <TabsTrigger value="hooks" className="gap-1.5 text-xs"><Anchor className="h-3.5 w-3.5" /> {t("ce.tabHooks")}</TabsTrigger>
+              <TabsTrigger value="hashtags" className="gap-1.5 text-xs"><Hash className="h-3.5 w-3.5" /> {t("ce.tabHashtags")}</TabsTrigger>
+              <TabsTrigger value="voiceover" className="gap-1.5 text-xs"><Mic className="h-3.5 w-3.5" /> {t("ce.tabVoiceover")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="script" className="mt-4 space-y-3">
@@ -489,7 +429,6 @@ export default function ContentEngine() {
             </TabsContent>
           </Tabs>
 
-          {/* Product Positioning */}
           <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
