@@ -70,7 +70,7 @@ async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> 
     const topTitle = items[0]?.title || keyword;
     return { totalOrders: totalCount, sellers: items.length, avgPrice, topTitle, rating };
   } catch (e) {
-    console.warn("AliExpress API hatası:", e);
+    console.warn("AliExpress API error:", e);
     return null;
   }
 }
@@ -109,6 +109,7 @@ export default function ProductAnalyzer() {
   const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, activatePro } = useAnalysisHistory();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale } = useLocale();
+  const isTr = locale === "tr";
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
   const fields: { key: keyof AnalyzerInput; labelKey: string; suffix?: boolean; placeholder: string }[] = [
@@ -211,7 +212,7 @@ export default function ProductAnalyzer() {
       setUnlockCode("");
       setShowUnlockInput(false);
       setShowPaywall(false);
-      toast({ title: locale === "tr" ? "PRO açıldı 🎉" : "PRO unlocked 🎉", description: locale === "tr" ? "Artık sınırsız analiz yapabilirsin." : "You now have unlimited analyses." });
+      toast({ title: isTr ? "PRO açıldı 🎉" : "PRO unlocked 🎉", description: isTr ? "Artık sınırsız analiz yapabilirsin." : "You now have unlimited analyses." });
     } else {
       setUnlockError(true);
     }
@@ -244,7 +245,10 @@ export default function ProductAnalyzer() {
 
   return (
     <div className="space-y-6 relative">
-      <SEO title="Ürün Analizi | KHELL AI" description="Ürün kârlılığını, marjını ve risk düzeyini AI ile saniyeler içinde analiz et." />
+      <SEO
+        title={isTr ? "Ürün Analizi | KHELL AI" : "Product Analyzer | KHELL AI"}
+        description={isTr ? "Ürün kârlılığını, marjını ve risk düzeyini AI ile saniyeler içinde analiz et." : "Analyze product profitability, margin and risk level with AI in seconds."}
+      />
       <BackButton />
 
       {fromOnboarding && (
@@ -304,16 +308,20 @@ export default function ProductAnalyzer() {
           </div>
 
           <p className={`text-xs font-medium mt-2 text-center ${isPro ? "text-winning" : remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
-            {isPro ? (locale === "tr" ? "PRO ✓ Sınırsız analiz" : "PRO ✓ Unlimited analyses") : remaining > 0 ? `${remaining} ${t("analyzer.remaining")}` : t("analyzer.limitReached")}
+            {isPro
+              ? (isTr ? "PRO ✓ Sınırsız analiz" : "PRO ✓ Unlimited analyses")
+              : remaining > 0
+              ? `${remaining} ${t("analyzer.remaining")}`
+              : t("analyzer.limitReached")}
           </p>
         </motion.div>
       </div>
 
-      {/* AKILLI ANALİZ PANELİ — her zaman görünür */}
+      {/* SMART ANALYSIS PANEL */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
-            🚀 Akıllı Analiz Paneli
+            {isTr ? "🚀 Akıllı Analiz Paneli" : "🚀 Smart Analysis Panel"}
           </span>
           <motion.button
             onClick={() => setExpandTrigger((v) => v + 1)}
@@ -321,30 +329,17 @@ export default function ProductAnalyzer() {
             transition={{ duration: 1.6, repeat: Infinity }}
             className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40 hover:bg-pink-500/30 cursor-pointer"
           >
-            ✨ Hepsini Aç
+            {isTr ? "✨ Hepsini Aç" : "✨ Expand All"}
           </motion.button>
         </div>
         <p className="text-[11px] text-muted-foreground -mt-1">
-          Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör.
+          {isTr
+            ? "Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör."
+            : "Enter product name and cost/price — see trend, competition, profit and commission calculations instantly."}
         </p>
-        <TrendScore
-          productName={productName}
-          googleApiKey={GOOGLE_API_KEY}
-          googleCx={GOOGLE_CX}
-          expandTrigger={expandTrigger}
-        />
-        <CompetitorAnalysis
-          productName={productName}
-          googleApiKey={GOOGLE_API_KEY}
-          googleCx={GOOGLE_CX}
-          expandTrigger={expandTrigger}
-        />
-        <MarketplaceCalculator
-          costUSD={input.product_cost}
-          salePriceUSD={input.selling_price}
-          exchangeRate={45}
-          expandTrigger={expandTrigger}
-        />
+        <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} />
+        <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} />
+        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={45} expandTrigger={expandTrigger} />
         <ProfitSimulator
           profitPerUnit={result.gross_profit}
           revenuePerUnit={input.selling_price}
@@ -376,7 +371,11 @@ export default function ProductAnalyzer() {
                       color: result.decision_score >= 80 ? "hsl(142 71% 55%)" : result.decision_score >= 60 ? "hsl(38 92% 60%)" : "hsl(0 84% 65%)",
                     }}
                   >
-                    {result.decision_score >= 80 ? "✓ KAZANAN" : result.decision_score >= 60 ? "⚠ TEST ET" : "✗ KAYBEDEN"}
+                    {result.decision_score >= 80
+                      ? (isTr ? "✓ KAZANAN" : "✓ WINNER")
+                      : result.decision_score >= 60
+                      ? (isTr ? "⚠ TEST ET" : "⚠ TEST IT")
+                      : (isTr ? "✗ KAYBEDEN" : "✗ LOSER")}
                   </span>
                   <button onClick={handleSave} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
                     <Save className="h-3.5 w-3.5" /> {t("analyzer.save")}
@@ -395,29 +394,42 @@ export default function ProductAnalyzer() {
               {aliLoading && (
                 <div className="card-glow rounded-xl p-4 flex items-center gap-3">
                   <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm text-muted-foreground">AliExpress pazar verisi yükleniyor...</span>
+                  <span className="text-sm text-muted-foreground">
+                    {isTr ? "AliExpress pazar verisi yükleniyor..." : "Loading AliExpress market data..."}
+                  </span>
                 </div>
               )}
+
               {aliData && !aliLoading && (
                 <div className="card-glow rounded-xl p-5 border border-border">
-                  <h4 className="text-sm font-bold text-foreground mb-3">🛒 AliExpress Pazar Verisi</h4>
+                  <h4 className="text-sm font-bold text-foreground mb-3">
+                    🛒 {isTr ? "AliExpress Pazar Verisi" : "AliExpress Market Data"}
+                  </h4>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-lg bg-accent/40 p-3 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Toplam Sipariş</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        {isTr ? "Toplam Sipariş" : "Total Orders"}
+                      </p>
                       <p className="text-lg font-bold text-winning">{aliData.totalOrders.toLocaleString()}+</p>
                     </div>
                     <div className="rounded-lg bg-accent/40 p-3 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Satıcı Sayısı</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        {isTr ? "Satıcı Sayısı" : "Sellers"}
+                      </p>
                       <p className="text-lg font-bold text-primary">{aliData.sellers}</p>
                     </div>
                     <div className="rounded-lg bg-accent/40 p-3 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Ort. Fiyat</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        {isTr ? "Ort. Fiyat" : "Avg. Price"}
+                      </p>
                       <p className="text-lg font-bold text-foreground">${aliData.avgPrice}</p>
                     </div>
                   </div>
                   {aliData.rating !== "0" && (
                     <div className="mt-3 flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">En iyi ürün puanı:</span>
+                      <span className="text-xs text-muted-foreground">
+                        {isTr ? "En iyi ürün puanı:" : "Top product rating:"}
+                      </span>
                       <span className="text-xs font-bold text-winning">⭐ {aliData.rating}</span>
                     </div>
                   )}
@@ -468,9 +480,8 @@ export default function ProductAnalyzer() {
 
               <MoneyLayer module="product" score={result.decision_score} dailyEstimate={Math.max(0, result.monthly_profit / 30)} />
               <AISuggestions
-                isTr={locale === "tr"}
+                isTr={isTr}
                 suggestions={(() => {
-                  const isTr = locale === "tr";
                   const s: Suggestion[] = [];
                   if (result.profit_margin < 15)
                     s.push({ level: "critical", text: isTr ? "**Kâr marjı çok düşük** — fiyat artışı veya tedarikçi pazarlığı şart." : "**Margin too low** — raise price or renegotiate supplier." });
@@ -488,41 +499,42 @@ export default function ProductAnalyzer() {
                 })()}
               />
               <ReportActions
-                isTr={locale === "tr"}
+                isTr={isTr}
                 filename={`khell-product-${(productName || "analysis").replace(/\s+/g, "-")}-${Date.now()}`}
                 rows={[
-                  [locale === "tr" ? "Ürün" : "Product", productName || "-"],
-                  [locale === "tr" ? "Skor" : "Score", `${result.decision_score}/100`],
-                  [locale === "tr" ? "Marj" : "Margin", `${result.profit_margin.toFixed(1)}%`],
-                  [locale === "tr" ? "Birim Kâr" : "Profit/Sale", currency(result.gross_profit)],
-                  [locale === "tr" ? "Aylık Kâr" : "Monthly Profit", currency(result.monthly_profit)],
-                  [locale === "tr" ? "Risk" : "Risk", result.risk_level.toUpperCase()],
-                  [locale === "tr" ? "Talep" : "Demand", demand],
-                  [locale === "tr" ? "Rekabet" : "Competition", competition],
+                  [isTr ? "Ürün" : "Product", productName || "-"],
+                  [isTr ? "Skor" : "Score", `${result.decision_score}/100`],
+                  [isTr ? "Marj" : "Margin", `${result.profit_margin.toFixed(1)}%`],
+                  [isTr ? "Birim Kâr" : "Profit/Sale", currency(result.gross_profit)],
+                  [isTr ? "Aylık Kâr" : "Monthly Profit", currency(result.monthly_profit)],
+                  [isTr ? "Risk" : "Risk", result.risk_level.toUpperCase()],
+                  [isTr ? "Talep" : "Demand", demand],
+                  [isTr ? "Rekabet" : "Competition", competition],
                   ...(aliData ? ([
-                    [locale === "tr" ? "AliExpress Sipariş" : "AliExpress Orders", `${aliData.totalOrders.toLocaleString()}+`],
-                    [locale === "tr" ? "AliExpress Satıcı" : "AliExpress Sellers", String(aliData.sellers)],
-                    [locale === "tr" ? "AliExpress Ort. Fiyat" : "AliExpress Avg Price", `$${aliData.avgPrice}`],
+                    [isTr ? "AliExpress Sipariş" : "AliExpress Orders", `${aliData.totalOrders.toLocaleString()}+`],
+                    [isTr ? "AliExpress Satıcı" : "AliExpress Sellers", String(aliData.sellers)],
+                    [isTr ? "AliExpress Ort. Fiyat" : "AliExpress Avg Price", `$${aliData.avgPrice}`],
                   ] as [string, string | number][]) : []),
                 ] as [string, string | number][]}
               />
 
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `🚀 KHELL AI Ürün Analizi\n\n` +
-                  `📦 Ürün: ${productName || "İsimsiz Ürün"}\n` +
-                  `⭐ Karar Skoru: ${result.decision_score}/100\n` +
-                  `💰 Kâr Marjı: %${result.profit_margin.toFixed(1)}\n` +
-                  `💵 Birim Kâr: ${currency(result.gross_profit)}\n` +
-                  `📈 Aylık Tahmini Kâr: ${currency(result.monthly_profit)}\n` +
+                  `🚀 KHELL AI Product Analysis\n\n` +
+                  `📦 Product: ${productName || "Unnamed"}\n` +
+                  `⭐ Decision Score: ${result.decision_score}/100\n` +
+                  `💰 Profit Margin: ${result.profit_margin.toFixed(1)}%\n` +
+                  `💵 Profit/Sale: ${currency(result.gross_profit)}\n` +
+                  `📈 Est. Monthly Profit: ${currency(result.monthly_profit)}\n` +
                   `⚠️ Risk: ${result.risk_level.toUpperCase()}\n\n` +
-                  `KHELL AI ile analiz edildi 🤖`
+                  `Analyzed by KHELL AI 🤖`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full rounded-lg bg-green-500/15 hover:bg-green-500/25 text-green-400 border border-green-500/30 text-sm font-semibold py-2.5 transition-colors"
               >
-                <MessageCircle className="h-4 w-4" /> WhatsApp'tan Paylaş
+                <MessageCircle className="h-4 w-4" />
+                {isTr ? "WhatsApp'tan Paylaş" : "Share via WhatsApp"}
               </a>
             </motion.div>
           )}
@@ -614,11 +626,8 @@ export default function ProductAnalyzer() {
               <p className="text-[11px] text-muted-foreground mt-3">{t("paywall.price")}</p>
 
               {!showUnlockInput ? (
-                <button
-                  onClick={() => setShowUnlockInput(true)}
-                  className="text-xs text-primary hover:underline mt-4 block w-full"
-                >
-                  {locale === "tr" ? "Zaten ödedim, kodum var" : "I already paid, I have a code"}
+                <button onClick={() => setShowUnlockInput(true)} className="text-xs text-primary hover:underline mt-4 block w-full">
+                  {isTr ? "Zaten ödedim, kodum var" : "I already paid, I have a code"}
                 </button>
               ) : (
                 <div className="mt-4 space-y-2">
@@ -628,16 +637,16 @@ export default function ProductAnalyzer() {
                       value={unlockCode}
                       onChange={(e) => { setUnlockCode(e.target.value); setUnlockError(false); }}
                       onKeyDown={(e) => e.key === "Enter" && handleRedeem()}
-                      placeholder={locale === "tr" ? "Erişim kodun" : "Your access code"}
+                      placeholder={isTr ? "Erişim kodun" : "Your access code"}
                       className="input-dark flex-1 text-sm text-center uppercase"
                     />
                     <button onClick={handleRedeem} className="btn-primary text-sm px-4">
-                      {locale === "tr" ? "Aç" : "Unlock"}
+                      {isTr ? "Aç" : "Unlock"}
                     </button>
                   </div>
                   {unlockError && (
                     <p className="text-xs text-destructive">
-                      {locale === "tr" ? "Kod geçersiz. Kodu Shopier ödeme sonrası WhatsApp'tan alıyorsun." : "Invalid code. You receive it via WhatsApp after Shopier payment."}
+                      {isTr ? "Kod geçersiz. Kodu Shopier ödeme sonrası WhatsApp'tan alıyorsun." : "Invalid code. You receive it via WhatsApp after Shopier payment."}
                     </p>
                   )}
                 </div>
