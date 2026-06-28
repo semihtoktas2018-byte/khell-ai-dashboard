@@ -45,7 +45,7 @@ export default function LandingPage() {
     },
     {
       name: "Pro",
-      price: isTr ? "249 ₺" : "$9",
+     price: isTr ? "249 ₺" : isFr ? "29 €" : "$29",
       period: isTr ? "/ay" : isFr ? "/mois" : "/mo",
       features: [t("landing.proF1"), t("landing.proF2"), t("landing.proF3New"), t("landing.proF4"), t("landing.proF5")],
       cta: t("landing.proCta"),
@@ -54,7 +54,7 @@ export default function LandingPage() {
     },
     {
       name: isTr ? "Kurumsal" : isFr ? "Entreprise" : "Enterprise",
-      price: isTr ? "₺990" : "$99",
+     price: isTr ? "₺990" : isFr ? "€199" : "$199",
       period: isTr ? "/ay" : isFr ? "/mois" : "/mo",
       features: [t("landing.entF1"), t("landing.entF2"), t("landing.entF3"), t("landing.entF4"), t("landing.entF5")],
       cta: t("landing.entCta"),
