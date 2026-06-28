@@ -50,7 +50,7 @@ export default function LandingPage() {
       features: [t("landing.proF1"), t("landing.proF2"), t("landing.proF3New"), t("landing.proF4"), t("landing.proF5")],
       cta: t("landing.proCta"),
       popular: true,
-      href: "https://www.shopier.com/bamironlinestore/46009500",
+     href: isTr ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025",
     },
     {
       name: isTr ? "Kurumsal" : isFr ? "Entreprise" : "Enterprise",
