@@ -254,10 +254,12 @@ export default function DashboardLayout() {
             </AnimatePresence>
           </div>
 
-          <button onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+          <button onClick={() => setLocale(locale === "tr" ? "en" : locale === "en" ? "fr" : "tr")}
+            
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
             <Globe className="h-3.5 w-3.5" />
-            {locale === "tr" ? "TR" : "EN"}
+            {locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}
+        
           </button>
           <button onClick={toggleTheme}
             className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
