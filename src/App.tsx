@@ -25,6 +25,8 @@ import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
 import TrendingProducts from "./pages/TrendingProducts";
 import OrderLog from "./pages/OrderLog";
+import StoreSpy from "./pages/StoreSpy";
+import PriceTracker from "./pages/PriceTracker";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
@@ -48,9 +50,7 @@ const App = () => {
   const dismissSplash = () => {
     try {
       sessionStorage.setItem("khell_splash_shown", "true");
-    } catch {
-      // ignore
-    }
+    } catch {}
     setShowSplash(false);
   };
 
@@ -84,6 +84,8 @@ const App = () => {
                           <Route path="product-page-generator" element={<ProductPageGenerator />} />
                           <Route path="sales-decision" element={<SalesDecisionEngine />} />
                           <Route path="content-engine" element={<ContentEngine />} />
+                          <Route path="store-spy" element={<StoreSpy />} />
+                          <Route path="price-tracker" element={<PriceTracker />} />
                         </Route>
                         <Route path="*" element={<NotFound />} />
                       </Routes>
