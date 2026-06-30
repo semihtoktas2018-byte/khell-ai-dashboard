@@ -6,6 +6,7 @@ interface CompetitorAnalysisProps {
   productName: string;
   googleApiKey: string;
   googleCx: string;
+  isTr?: boolean;
 }
 
 interface MarketResult {
@@ -24,11 +25,11 @@ const MARKETS = [
   { name: "AliExpress", emoji: "🔵", site: "aliexpress.com" },
 ];
 
-function getLevel(count: number | null): { label: string; color: string; bg: string } {
-  if (count === null) return { label: "Veri yok", color: "text-muted-foreground", bg: "bg-muted/20" };
-  if (count <= 15) return { label: "Az Rakip 🟢", color: "text-green-400", bg: "bg-green-500/10" };
-  if (count <= 50) return { label: "Orta Rekabet 🟡", color: "text-yellow-400", bg: "bg-yellow-500/10" };
-  return { label: "Yüksek Rekabet 🔴", color: "text-red-400", bg: "bg-red-500/10" };
+function getLevel(count: number | null, isTr: boolean): { label: string; color: string; bg: string } {
+  if (count === null) return { label: isTr ? "Veri yok" : "No data", color: "text-muted-foreground", bg: "bg-muted/20" };
+  if (count <= 15) return { label: isTr ? "Az Rakip 🟢" : "Low Competition 🟢", color: "text-green-400", bg: "bg-green-500/10" };
+  if (count <= 50) return { label: isTr ? "Orta Rekabet 🟡" : "Medium Competition 🟡", color: "text-yellow-400", bg: "bg-yellow-500/10" };
+  return { label: isTr ? "Yüksek Rekabet 🔴" : "High Competition 🔴", color: "text-red-400", bg: "bg-red-500/10" };
 }
 
 function getScore(results: MarketResult[]): number {
@@ -41,7 +42,7 @@ function getScore(results: MarketResult[]): number {
   return 25;
 }
 
-export default function CompetitorAnalysis({ productName, googleApiKey, googleCx , expandTrigger }: CompetitorAnalysisProps) {
+export default function CompetitorAnalysis({ productName, googleApiKey, googleCx, expandTrigger, isTr = true }: CompetitorAnalysisProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -99,24 +100,24 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
           <div className="p-1 rounded-md bg-blue-500/15 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)] transition-shadow">
             <Target className="h-3 w-3 text-blue-400" />
           </div>
-          <span className="font-bold text-blue-400 tracking-wide">RAKİP ANALİZİ</span>
+          <span className="font-bold text-blue-400 tracking-wide">{isTr ? "RAKİP ANALİZİ" : "COMPETITOR ANALYSIS"}</span>
         </div>
         <div className="flex items-center gap-2">
           {!hasName ? (
-            <span className="text-muted-foreground italic">Ürün adı girin →</span>
+            <span className="text-muted-foreground italic">{isTr ? "Ürün adı girin →" : "Enter product name →"}</span>
           ) : !started ? (
-            <span className="text-muted-foreground">Tıkla, analiz başlasın</span>
+            <span className="text-muted-foreground">{isTr ? "Tıkla, analiz başlasın" : "Click to start analysis"}</span>
           ) : allDone && bestMarket ? (
             <span className="text-muted-foreground">
-              En az rakip: <span className="font-bold text-green-400">{bestMarket.name} ({bestMarket.count})</span>
+              {isTr ? "En az rakip:" : "Lowest competition:"} <span className="font-bold text-green-400">{bestMarket.name} ({bestMarket.count})</span>
               {" · "}
               <span className={`font-bold ${score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
-                Fırsat Skoru: {score}
+                {isTr ? "Fırsat Skoru:" : "Opportunity Score:"} {score}
               </span>
             </span>
           ) : (
             <span className="text-muted-foreground flex items-center gap-1">
-              <Loader2 className="h-2.5 w-2.5 animate-spin" /> Analiz ediliyor...
+              <Loader2 className="h-2.5 w-2.5 animate-spin" /> {isTr ? "Analiz ediliyor..." : "Analyzing..."}
             </span>
           )}
           {open ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
@@ -127,25 +128,27 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
         <div className="px-3 pb-3 space-y-1.5 border-t border-blue-500/10 pt-2">
           {!hasName ? (
             <p className="text-muted-foreground text-center py-2">
-              Yukarıdaki kutuya ürün adını yaz, 4 platformda rakip sayısı analiz edilsin 🎯
+              {isTr
+                ? "Yukarıdaki kutuya ürün adını yaz, 4 platformda rakip sayısı analiz edilsin 🎯"
+                : "Enter the product name above to analyze competitor count across 4 platforms 🎯"}
             </p>
           ) : (
             <>
               {results.map((r) => {
-                const level = getLevel(r.count);
+                const level = getLevel(r.count, isTr);
                 return (
                   <div key={r.site} className={`rounded-lg border border-transparent px-2.5 py-2 ${level.bg}`}>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-foreground">{r.emoji} {r.name}</span>
                       {r.loading ? (
                         <span className="flex items-center gap-1 text-muted-foreground">
-                          <Loader2 className="h-2.5 w-2.5 animate-spin" /> Yükleniyor...
+                          <Loader2 className="h-2.5 w-2.5 animate-spin" /> {isTr ? "Yükleniyor..." : "Loading..."}
                         </span>
                       ) : r.error ? (
-                        <span className="text-muted-foreground">Veri alınamadı</span>
+                        <span className="text-muted-foreground">{isTr ? "Veri alınamadı" : "Data unavailable"}</span>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-foreground">{r.count?.toLocaleString()} sonuç</span>
+                          <span className="font-mono text-foreground">{r.count?.toLocaleString()} {isTr ? "sonuç" : "results"}</span>
                           <span className={`font-semibold ${level.color}`}>{level.label}</span>
                         </div>
                       )}
@@ -156,18 +159,22 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
 
               {allDone && (
                 <div className="mt-2 rounded-lg border border-blue-500/20 bg-blue-500/10 px-2.5 py-2 text-center">
-                  <span className="text-muted-foreground">Fırsat Skoru: </span>
+                  <span className="text-muted-foreground">{isTr ? "Fırsat Skoru:" : "Opportunity Score:"} </span>
                   <span className={`font-bold text-sm ${score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
                     {score}/100
                   </span>
                   <span className="text-muted-foreground ml-2">
-                    {score >= 70 ? "— Düşük rekabet, gir!" : score >= 50 ? "— Orta rekabet, dikkatli ol" : "— Yüksek rekabet, zorlu pazar"}
+                    {score >= 70
+                      ? (isTr ? "— Düşük rekabet, gir!" : "— Low competition, go for it!")
+                      : score >= 50
+                      ? (isTr ? "— Orta rekabet, dikkatli ol" : "— Medium competition, be careful")
+                      : (isTr ? "— Yüksek rekabet, zorlu pazar" : "— High competition, tough market")}
                   </span>
                 </div>
               )}
 
               <p className="text-muted-foreground text-center pt-0.5">
-                Google arama sonuç sayısına göre tahmin · Gerçek zamanlı değil
+                {isTr ? "Google arama sonuç sayısına göre tahmin · Gerçek zamanlı değil" : "Estimated from Google search result counts · Not real-time"}
               </p>
             </>
           )}
