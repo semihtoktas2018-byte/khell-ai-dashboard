@@ -6,6 +6,7 @@ interface TrendScoreProps {
   productName: string;
   googleApiKey: string;
   googleCx: string;
+  isTr?: boolean;
 }
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
@@ -26,13 +27,13 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.token;
 }
 
-function scoreLabel(score: number): { label: string; color: string } {
-  if (score >= 70) return { label: "Yüksek Potansiyel 🔥", color: "text-emerald-400" };
-  if (score >= 45) return { label: "Orta Potansiyel ⚡", color: "text-yellow-400" };
-  return { label: "Düşük Potansiyel", color: "text-red-400" };
+function scoreLabel(score: number, isTr: boolean): { label: string; color: string } {
+  if (score >= 70) return { label: isTr ? "Yüksek Potansiyel 🔥" : "High Potential 🔥", color: "text-emerald-400" };
+  if (score >= 45) return { label: isTr ? "Orta Potansiyel ⚡" : "Medium Potential ⚡", color: "text-yellow-400" };
+  return { label: isTr ? "Düşük Potansiyel" : "Low Potential", color: "text-red-400" };
 }
 
-export default function TrendScore({ productName, googleApiKey, googleCx , expandTrigger }: TrendScoreProps) {
+export default function TrendScore({ productName, googleApiKey, googleCx, expandTrigger, isTr = true }: TrendScoreProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -54,7 +55,6 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
     setMarketCount(null);
     setRedditCount(null);
 
-    // 1) CJ Popularity
     try {
       const token = await getAccessToken();
       const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&productNameEn=${encodeURIComponent(productName)}`;
@@ -66,7 +66,6 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
       setCjCount(null);
     }
 
-    // 2) Market Saturation (Google Custom Search)
     if (googleApiKey) {
       try {
         const query = encodeURIComponent(
@@ -82,7 +81,6 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
       }
     }
 
-    // 3) Reddit Mentions (public search JSON — CORS engellerse sessizce veri yok kalır)
     try {
       const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(productName)}&limit=25&sort=new&t=month`;
       const res = await fetch(url);
@@ -105,10 +103,8 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
     if (!hasName) { setStarted(false); setCjCount(null); setMarketCount(null); setRedditCount(null); }
   }, [open, productName]);
 
-  // CJ Popularity Score: 0-100 (daha çok tedarikçi = kategori aktif)
   const cjScore = cjCount !== null ? Math.min(100, Math.round((cjCount / 50) * 100)) : null;
 
-  // Market Saturation Score: düşük rekabet = yüksek skor
   let satScore: number | null = null;
   if (marketCount !== null) {
     if (marketCount <= 15) satScore = 90;
@@ -117,7 +113,6 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
     else satScore = 20;
   }
 
-  // Reddit Mention Score: 0-100 (son 1 ayda kaç gönderide bahsediliyor)
   const redditScore = redditCount !== null ? Math.min(100, Math.round((redditCount / 15) * 100)) : null;
 
   const validScores = [cjScore, satScore, redditScore].filter((s): s is number => s !== null);
@@ -125,7 +120,7 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
     ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
     : null;
 
-  const meta = trendScore !== null ? scoreLabel(trendScore) : null;
+  const meta = trendScore !== null ? scoreLabel(trendScore, isTr) : null;
 
   return (
     <div className="group rounded-xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 via-pink-500/5 to-transparent text-[11px] overflow-hidden transition-all duration-300 hover:border-pink-400/60 hover:shadow-[0_0_24px_rgba(236,72,153,0.35)]">
@@ -137,16 +132,16 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
           <div className="p-1 rounded-md bg-pink-500/15 group-hover:shadow-[0_0_10px_rgba(236,72,153,0.6)] transition-shadow">
             <Flame className="h-3 w-3 text-pink-400" />
           </div>
-          <span className="font-bold text-pink-400 tracking-wide">TREND SKORU</span>
+          <span className="font-bold text-pink-400 tracking-wide">{isTr ? "TREND SKORU" : "TREND SCORE"}</span>
         </div>
         <div className="flex items-center gap-2">
           {!hasName ? (
-            <span className="text-muted-foreground italic">Ürün adı girin →</span>
+            <span className="text-muted-foreground italic">{isTr ? "Ürün adı girin →" : "Enter product name →"}</span>
           ) : !started ? (
-            <span className="text-muted-foreground">Tıkla, hesaplansın</span>
+            <span className="text-muted-foreground">{isTr ? "Tıkla, hesaplansın" : "Click to calculate"}</span>
           ) : loading ? (
             <span className="text-muted-foreground flex items-center gap-1">
-              <Loader2 className="h-2.5 w-2.5 animate-spin" /> Hesaplanıyor...
+              <Loader2 className="h-2.5 w-2.5 animate-spin" /> {isTr ? "Hesaplanıyor..." : "Calculating..."}
             </span>
           ) : trendScore !== null && meta ? (
             <span className="text-muted-foreground">
@@ -155,7 +150,7 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
               <span className={meta.color}>{meta.label}</span>
             </span>
           ) : (
-            <span className="text-muted-foreground">Veri yok</span>
+            <span className="text-muted-foreground">{isTr ? "Veri yok" : "No data"}</span>
           )}
           {open ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
         </div>
@@ -165,36 +160,40 @@ export default function TrendScore({ productName, googleApiKey, googleCx , expan
         <div className="px-3 pb-3 space-y-1.5 border-t border-pink-500/10 pt-2">
           {!hasName ? (
             <p className="text-muted-foreground text-center py-2">
-              Yukarıdaki kutuya ürün adını yaz, Trend Skoru otomatik hesaplanır 🚀
+              {isTr
+                ? "Yukarıdaki kutuya ürün adını yaz, Trend Skoru otomatik hesaplanır 🚀"
+                : "Enter the product name above, the Trend Score will be calculated automatically 🚀"}
             </p>
           ) : (
             <>
               <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
-                <span className="text-muted-foreground">📦 CJ Tedarikçi Yoğunluğu</span>
+                <span className="text-muted-foreground">📦 {isTr ? "CJ Tedarikçi Yoğunluğu" : "CJ Supplier Density"}</span>
                 {cjCount !== null ? (
-                  <span className="text-foreground font-mono">{cjCount} ürün → {cjScore}/100</span>
+                  <span className="text-foreground font-mono">{cjCount} {isTr ? "ürün" : "products"} → {cjScore}/100</span>
                 ) : (
-                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                  <span className="text-muted-foreground">{loading ? "..." : isTr ? "veri yok" : "no data"}</span>
                 )}
               </div>
               <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
-                <span className="text-muted-foreground">🛒 Pazar Doygunluğu</span>
+                <span className="text-muted-foreground">🛒 {isTr ? "Pazar Doygunluğu" : "Market Saturation"}</span>
                 {marketCount !== null ? (
-                  <span className="text-foreground font-mono">{marketCount} sonuç → {satScore}/100</span>
+                  <span className="text-foreground font-mono">{marketCount} {isTr ? "sonuç" : "results"} → {satScore}/100</span>
                 ) : (
-                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                  <span className="text-muted-foreground">{loading ? "..." : isTr ? "veri yok" : "no data"}</span>
                 )}
               </div>
               <div className="rounded-lg bg-background/40 px-2.5 py-2 flex items-center justify-between">
-                <span className="text-muted-foreground">💬 Reddit Mention (30 gün)</span>
+                <span className="text-muted-foreground">💬 Reddit Mention (30 {isTr ? "gün" : "days"})</span>
                 {redditCount !== null ? (
-                  <span className="text-foreground font-mono">{redditCount} gönderi → {redditScore}/100</span>
+                  <span className="text-foreground font-mono">{redditCount} {isTr ? "gönderi" : "posts"} → {redditScore}/100</span>
                 ) : (
-                  <span className="text-muted-foreground">{loading ? "..." : "veri yok"}</span>
+                  <span className="text-muted-foreground">{loading ? "..." : isTr ? "veri yok" : "no data"}</span>
                 )}
               </div>
               <p className="text-muted-foreground text-center pt-0.5">
-                CJ tedarikçi + pazar doygunluğu + Reddit mention'a göre tahmini skor
+                {isTr
+                  ? "CJ tedarikçi + pazar doygunluğu + Reddit mention'a göre tahmini skor"
+                  : "Estimated score based on CJ supplier density + market saturation + Reddit mentions"}
               </p>
             </>
           )}
