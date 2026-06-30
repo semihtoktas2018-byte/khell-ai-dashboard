@@ -8,11 +8,12 @@ interface ProfitSimulatorProps {
   costPerUnit: number;
   currency: (val: number) => string;
   initialOrders?: number;
+  isTr?: boolean;
 }
 
 const MARKS = [10, 25, 50, 100, 250, 500, 1000];
 
-export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPerUnit, currency, initialOrders = 50 , expandTrigger }: ProfitSimulatorProps) {
+export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPerUnit, currency, initialOrders = 50, expandTrigger, isTr = true }: ProfitSimulatorProps) {
   const [orders, setOrders] = useState(initialOrders);
   const [open, setOpen] = useState(false);
 
@@ -39,14 +40,14 @@ export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPer
           <div className="p-1 rounded-md bg-emerald-500/15 group-hover:shadow-[0_0_10px_rgba(16,185,129,0.6)] transition-shadow">
             <TrendingUp className="h-3 w-3 text-emerald-400" />
           </div>
-          <span className="font-bold text-emerald-400 tracking-wide">KÂR SİMÜLATÖRÜ</span>
+          <span className="font-bold text-emerald-400 tracking-wide">{isTr ? "KÂR SİMÜLATÖRÜ" : "PROFIT SIMULATOR"}</span>
         </div>
         <div className="flex items-center gap-2">
           {!hasData ? (
-            <span className="text-muted-foreground italic">Maliyet & satış fiyatı girin →</span>
+            <span className="text-muted-foreground italic">{isTr ? "Maliyet & satış fiyatı girin →" : "Enter cost & sale price →"}</span>
           ) : (
             <span className="text-muted-foreground">
-              {orders} adet/ay → <span className={`font-bold ${monthlyProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>{currency(monthlyProfit)}</span>
+              {orders} {isTr ? "adet/ay" : "units/mo"} → <span className={`font-bold ${monthlyProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>{currency(monthlyProfit)}</span>
             </span>
           )}
           {open ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
@@ -57,14 +58,16 @@ export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPer
         <div className="px-3 pb-3 space-y-3 border-t border-emerald-500/10 pt-3">
           {!hasData ? (
             <p className="text-muted-foreground text-center py-2">
-              Maliyet ve satış fiyatını girince slider ile "50/100/500 adet satarsam ne kazanırım?" simüle edebilirsin 📈
+              {isTr
+                ? "Maliyet ve satış fiyatını girince slider ile \"50/100/500 adet satarsam ne kazanırım?\" simüle edebilirsin 📈"
+                : "Enter cost and sale price, then use the slider to simulate \"what if I sell 50/100/500 units?\" 📈"}
             </p>
           ) : (
             <>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Aylık Sipariş Sayısı</span>
-                  <span className="font-mono font-bold text-emerald-400 text-base">{orders.toLocaleString("tr-TR")} adet</span>
+                  <span className="text-muted-foreground">{isTr ? "Aylık Sipariş Sayısı" : "Monthly Order Count"}</span>
+                  <span className="font-mono font-bold text-emerald-400 text-base">{orders.toLocaleString(isTr ? "tr-TR" : "en-US")} {isTr ? "adet" : "units"}</span>
                 </div>
                 <input
                   type="range"
@@ -86,44 +89,48 @@ export default function ProfitSimulator({ profitPerUnit, revenuePerUnit, costPer
 
               <div className="grid grid-cols-3 gap-2">
                 <div className="rounded-lg bg-background/60 p-2.5 text-center">
-                  <p className="text-muted-foreground mb-1">Aylık Ciro</p>
+                  <p className="text-muted-foreground mb-1">{isTr ? "Aylık Ciro" : "Monthly Revenue"}</p>
                   <p className="text-sm font-bold font-mono text-foreground">{currency(monthlyRevenue)}</p>
                 </div>
                 <div className="rounded-lg bg-background/60 p-2.5 text-center">
-                  <p className="text-muted-foreground mb-1">Toplam Maliyet</p>
+                  <p className="text-muted-foreground mb-1">{isTr ? "Toplam Maliyet" : "Total Cost"}</p>
                   <p className="text-sm font-bold font-mono text-red-400">-{currency(monthlyCost)}</p>
                 </div>
                 <div className="rounded-lg bg-emerald-500/10 p-2.5 text-center border border-emerald-500/20">
-                  <p className="text-muted-foreground mb-1">Net Kâr</p>
+                  <p className="text-muted-foreground mb-1">{isTr ? "Net Kâr" : "Net Profit"}</p>
                   <p className={`text-sm font-bold font-mono ${monthlyProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>{currency(monthlyProfit)}</p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between rounded-lg bg-background/40 px-2.5 py-2">
-                <span className="text-muted-foreground flex items-center gap-1.5"><Target className="h-3 w-3" /> Günlük hedef</span>
-                <span className="font-mono font-bold text-foreground">~{dailyOrdersNeeded} sipariş/gün</span>
+                <span className="text-muted-foreground flex items-center gap-1.5"><Target className="h-3 w-3" /> {isTr ? "Günlük hedef" : "Daily target"}</span>
+                <span className="font-mono font-bold text-foreground">~{dailyOrdersNeeded} {isTr ? "sipariş/gün" : "orders/day"}</span>
               </div>
 
               {monthlyProfit > 0 ? (
                 <div className="space-y-1.5 pt-1">
-                  <p className="uppercase tracking-wider text-muted-foreground">Bu hızla birikim</p>
+                  <p className="uppercase tracking-wider text-muted-foreground">{isTr ? "Bu hızla birikim" : "Cumulative at this rate"}</p>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <p className="text-muted-foreground">3 Ay</p>
+                      <p className="text-muted-foreground">3 {isTr ? "Ay" : "Mo"}</p>
                       <p className="font-bold font-mono text-foreground">{currency(goal3Months)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">6 Ay</p>
+                      <p className="text-muted-foreground">6 {isTr ? "Ay" : "Mo"}</p>
                       <p className="font-bold font-mono text-foreground">{currency(goal6Months)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">12 Ay</p>
+                      <p className="text-muted-foreground">12 {isTr ? "Ay" : "Mo"}</p>
                       <p className="font-bold font-mono text-foreground">{currency(goal12Months)}</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-red-400 text-center">⚠️ Bu fiyatlarla zarar ediyorsun — maliyet veya satış fiyatını gözden geçir.</p>
+                <p className="text-red-400 text-center">
+                  {isTr
+                    ? "⚠️ Bu fiyatlarla zarar ediyorsun — maliyet veya satış fiyatını gözden geçir."
+                    : "⚠️ You're losing money at these prices — review your cost or sale price."}
+                </p>
               )}
             </>
           )}
