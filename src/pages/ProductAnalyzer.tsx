@@ -337,9 +337,9 @@ export default function ProductAnalyzer() {
             ? "Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör."
             : "Enter product name and cost/price — see trend, competition, profit and commission calculations instantly."}
         </p>
-        <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} />
-        <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} />
-        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={45} expandTrigger={expandTrigger} />
+        <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
+        <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
+        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={45} expandTrigger={expandTrigger} isTr={isTr} />
         <ProfitSimulator
           profitPerUnit={result.gross_profit}
           revenuePerUnit={input.selling_price}
@@ -347,6 +347,7 @@ export default function ProductAnalyzer() {
           currency={currency}
           initialOrders={input.monthly_orders_estimate || 50}
           expandTrigger={expandTrigger}
+          isTr={isTr}
         />
       </div>
 
