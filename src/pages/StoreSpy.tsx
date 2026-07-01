@@ -25,6 +25,15 @@ interface StoreResult {
   products: StoreProduct[];
 }
 
+const EXAMPLE_STORES = [
+  { domain: "allbirds.com", emoji: "👟" },
+  { domain: "gymshark.com", emoji: "💪" },
+  { domain: "colourpop.com", emoji: "💄" },
+  { domain: "chubbiesshorts.com", emoji: "🩳" },
+  { domain: "brooklinen.com", emoji: "🛏️" },
+  { domain: "deathwishcoffee.com", emoji: "☕" },
+];
+
 export default function StoreSpy() {
   const { locale } = useLocale();
   const isTr = locale === "tr";
@@ -33,13 +42,14 @@ export default function StoreSpy() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAnalyze = async () => {
-    if (!url.trim()) return;
+  const handleAnalyze = async (targetUrl?: string) => {
+    const u = (targetUrl ?? url).trim();
+    if (!u) return;
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("store-spy", { body: { url } });
+      const { data, error: fnError } = await supabase.functions.invoke("store-spy", { body: { url: u } });
       if (fnError) throw fnError;
       if (data?.error) {
         setError(data.error);
@@ -122,7 +132,7 @@ export default function StoreSpy() {
             />
           </div>
           <button
-            onClick={handleAnalyze}
+            onClick={() => handleAnalyze()}
             disabled={loading || !url.trim()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
             style={{ background: "hsl(271 91% 60%)", boxShadow: "0 0 20px hsl(271 91% 60% / 0.3)" }}
@@ -142,6 +152,24 @@ export default function StoreSpy() {
             {error}
           </div>
         )}
+
+        <div className="mt-4">
+          <p className="text-[10px] text-muted-foreground mb-2">
+            {isTr ? "Deneyebileceğin bilinen Shopify mağazaları:" : "Try one of these known Shopify stores:"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {EXAMPLE_STORES.map((ex) => (
+              <button
+                key={ex.domain}
+                onClick={() => { setUrl(ex.domain); handleAnalyze(ex.domain); }}
+                disabled={loading}
+                className="text-[11px] px-3 py-1.5 rounded-lg text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+                style={{ background: "hsl(217 32% 12%)", border: "1px solid hsl(217 32% 20%)" }}>
+                {ex.emoji} {ex.domain}
+              </button>
+            ))}
+          </div>
+        </div>
       </motion.div>
 
       {/* Results */}
