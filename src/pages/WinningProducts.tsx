@@ -72,8 +72,9 @@ export default function WinningProducts() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showNewOnly, setShowNewOnly] = useState(false);
   const navigate = useNavigate();
-  const { currency } = useLocale();
+  const { locale, currency } = useLocale();
   const { isPro } = useAnalysisHistory();
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
 
   const marginFilters = [
     { label: "Tümü", min: 0 },
@@ -285,7 +286,7 @@ export default function WinningProducts() {
               <h3 className="text-base font-bold text-white mb-1">+{lockedItems.length} Ürün PRO ile Açılır</h3>
               <p className="text-xs text-muted-foreground mb-4">Rakipler fark etmeden önce trend ürünleri sen gör</p>
               <button className="px-8 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))", boxShadow: "0 4px 20px hsl(38 92% 50% / 0.3)" }}>
-                Pro'ya Geç — 249₺/ay
+                Pro'ya Geç — {proPriceLabel}
               </button>
             </motion.div>
           )}
@@ -310,7 +311,7 @@ export default function WinningProducts() {
               ))}
             </div>
             <a href="https://www.shopier.com/bamironlinestore/46009500" target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
-              Pro'ya Geç — 249₺/ay
+              Pro'ya Geç — {proPriceLabel}
             </a>
             <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">Şimdi değil</button>
           </motion.div>
