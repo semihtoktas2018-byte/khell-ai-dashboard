@@ -21,13 +21,23 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const success = isLogin ? await login(email, password) : await signup(name, email, password);
-      if (success) {
-        toast({ title: isLogin ? "Giriş başarılı" : "Kayıt başarılı", description: "Dashboard'a yönlendiriliyorsunuz..." });
+      if (isLogin) {
+        await login(email, password);
+        toast({ title: "Giriş başarılı", description: "Dashboard'a yönlendiriliyorsunuz..." });
         navigate("/dashboard");
+      } else {
+        await signup(name, email, password);
+        toast({
+          title: "Kayıt başarılı",
+          description: "E-posta adresinize gönderilen doğrulama bağlantısına tıklayın.",
+        });
       }
-    } catch {
-      toast({ title: "Hata", description: "Bir şeyler yanlış gitti", variant: "destructive" });
+    } catch (err: any) {
+      toast({
+        title: "Hata",
+        description: err?.message || "Bir şeyler yanlış gitti",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
