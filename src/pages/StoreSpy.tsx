@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Globe, AlertCircle } from "lucide-react";
+import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Globe, AlertCircle, Crown } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
@@ -37,14 +38,25 @@ const EXAMPLE_STORES = [
 export default function StoreSpy() {
   const { locale } = useLocale();
   const isTr = locale === "tr";
+  const { isPro } = useAnalysisHistory();
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<StoreResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const FREE_USE_KEY = "khell_storespy_used";
+  const hasUsedFree = () => localStorage.getItem(FREE_USE_KEY) === "true";
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
 
   const handleAnalyze = async (targetUrl?: string) => {
     const u = (targetUrl ?? url).trim();
     if (!u) return;
+    if (!isPro && hasUsedFree()) {
+      setShowPaywall(true);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -55,6 +67,7 @@ export default function StoreSpy() {
         setError(data.error);
       } else {
         setResult(data as StoreResult);
+        if (!isPro) localStorage.setItem(FREE_USE_KEY, "true");
       }
     } catch (e: any) {
       setError(isTr ? "Mağaza analiz edilemedi. Bağlantıyı kontrol edip tekrar dene." : "Could not analyze store. Check the link and try again.");
@@ -98,14 +111,21 @@ export default function StoreSpy() {
 
         <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{
-            background: "hsl(271 91% 65% / 0.12)",
-            border: "1px solid hsl(271 91% 65% / 0.35)",
-            color: "hsl(271 91% 75%)",
+            background: isPro ? "hsl(142 71% 45% / 0.12)" : "hsl(38 92% 50% / 0.12)",
+            border: `1px solid ${isPro ? "hsl(142 71% 45% / 0.35)" : "hsl(38 92% 50% / 0.35)"}`,
+            color: isPro ? "hsl(142 71% 55%)" : "hsl(38 92% 60%)",
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          {isTr ? "Şu an sadece Shopify mağazaları destekleniyor" : "Currently only Shopify stores are supported"}
+          <span className={`w-1.5 h-1.5 rounded-full animate-pulse`} style={{ background: isPro ? "hsl(142 71% 55%)" : "hsl(38 92% 60%)" }} />
+          {isPro
+            ? (isTr ? "PRO — Sınırsız mağaza analizi" : "PRO — Unlimited store analysis")
+            : hasUsedFree()
+              ? (isTr ? "Ücretsiz hakkın kullanıldı — PRO'ya geç" : "Free analysis used — upgrade to PRO")
+              : (isTr ? "1 ücretsiz analiz hakkın var" : "You have 1 free analysis")}
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          {isTr ? "Şu an sadece Shopify mağazaları destekleniyor" : "Currently only Shopify stores are supported"}
+        </p>
       </motion.div>
 
       {/* URL Input */}
@@ -246,6 +266,35 @@ export default function StoreSpy() {
             </div>
           ))}
         </motion.div>
+      )}
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">🕵️</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">
+              {isTr ? "Sınırsız Mağaza Spy PRO'da" : "Unlimited Store Spy with PRO"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isTr ? "Ücretsiz analiz hakkını kullandın. Sınırsız rakip mağaza analizi için PRO'ya geç." : "You've used your free analysis. Upgrade to PRO for unlimited competitor store analysis."}
+            </p>
+            <div className="space-y-2 text-left mb-6">
+              {[
+                isTr ? "🕵️ Sınırsız mağaza analizi" : "🕵️ Unlimited store analysis",
+                isTr ? "🔥 Sınırsız trend/kazanan ürün" : "🔥 Unlimited trending/winning products",
+                isTr ? "📊 Sınırsız ürün analizi" : "📊 Unlimited product analysis",
+                isTr ? "🔔 Fiyat takibi ve bildirimler" : "🔔 Price tracking & alerts",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-sm text-foreground"><span className="text-winning">✔</span> {f}</div>
+              ))}
+            </div>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {isTr ? "Pro'ya Geç" : "Go Pro"} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">
+              {isTr ? "Şimdi değil" : "Not now"}
+            </button>
+          </motion.div>
+        </div>
       )}
     </div>
   );
