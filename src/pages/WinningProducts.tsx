@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Radio, BarChart3, RefreshCw, TrendingUp, Filter, Bell, Lock, Crown } from "lucide-react";
+import { Package, Radio, BarChart3, RefreshCw, TrendingUp, Filter, Bell, BellRing, Lock, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
@@ -89,6 +91,8 @@ const COPY = {
     analyze: "Analiz Et",
     searchAd: "Reklamda Ara",
     searchTiktok: "TikTok'ta Ara",
+    track: "Takibe Al",
+    tracking: "Takipte",
   },
   en: {
     title: "Winning Products",
@@ -124,6 +128,8 @@ const COPY = {
     analyze: "Analyze",
     searchAd: "Search in Ads",
     searchTiktok: "Search on TikTok",
+    track: "Track Price",
+    tracking: "Tracking",
   },
   fr: {
     title: "Produits gagnants",
@@ -159,6 +165,8 @@ const COPY = {
     analyze: "Analyser",
     searchAd: "Chercher en pub",
     searchTiktok: "Chercher sur TikTok",
+    track: "Suivre le prix",
+    tracking: "Suivi",
   },
 } as const;
 
@@ -176,10 +184,38 @@ export default function WinningProducts() {
   const navigate = useNavigate();
   const { locale, currency } = useLocale();
   const { isPro } = useAnalysisHistory();
+  const { user } = useAuth();
   const c = COPY[locale] || COPY.en;
   const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
   const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
   const dateLocale = locale === "tr" ? "tr-TR" : locale === "fr" ? "fr-FR" : "en-US";
+  const [trackedPids, setTrackedPids] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("tracked_products").select("pid").eq("user_id", user.id).then(({ data }) => {
+      if (data) setTrackedPids(new Set(data.map((d: any) => d.pid)));
+    });
+  }, [user]);
+
+  const toggleTrack = async (p: any, cost: number, img: string, displayName: string) => {
+    if (!user) return;
+    if (trackedPids.has(p.pid)) {
+      setTrackedPids((prev) => { const next = new Set(prev); next.delete(p.pid); return next; });
+      await supabase.from("tracked_products").delete().eq("user_id", user.id).eq("pid", p.pid);
+    } else {
+      setTrackedPids((prev) => new Set(prev).add(p.pid));
+      await supabase.from("tracked_products").upsert({
+        user_id: user.id,
+        pid: p.pid,
+        product_name: displayName,
+        image_url: img || null,
+        product_url: p.productUrl || null,
+        initial_price: cost,
+        last_checked_price: cost,
+      }, { onConflict: "user_id,pid" });
+    }
+  };
 
   const marginFilters = [
     { label: c.all, min: 0 },
@@ -259,6 +295,20 @@ export default function WinningProducts() {
     const displayName = translations[rawName] || rawName;
     const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
     const isPick = isEditorPick(rawName);
+    const isTracked = trackedPids.has(p.pid);
+    const trackButton = user ? (
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleTrack(p, p._cost, img, displayName); }}
+        title={isTracked ? c.tracking : c.track}
+        className="absolute bottom-2 right-2 z-10 h-7 w-7 rounded-full flex items-center justify-center transition-colors"
+        style={{
+          background: isTracked ? "hsl(199 89% 60%)" : "hsl(222 47% 6% / 0.85)",
+          border: `1px solid ${isTracked ? "hsl(199 89% 60%)" : "hsl(217 32% 30% / 0.6)"}`,
+          backdropFilter: "blur(6px)",
+        }}>
+        {isTracked ? <BellRing className="h-3.5 w-3.5 text-white" /> : <Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+      </button>
+    ) : null;
     return (
       <motion.div key={p.pid || i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }}
@@ -270,6 +320,7 @@ export default function WinningProducts() {
           {img ? <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>}
           {isPick && <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white" style={{ background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))", boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)" }}>⭐ {c.editorPick}</span>}
           <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md" style={{ background: "hsl(222 47% 6% / 0.85)", backdropFilter: "blur(6px)", border: `1px solid ${marginAccent}55`, color: marginAccent }}>{marginMeta.label}</span>
+          {trackButton}
         </a>
         <div className="p-4 space-y-2 flex-1 flex flex-col">
           <div className="flex items-center gap-1.5">
