@@ -1,35 +1,60 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Lock, Globe } from "lucide-react";
+import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Globe, AlertCircle } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { supabase } from "@/integrations/supabase/client";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const DEMO_RESULTS = [
-  { name: "Wireless Earbuds Pro X", price: "$24.99", orders: "1,200+", margin: "62%", trend: "↑ Hot", score: 88 },
-  { name: "LED Desk Lamp USB-C", price: "$18.50", orders: "890+", margin: "54%", trend: "↑ Rising", score: 76 },
-  { name: "Phone Stand Adjustable", price: "$9.99", orders: "2,100+", margin: "71%", trend: "🔥 Viral", score: 94 },
-  { name: "Silicone Kitchen Set", price: "$32.00", orders: "540+", margin: "48%", trend: "→ Stable", score: 61 },
-  { name: "Portable Fan Mini", price: "$14.99", orders: "3,400+", margin: "67%", trend: "🔥 Viral", score: 91 },
-];
+interface StoreProduct {
+  name: string;
+  vendor: string;
+  category: string;
+  price: number;
+  image: string;
+  url: string;
+}
+
+interface StoreResult {
+  storeUrl: string;
+  totalProducts: number;
+  avgPrice: string;
+  topCategory: string;
+  products: StoreProduct[];
+}
 
 export default function StoreSpy() {
   const { locale } = useLocale();
   const isTr = locale === "tr";
   const [url, setUrl] = useState("");
-  const [showDemo, setShowDemo] = useState(false);
+  const [result, setResult] = useState<StoreResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!url.trim()) return;
     setLoading(true);
-    setTimeout(() => {
+    setError(null);
+    setResult(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("store-spy", { body: { url } });
+      if (fnError) throw fnError;
+      if (data?.error) {
+        setError(data.error);
+      } else {
+        setResult(data as StoreResult);
+      }
+    } catch (e: any) {
+      setError(isTr ? "Mağaza analiz edilemedi. Bağlantıyı kontrol edip tekrar dene." : "Could not analyze store. Check the link and try again.");
+    } finally {
       setLoading(false);
-      setShowDemo(true);
-    }, 1800);
+    }
   };
+
+  const minPrice = result ? Math.min(...result.products.map((p) => p.price)) : 0;
+  const maxPrice = result ? Math.max(...result.products.map((p) => p.price)) : 0;
 
   return (
     <div className="space-y-6">
@@ -56,12 +81,11 @@ export default function StoreSpy() {
               {isTr ? "🕵️ Mağaza Spy" : "🕵️ Store Spy"}
             </h1>
             <p className="text-xs text-muted-foreground">
-              {isTr ? "Rakip mağazanın en çok satan ürünlerini gör" : "See what's selling best in any competitor store"}
+              {isTr ? "Rakip Shopify mağazasının ürünlerini gerçek zamanlı gör" : "See any competitor's Shopify store products in real time"}
             </p>
           </div>
         </div>
 
-        {/* Coming soon badge */}
         <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{
             background: "hsl(271 91% 65% / 0.12)",
@@ -70,7 +94,7 @@ export default function StoreSpy() {
           }}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          {isTr ? "Backend entegrasyonu yakında aktif" : "Backend integration coming soon"}
+          {isTr ? "Şu an sadece Shopify mağazaları destekleniyor" : "Currently only Shopify stores are supported"}
         </div>
       </motion.div>
 
@@ -92,7 +116,8 @@ export default function StoreSpy() {
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder={isTr ? "https://shopify-magaza.com veya amazon.com/shops/..." : "https://shopify-store.com or amazon.com/shops/..."}
+              onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+              placeholder={isTr ? "https://shopify-magaza.com" : "https://shopify-store.com"}
               className="input-dark w-full pl-10"
             />
           </div>
@@ -111,29 +136,26 @@ export default function StoreSpy() {
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {["shopify-store.com", "amazon.com/shops/example", "trendyol.com/magaza/ornek"].map((ex) => (
-            <button key={ex} onClick={() => setUrl(`https://${ex}`)}
-              className="text-[10px] px-2 py-1 rounded-md text-muted-foreground hover:text-primary transition-colors"
-              style={{ background: "hsl(217 32% 12%)", border: "1px solid hsl(217 32% 20%)" }}>
-              {ex}
-            </button>
-          ))}
-        </div>
+        {error && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            {error}
+          </div>
+        )}
       </motion.div>
 
-      {/* Demo Results */}
-      {showDemo && (
+      {/* Results */}
+      {result && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="space-y-4">
-          
+
           {/* Store Overview */}
           <div className="rounded-xl p-5 grid grid-cols-2 sm:grid-cols-4 gap-4"
             style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
             {[
-              { label: isTr ? "Toplam Ürün" : "Total Products", value: "127", icon: Package, color: "text-blue-400" },
-              { label: isTr ? "Ort. Fiyat" : "Avg. Price", value: "$20.09", icon: DollarSign, color: "text-green-400" },
-              { label: isTr ? "En İyi Kategori" : "Top Category", value: isTr ? "Elektronik" : "Electronics", icon: TrendingUp, color: "text-purple-400" },
-              { label: isTr ? "Tahmini Aylık Satış" : "Est. Monthly Sales", value: "$8,200+", icon: Store, color: "text-amber-400" },
+              { label: isTr ? "Toplam Ürün" : "Total Products", value: String(result.totalProducts), icon: Package, color: "text-blue-400" },
+              { label: isTr ? "Ort. Fiyat" : "Avg. Price", value: `$${result.avgPrice}`, icon: DollarSign, color: "text-green-400" },
+              { label: isTr ? "En İyi Kategori" : "Top Category", value: result.topCategory || "-", icon: TrendingUp, color: "text-purple-400" },
+              { label: isTr ? "Fiyat Aralığı" : "Price Range", value: `$${minPrice.toFixed(0)}–$${maxPrice.toFixed(0)}`, icon: Store, color: "text-amber-400" },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <s.icon className={`h-5 w-5 mx-auto mb-1 ${s.color}`} />
@@ -147,61 +169,46 @@ export default function StoreSpy() {
           <div className="rounded-xl overflow-hidden" style={{ border: "1px solid hsl(217 32% 17%)" }}>
             <div className="px-5 py-3 flex items-center justify-between" style={{ background: "hsl(222 47% 8%)" }}>
               <h4 className="text-sm font-bold text-white">
-                {isTr ? "🔥 En Çok Satan Ürünler" : "🔥 Best Selling Products"}
+                {isTr ? "🛍️ Mağazadaki Ürünler" : "🛍️ Store Products"}
               </h4>
-              <span className="text-[10px] text-muted-foreground">{isTr ? "Demo verisi" : "Demo data"}</span>
+              <span className="text-[10px] text-muted-foreground">{isTr ? "En pahalıdan ucuza" : "Highest to lowest price"}</span>
             </div>
-            <div className="divide-y divide-border">
-              {DEMO_RESULTS.map((p, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-accent/20 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-muted-foreground w-4">#{i + 1}</span>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{p.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-muted-foreground">{p.orders} {isTr ? "sipariş" : "orders"}</span>
-                        <span className="text-[10px] text-green-400">{p.trend}</span>
+            <div className="divide-y divide-border max-h-[500px] overflow-y-auto">
+              {result.products.map((p, i) => (
+                <a key={i} href={p.url} target="_blank" rel="noreferrer"
+                  className="flex items-center justify-between px-5 py-3 hover:bg-accent/20 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {p.image ? (
+                      <img src={p.image} alt="" className="h-9 w-9 rounded-md object-cover shrink-0" />
+                    ) : (
+                      <div className="h-9 w-9 rounded-md bg-muted flex items-center justify-center shrink-0">
+                        <Package className="h-4 w-4 text-muted-foreground" />
                       </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                      {p.category && <p className="text-[10px] text-muted-foreground">{p.category}</p>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-right">
-                    <div>
-                      <p className="text-sm font-bold text-white">{p.price}</p>
-                      <p className="text-[10px] text-green-400">{p.margin} margin</p>
-                    </div>
-                    <div className={`text-lg font-black font-mono ${p.score >= 80 ? "text-green-400" : p.score >= 60 ? "text-amber-400" : "text-red-400"}`}>
-                      {p.score}
-                    </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <p className="text-sm font-bold text-white">${p.price.toFixed(2)}</p>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
                   </div>
-                </div>
+                </a>
               ))}
             </div>
-          </div>
-
-          {/* Coming Soon Overlay CTA */}
-          <div className="rounded-xl p-6 text-center"
-            style={{ background: "hsl(271 91% 60% / 0.08)", border: "1px solid hsl(271 91% 60% / 0.25)" }}>
-            <Lock className="h-8 w-8 text-purple-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">
-              {isTr ? "Gerçek Veri Yakında Aktif" : "Real Data Coming Soon"}
-            </h3>
-            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              {isTr
-                ? "Şu an demo verisi görüyorsun. Backend entegrasyonu tamamlanınca gerçek mağaza verileri burada olacak."
-                : "You're seeing demo data. Once backend integration is complete, real store data will appear here."}
-            </p>
           </div>
         </motion.div>
       )}
 
       {/* How it works */}
-      {!showDemo && (
+      {!result && !loading && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.2 }}
           className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { icon: "🔗", title: isTr ? "URL Yapıştır" : "Paste URL", desc: isTr ? "Shopify, Amazon veya Trendyol mağaza linkini gir" : "Enter any Shopify, Amazon or Trendyol store link" },
-            { icon: "🔍", title: isTr ? "AI Analiz Eder" : "AI Analyzes", desc: isTr ? "En çok satan ürünleri, fiyatları ve satış hacmini çeker" : "Pulls best sellers, prices and sales volume" },
-            { icon: "🎯", title: isTr ? "Boşlukları Bul" : "Find Gaps", desc: isTr ? "Rakibin hangi ürünlerde zayıf olduğunu gör, oraya gir" : "See where competitors are weak and enter those gaps" },
+            { icon: "🔗", title: isTr ? "URL Yapıştır" : "Paste URL", desc: isTr ? "Herhangi bir Shopify mağaza linkini gir" : "Enter any Shopify store link" },
+            { icon: "🔍", title: isTr ? "Anında Çeker" : "Fetches Instantly", desc: isTr ? "Mağazadaki tüm ürünleri ve fiyatları gerçek zamanlı çeker" : "Pulls all products and prices in real time" },
+            { icon: "🎯", title: isTr ? "Fırsatları Bul" : "Find Opportunities", desc: isTr ? "Fiyat aralığını ve popüler kategorileri gör, kendi stratejini kur" : "See price range and popular categories to shape your strategy" },
           ].map((s) => (
             <div key={s.title} className="rounded-xl p-5 text-center"
               style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
