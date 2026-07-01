@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, Radio, BarChart3, RefreshCw, TrendingUp, Filter } from "lucide-react";
+import { Package, Radio, BarChart3, RefreshCw, TrendingUp, Filter, Bell, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 
 const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
 const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
@@ -66,8 +67,11 @@ export default function WinningProducts() {
   const [marginFilter, setMarginFilter] = useState(0);
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [newPids, setNewPids] = useState<Set<string>>(new Set());
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [showNewOnly, setShowNewOnly] = useState(false);
   const navigate = useNavigate();
   const { currency } = useLocale();
+  const { isPro } = useAnalysisHistory();
 
   const marginFilters = [
     { label: "Tümü", min: 0 },
@@ -81,7 +85,6 @@ export default function WinningProducts() {
     setError(null);
     try {
       const token = await getAccessToken();
-      // Farklı kategorilerden ürün çek, karıştır → her seferinde farklı görünüm
       const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 3);
       const results: CJProduct[] = [];
 
@@ -92,7 +95,6 @@ export default function WinningProducts() {
         if (data?.data?.list) results.push(...data.data.list);
       }
 
-      // Tekrarları temizle, kâr marjı hesapla, yüksek kârlıları öne çıkar
       const unique = Array.from(new Map(results.map((p) => [p.pid, p])).values());
       const withMargin = unique
         .map((p) => {
@@ -109,7 +111,6 @@ export default function WinningProducts() {
       setNewPids(getNewPids("winning", pids));
       markSeen("winning", pids);
       setLastUpdated(new Date());
-      // Ürün adlarını Türkçeye çevir
       const names = withMargin.map((p: any) => p.productNameEn || p.productName).filter(Boolean);
       translateProducts(names).then(setTranslations).catch(() => {});
       setCountdown(REFRESH_INTERVAL / 1000);
@@ -135,7 +136,17 @@ export default function WinningProducts() {
 
   const formatCountdown = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
-  const filteredItems = (items as any[]).filter((p) => p._margin >= marginFilters[marginFilter].min);
+  const handleNewProductsClick = () => {
+    if (!isPro) {
+      setShowPaywall(true);
+      return;
+    }
+    setShowNewOnly((v) => !v);
+  };
+
+  const filteredItems = (items as any[])
+    .filter((p) => p._margin >= marginFilters[marginFilter].min)
+    .filter((p) => !showNewOnly || newPids.has(p.pid));
 
   return (
     <div className="space-y-6">
@@ -175,15 +186,19 @@ export default function WinningProducts() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href={`https://wa.me/905446452430?text=${encodeURIComponent("Merhaba! KHELL AI'da yeni kazanan ürünler çıktığında beni haberdar eder misiniz? 🔔")}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-colors"
-            style={{ background: "hsl(142 71% 45% / 0.12)", color: "hsl(142 71% 55%)", border: "1px solid hsl(142 71% 45% / 0.3)" }}
+          <button
+            onClick={handleNewProductsClick}
+            className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-all"
+            style={{
+              background: showNewOnly && isPro ? "hsl(142 71% 45% / 0.25)" : "hsl(142 71% 45% / 0.12)",
+              color: "hsl(142 71% 55%)",
+              border: `1px solid ${showNewOnly && isPro ? "hsl(142 71% 45% / 0.6)" : "hsl(142 71% 45% / 0.3)"}`,
+            }}
           >
-            🔔 Yeni Ürünlerden Haberdar Ol
-          </a>
+            {isPro ? <Bell className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+            {showNewOnly && isPro ? "🆕 Sadece Yeniler" : "🔔 Yeni Ürünleri Gör"}
+            {!isPro && <span className="ml-1 text-[9px] opacity-70">PRO</span>}
+          </button>
           <button
             onClick={fetchWinning}
             disabled={loading}
@@ -194,6 +209,18 @@ export default function WinningProducts() {
           </button>
         </div>
       </div>
+
+      {showNewOnly && isPro && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-lg px-4 py-2.5 text-xs font-medium flex items-center gap-2"
+          style={{ background: "hsl(199 89% 60% / 0.12)", border: "1px solid hsl(199 89% 60% / 0.3)", color: "hsl(199 89% 65%)" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+          Sadece bu oturumda ilk kez görünen yeni ürünler — {newPids.size} yeni ürün bulundu
+        </motion.div>
+      )}
 
       {/* Margin Filters */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -260,7 +287,6 @@ export default function WinningProducts() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.border = `1px solid ${marginAccent}55`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 14px 36px ${marginAccent}22`; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
               >
-                {/* Görsel */}
                 <a
                   href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`}
                   target="_blank"
@@ -298,7 +324,6 @@ export default function WinningProducts() {
                   </span>
                 </a>
 
-                {/* İçerik */}
                 <div className="p-4 space-y-2 flex-1 flex flex-col">
                   <div className="flex items-center gap-1.5">
                     {newPids.has(p.pid) && (
@@ -367,7 +392,46 @@ export default function WinningProducts() {
 
       {!loading && filteredItems.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
-          <p className="text-sm">Bu filtreye uygun ürün bulunamadı.</p>
+          <p className="text-sm">{showNewOnly ? "Bu oturumda henüz yeni ürün yok. 30 dakikada bir güncelleniyor." : "Bu filtreye uygun ürün bulunamadı."}</p>
+        </div>
+      )}
+
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center"
+          >
+            <div className="text-5xl mb-4">🔔</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">Pro Özellik</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Yeni ürünleri rakiplerden önce görmek <span className="text-primary font-semibold">PRO</span> üyeliğe özeldir.
+              Her 30 dakikada güncellenen yeni ürünleri anında filtrele, ilk sen gör.
+            </p>
+            <div className="space-y-2 text-left mb-6">
+              {["🆕 Yeni ürünleri tek tıkla filtrele", "⚡ Rakipten önce trend ürünü yakala", "📊 Sınırsız analiz hakkı", "🎯 Gelişmiş risk skoru"].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-sm text-foreground">
+                  <span className="text-winning">✔</span> {f}
+                </div>
+              ))}
+            </div>
+            <a
+              href="https://www.shopier.com/bamironlinestore/46009500"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25"
+            >
+              Pro'ya Geç — 249₺/ay
+            </a>
+            <button
+              onClick={() => setShowPaywall(false)}
+              className="text-xs text-muted-foreground hover:underline mt-4 block w-full"
+            >
+              Şimdi değil
+            </button>
+          </motion.div>
         </div>
       )}
     </div>
