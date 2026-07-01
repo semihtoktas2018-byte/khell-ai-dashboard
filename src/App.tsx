@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SavedProductsProvider } from "@/contexts/SavedProductsContext";
 import { AnalysisHistoryProvider } from "@/contexts/AnalysisHistoryContext";
 import { OrderLogProvider } from "@/contexts/OrderLogContext";
@@ -29,12 +29,16 @@ import StoreSpy from "./pages/StoreSpy";
 import PriceTracker from "./pages/PriceTracker";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import SplashScreen from "./components/SplashScreen";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
 

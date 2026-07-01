@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { isProUnlocked, redeemCode } from "@/lib/proAccess";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface AnalysisRecord {
   id: string;
@@ -69,7 +69,7 @@ const AnalysisHistoryContext = createContext<AnalysisHistoryContextType | null>(
 
 export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AnalysisRecord[]>(loadHistory);
-  const [isPro, setIsPro] = useState<boolean>(isProUnlocked());
+  const { isPro } = useAuth();
   const [usage, setUsage] = useState(loadUsage);
 
   const todayCount = usage.count;
@@ -100,10 +100,9 @@ export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
   }, []);
 
-  const activatePro = useCallback((code: string) => {
-    const ok = redeemCode(code);
-    if (ok) setIsPro(true);
-    return ok;
+  const activatePro = useCallback((_code: string) => {
+    // Plan upgrades now happen server-side via Supabase; codes are disabled.
+    return false;
   }, []);
 
   return (
