@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLocale } from "@/contexts/LocaleContext";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
@@ -62,6 +63,8 @@ export default function TrendingProducts() {
   const [showPaywall, setShowPaywall] = useState(false);
   const navigate = useNavigate();
   const { isPro } = useAnalysisHistory();
+  const { locale } = useLocale();
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
 
   const fetchTrending = useCallback(async () => {
     setLoading(true);
@@ -228,7 +231,7 @@ export default function TrendingProducts() {
               <h3 className="text-base font-bold text-white mb-1">+{lockedItems.length} Trend Ürün PRO ile Açılır</h3>
               <p className="text-xs text-muted-foreground mb-4">Rakipler fark etmeden önce en çok satan ürünleri sen gör</p>
               <button className="px-8 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))", boxShadow: "0 4px 20px hsl(38 92% 50% / 0.3)" }}>
-                Pro'ya Geç — 249₺/ay
+                Pro'ya Geç — {proPriceLabel}
               </button>
             </motion.div>
           )}
@@ -249,7 +252,7 @@ export default function TrendingProducts() {
               ))}
             </div>
             <a href="https://www.shopier.com/bamironlinestore/46009500" target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
-              Pro'ya Geç — 249₺/ay
+              Pro'ya Geç — {proPriceLabel}
             </a>
             <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">Şimdi değil</button>
           </motion.div>
