@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw, Crown } from "lucide-react";
+import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw, Crown, Bell, BellRing } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
@@ -80,6 +82,8 @@ const COPY = {
     searchTiktok: "TikTok'ta Ara",
     analyze: "Analiz Et",
     createPage: "Sayfa Oluştur",
+    track: "Takibe Al",
+    tracking: "Takipte",
   },
   en: {
     proFeature: "PRO Feature",
@@ -108,6 +112,8 @@ const COPY = {
     searchTiktok: "Search on TikTok",
     analyze: "Analyze",
     createPage: "Create Page",
+    track: "Track Price",
+    tracking: "Tracking",
   },
   fr: {
     proFeature: "Fonction PRO",
@@ -136,6 +142,8 @@ const COPY = {
     searchTiktok: "Chercher sur TikTok",
     analyze: "Analyser",
     createPage: "Créer une page",
+    track: "Suivre le prix",
+    tracking: "Suivi",
   },
 } as const;
 
@@ -151,9 +159,37 @@ export default function TrendingProducts() {
   const navigate = useNavigate();
   const { isPro } = useAnalysisHistory();
   const { locale } = useLocale();
+  const { user } = useAuth();
   const c = COPY[locale] || COPY.en;
   const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
   const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
+  const [trackedPids, setTrackedPids] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("tracked_products").select("pid").eq("user_id", user.id).then(({ data }) => {
+      if (data) setTrackedPids(new Set(data.map((d: any) => d.pid)));
+    });
+  }, [user]);
+
+  const toggleTrack = async (p: CJProduct, cost: number, img: string, displayName: string) => {
+    if (!user) return;
+    if (trackedPids.has(p.pid)) {
+      setTrackedPids((prev) => { const next = new Set(prev); next.delete(p.pid); return next; });
+      await supabase.from("tracked_products").delete().eq("user_id", user.id).eq("pid", p.pid);
+    } else {
+      setTrackedPids((prev) => new Set(prev).add(p.pid));
+      await supabase.from("tracked_products").upsert({
+        user_id: user.id,
+        pid: p.pid,
+        product_name: displayName,
+        image_url: img || null,
+        product_url: p.productUrl || null,
+        initial_price: cost,
+        last_checked_price: cost,
+      }, { onConflict: "user_id,pid" });
+    }
+  };
 
   const fetchTrending = useCallback(async () => {
     setLoading(true);
@@ -262,8 +298,21 @@ export default function TrendingProducts() {
                   onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
                   {i < 3 && <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 rounded-md text-white" style={{ background: "linear-gradient(135deg, hsl(24 95% 58%), hsl(38 92% 50%))", boxShadow: "0 4px 12px hsl(24 95% 53% / 0.4)" }}><TrendingUp className="h-2.5 w-2.5" /> {c.top} {i + 1}</span>}
                   {isPick && <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white" style={{ background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))", boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)" }}>⭐ {c.editorPick}</span>}
-                  <div onClick={() => openProduct(p)} className="block aspect-square bg-background overflow-hidden cursor-pointer">
+                  <div onClick={() => openProduct(p)} className="block aspect-square bg-background overflow-hidden cursor-pointer relative">
                     {img ? <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>}
+                    {user && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleTrack(p, cost, img, displayName); }}
+                        title={trackedPids.has(p.pid) ? c.tracking : c.track}
+                        className="absolute bottom-2 right-2 z-10 h-7 w-7 rounded-full flex items-center justify-center transition-colors"
+                        style={{
+                          background: trackedPids.has(p.pid) ? "hsl(199 89% 60%)" : "hsl(222 47% 6% / 0.85)",
+                          border: `1px solid ${trackedPids.has(p.pid) ? "hsl(199 89% 60%)" : "hsl(217 32% 30% / 0.6)"}`,
+                          backdropFilter: "blur(6px)",
+                        }}>
+                        {trackedPids.has(p.pid) ? <BellRing className="h-3.5 w-3.5 text-white" /> : <Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    )}
                   </div>
                   <div className="p-3 space-y-2 flex-1 flex flex-col">
                     <div className="flex items-center gap-1.5">
