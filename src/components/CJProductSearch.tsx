@@ -11,6 +11,7 @@ const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c3
 interface CJProduct {
   pid: string;
   productName: string;
+  productNameEn?: string;
   productImage: string;
   sellPrice?: string;
   productSku?: string;
