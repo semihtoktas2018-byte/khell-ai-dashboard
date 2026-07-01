@@ -163,6 +163,26 @@ export default function DashboardLayout() {
               <span className="text-[10px] opacity-90">{isTr ? "Kazanan Ürünleri Bul" : "Find Winning Products"}</span>
               <span className="mt-2 text-xs font-bold bg-white/20 rounded-md px-3 py-1">Upgrade Now</span>
             </a>
+            <a
+              href="https://signal-magic-grab.lovable.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 w-full rounded-lg border py-2.5 px-3 transition-all"
+              style={{
+                background: "linear-gradient(135deg, rgba(155,92,255,0.14), rgba(245,182,41,0.10))",
+                borderColor: "rgba(245,182,41,0.35)",
+              }}
+            >
+              <span className="text-lg shrink-0">🪙</span>
+              <span className="min-w-0 text-left">
+                <span className="block text-[11px] font-bold text-foreground leading-tight">
+                  {isTr ? "Kripto sinyalleriyle ilgileniyor musun?" : "Interested in crypto signals?"}
+                </span>
+                <span className="block text-[10px] leading-tight" style={{ color: "#f5b629" }}>
+                  {isTr ? "KELTOŞ Paraya Koş'a göz at →" : "Check out KELTOŞ →"}
+                </span>
+              </span>
+            </a>
             {user && (
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
