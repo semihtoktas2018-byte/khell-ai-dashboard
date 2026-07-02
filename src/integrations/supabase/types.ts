@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      price_alerts: {
+        Row: {
+          change_pct: number
+          created_at: string
+          id: string
+          is_read: boolean
+          new_price: number
+          old_price: number
+          product_name: string
+          tracked_product_id: string
+          user_id: string
+        }
+        Insert: {
+          change_pct: number
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          new_price: number
+          old_price: number
+          product_name: string
+          tracked_product_id: string
+          user_id: string
+        }
+        Update: {
+          change_pct?: number
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          new_price?: number
+          old_price?: number
+          product_name?: string
+          tracked_product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_alerts_tracked_product_id_fkey"
+            columns: ["tracked_product_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -35,6 +79,48 @@ export type Database = {
           id?: string
           plan?: Database["public"]["Enums"]["app_plan"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tracked_products: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          initial_price: number
+          last_checked_price: number
+          pid: string
+          product_name: string
+          product_url: string | null
+          target_price: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          initial_price: number
+          last_checked_price: number
+          pid: string
+          product_name: string
+          product_url?: string | null
+          target_price?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          initial_price?: number
+          last_checked_price?: number
+          pid?: string
+          product_name?: string
+          product_url?: string | null
+          target_price?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
