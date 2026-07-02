@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://khell-profit-wizard.lovable.app/</loc><priority>1.0</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard</loc><priority>0.9</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/analyzer</loc><priority>0.9</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/viral-products</loc><priority>0.8</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/discovery</loc><priority>0.8</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/suppliers</loc><priority>0.8</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/risk</loc><priority>0.7</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/product-page-generator</loc><priority>0.7</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/sales-decision</loc><priority>0.7</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/dashboard/content-engine</loc><priority>0.7</priority></url>
-  <url><loc>https://khell-profit-wizard.lovable.app/filo</loc><priority>0.8</priority></url>
+  <url><loc>https://khell-profit-wizard.lovable.app/auth</loc><priority>0.5</priority></url>
 </urlset>
