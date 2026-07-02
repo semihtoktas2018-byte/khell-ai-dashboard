@@ -4,9 +4,7 @@ import { Search, Package, Loader2, Radio, BarChart3, FileText, ShoppingCart } fr
 import { useNavigate } from "react-router-dom";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
-
-const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
-const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CJProduct {
   pid: string;
@@ -17,23 +15,6 @@ interface CJProduct {
   productSku?: string;
   productUrl?: string;
   categoryName?: string;
-}
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) {
-    throw new Error(`Token Hatası: ${data?.message} (code: ${data?.code})`);
-  }
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
 }
 
 export default function CJProductSearch() {
@@ -51,10 +32,13 @@ export default function CJProductSearch() {
     setResults([]);
     setTranslations({});
     try {
-      const token = await getAccessToken();
-      const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=12&productNameEn=${encodeURIComponent(query)}`;
-      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-      const data = await res.json();
+      const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
+        body: {
+          path: "/api2.0/v1/product/list",
+          query: { pageNum: "1", pageSize: "12", productNameEn: query },
+        },
+      });
+      if (fnErr) throw fnErr;
       if (!data?.data?.list) {
         throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
