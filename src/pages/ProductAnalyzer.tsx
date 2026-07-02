@@ -101,7 +101,7 @@ export default function ProductAnalyzer() {
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, activatePro } = useAnalysisHistory();
   const { toast } = useToast();
-  const { t, currency, currencySymbol, locale } = useLocale();
+  const { t, currency, currencySymbol, locale, country } = useLocale();
   const isTr = locale === "tr";
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
@@ -332,7 +332,7 @@ export default function ProductAnalyzer() {
         </p>
         <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
         <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
-        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={45} expandTrigger={expandTrigger} isTr={isTr} />
+        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={45} expandTrigger={expandTrigger} isTr={isTr} countryCode={country} />
         <ProfitSimulator
           profitPerUnit={result.gross_profit}
           revenuePerUnit={input.selling_price}
