@@ -9,7 +9,7 @@ import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
-import { SEO } from "@/components/SEO";
+import SEO from "@/components/SEO";
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;

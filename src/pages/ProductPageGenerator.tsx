@@ -20,7 +20,7 @@ import {
 } from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
 import { useLocale } from "@/contexts/LocaleContext";
-import { SEO } from "@/components/SEO";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
