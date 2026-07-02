@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Zap, Mail, Lock, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -45,6 +46,10 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <SEO
+        title="Giriş Yap veya Kayıt Ol — KHELL AI"
+        description="KHELL AI hesabınıza giriş yapın veya ücretsiz kayıt olun. AI destekli e-ticaret kârlılık ve viral ürün analizine erişin."
+      />
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[120px]" />
       </div>

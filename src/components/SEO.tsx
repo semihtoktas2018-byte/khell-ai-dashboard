@@ -16,12 +16,13 @@ export default function SEO({ title, description, image = "/og-image.png" }: SEO
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      {pageUrl && <link rel="canonical" href={pageUrl} />}
 
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={imageUrl} />
-      <meta property="og:url" content={pageUrl} />
+      {pageUrl && <meta property="og:url" content={pageUrl} />}
       <meta property="og:site_name" content="KHELL AI" />
 
       <meta name="twitter:card" content="summary_large_image" />
