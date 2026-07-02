@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Trash2, TrendingDown, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { Bell, Trash2, TrendingDown, TrendingUp, AlertCircle, Loader2, Lock } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
+const FREE_TRACK_LIMIT = 2;
 
 interface TrackedProduct {
   id: string;
@@ -34,10 +36,15 @@ interface PriceAlert {
 export default function PriceTracker() {
   const { locale } = useLocale();
   const { user } = useAuth();
+  const { isPro } = useAnalysisHistory();
   const isTr = locale === "tr";
   const [tracked, setTracked] = useState<TrackedProduct[]>([]);
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
 
   const load = useCallback(async () => {
     if (!user) {
@@ -69,6 +76,7 @@ export default function PriceTracker() {
   };
 
   const unreadCount = alerts.filter((a) => !a.is_read).length;
+  const atLimit = !isPro && tracked.length >= FREE_TRACK_LIMIT;
 
   return (
     <div className="space-y-6">
@@ -94,6 +102,19 @@ export default function PriceTracker() {
             </p>
           </div>
         </div>
+
+        <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{
+            background: isPro ? "hsl(142 71% 45% / 0.12)" : "hsl(38 92% 50% / 0.12)",
+            border: `1px solid ${isPro ? "hsl(142 71% 45% / 0.35)" : "hsl(38 92% 50% / 0.35)"}`,
+            color: isPro ? "hsl(142 71% 55%)" : "hsl(38 92% 60%)",
+          }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: isPro ? "hsl(142 71% 55%)" : "hsl(38 92% 60%)" }} />
+          {isPro
+            ? (isTr ? "PRO — Sınırsız ürün takibi" : "PRO — Unlimited price tracking")
+            : (isTr ? `${Math.max(0, FREE_TRACK_LIMIT - tracked.length)} / ${FREE_TRACK_LIMIT} ücretsiz takip hakkın kaldı` : `${Math.max(0, FREE_TRACK_LIMIT - tracked.length)} / ${FREE_TRACK_LIMIT} free tracking slots left`)}
+        </div>
       </motion.div>
 
       {!user ? (
@@ -106,6 +127,22 @@ export default function PriceTracker() {
         </div>
       ) : (
         <>
+          {atLimit && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl p-5 flex items-center justify-between gap-4"
+              style={{ background: "hsl(38 92% 55% / 0.08)", border: "1px solid hsl(38 92% 55% / 0.35)" }}>
+              <div className="flex items-center gap-3">
+                <Lock className="h-5 w-5 text-amber-400 shrink-0" />
+                <p className="text-xs text-foreground">
+                  {isTr ? "Ücretsiz takip limitine ulaştın. Yeni ürün takip etmek için PRO'ya geç veya mevcut bir ürünü listeden çıkar." : "You've reached your free tracking limit. Upgrade to PRO or remove a tracked product to add a new one."}
+                </p>
+              </div>
+              <button onClick={() => setShowPaywall(true)} className="shrink-0 text-xs font-bold px-4 py-2 rounded-lg text-white bg-gradient-to-r from-amber-500 to-orange-500">
+                {isTr ? "PRO'ya Geç" : "Go PRO"}
+              </button>
+            </motion.div>
+          )}
+
           {/* Alerts */}
           {alerts.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.05 }}>
@@ -210,6 +247,26 @@ export default function PriceTracker() {
             {isTr ? "Fiyatlar her saat başı otomatik kontrol edilir, %2'den fazla değişimde burada bildirim alırsın." : "Prices are checked automatically every hour — you'll get an alert here when they change by more than 2%."}
           </motion.div>
         </>
+      )}
+
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">📊</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">
+              {isTr ? "Sınırsız Fiyat Takibi PRO'da" : "Unlimited Price Tracking with PRO"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isTr ? "Ücretsiz takip hakkını kullandın. Sınırsız ürün takibi için PRO'ya geç." : "You've used your free tracking slots. Upgrade to PRO for unlimited tracking."}
+            </p>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {isTr ? "Pro'ya Geç" : "Go Pro"} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">
+              {isTr ? "Şimdi değil" : "Not now"}
+            </button>
+          </motion.div>
+        </div>
       )}
     </div>
   );
