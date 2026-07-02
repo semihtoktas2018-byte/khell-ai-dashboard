@@ -93,13 +93,10 @@ export default function ProductAnalyzer() {
   const [showSocialProof, setShowSocialProof] = useState(false);
   const [aliData, setAliData] = useState<AliProduct | null>(null);
   const [aliLoading, setAliLoading] = useState(false);
-  const [showUnlockInput, setShowUnlockInput] = useState(false);
-  const [unlockCode, setUnlockCode] = useState("");
-  const [unlockError, setUnlockError] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
-  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, activatePro } = useAnalysisHistory();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro } = useAnalysisHistory();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale, country } = useLocale();
   const isTr = locale === "tr";
@@ -197,19 +194,6 @@ export default function ProductAnalyzer() {
       });
     }
     setShowResult(true);
-  };
-
-  const handleRedeem = () => {
-    const ok = activatePro(unlockCode);
-    if (ok) {
-      setUnlockError(false);
-      setUnlockCode("");
-      setShowUnlockInput(false);
-      setShowPaywall(false);
-      toast({ title: isTr ? "PRO açıldı 🎉" : "PRO unlocked 🎉", description: isTr ? "Artık sınırsız analiz yapabilirsin." : "You now have unlimited analyses." });
-    } else {
-      setUnlockError(true);
-    }
   };
 
   const handleSave = () => {
@@ -618,34 +602,9 @@ export default function ProductAnalyzer() {
               <a href="https://www.shopier.com/bamironlinestore/46009500" target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
                 {t("paywall.cta")}
               </a>
-              <p className="text-[11px] text-muted-foreground mt-3">{t("paywall.price")}</p>
-
-              {!showUnlockInput ? (
-                <button onClick={() => setShowUnlockInput(true)} className="text-xs text-primary hover:underline mt-4 block w-full">
-                  {isTr ? "Zaten ödedim, kodum var" : "I already paid, I have a code"}
-                </button>
-              ) : (
-                <div className="mt-4 space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={unlockCode}
-                      onChange={(e) => { setUnlockCode(e.target.value); setUnlockError(false); }}
-                      onKeyDown={(e) => e.key === "Enter" && handleRedeem()}
-                      placeholder={isTr ? "Erişim kodun" : "Your access code"}
-                      className="input-dark flex-1 text-sm text-center uppercase"
-                    />
-                    <button onClick={handleRedeem} className="btn-primary text-sm px-4">
-                      {isTr ? "Aç" : "Unlock"}
-                    </button>
-                  </div>
-                  {unlockError && (
-                    <p className="text-xs text-destructive">
-                      {isTr ? "Kod geçersiz. Kodu Shopier ödeme sonrası WhatsApp'tan alıyorsun." : "Invalid code. You receive it via WhatsApp after Shopier payment."}
-                    </p>
-                  )}
-                </div>
-              )}
+              <p className="text-[11px] text-muted-foreground mt-3">
+                {isTr ? "Ödeme tamamlanır tamamlanmaz hesabın otomatik Pro olur, sayfayı yenilemen yeterli." : "Your account upgrades to Pro automatically right after payment — just refresh the page."}
+              </p>
 
               <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4">{t("paywall.later")}</button>
             </motion.div>
