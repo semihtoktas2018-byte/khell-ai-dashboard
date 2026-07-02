@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Globe, AlertCircle, Crown } from "lucide-react";
+import { Search, Store, TrendingUp, Package, DollarSign, ExternalLink, Globe, AlertCircle, Crown, Download } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
+import { useToast } from "@/hooks/use-toast";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -39,6 +41,8 @@ export default function StoreSpy() {
   const { locale } = useLocale();
   const isTr = locale === "tr";
   const { isPro } = useAnalysisHistory();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<StoreResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,6 +78,22 @@ export default function StoreSpy() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImport = (p: StoreProduct) => {
+    // Rakip fiyatı referans alıp %35 kâr payı bırakacak bir maliyet öneriyoruz —
+    // kullanıcı Ürün Analizi sayfasında bu rakamları kendi verisiyle düzeltebilir.
+    const suggestedCost = Math.round(p.price * 0.5 * 100) / 100;
+    const params = new URLSearchParams({
+      productName: p.name,
+      selling_price: String(p.price),
+      product_cost: String(suggestedCost),
+    });
+    toast({
+      title: isTr ? "Ürün aktarıldı" : "Product imported",
+      description: isTr ? `${p.name} — Ürün Analizi'ne gönderildi` : `${p.name} — sent to Product Analyzer`,
+    });
+    navigate(`/product-analyzer?${params.toString()}`);
   };
 
   const minPrice = result ? Math.min(...result.products.map((p) => p.price)) : 0;
@@ -223,9 +243,8 @@ export default function StoreSpy() {
             </div>
             <div className="divide-y divide-border max-h-[500px] overflow-y-auto">
               {result.products.map((p, i) => (
-                <a key={i} href={p.url} target="_blank" rel="noreferrer"
-                  className="flex items-center justify-between px-5 py-3 hover:bg-accent/20 transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-accent/20 transition-colors gap-3">
+                  <a href={p.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 min-w-0 flex-1">
                     {p.image ? (
                       <img src={p.image} alt="" className="h-9 w-9 rounded-md object-cover shrink-0" />
                     ) : (
@@ -237,12 +256,22 @@ export default function StoreSpy() {
                       <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
                       {p.category && <p className="text-[10px] text-muted-foreground">{p.category}</p>}
                     </div>
-                  </div>
+                  </a>
                   <div className="flex items-center gap-2 shrink-0">
                     <p className="text-sm font-bold text-white">${p.price.toFixed(2)}</p>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    <button
+                      onClick={() => handleImport(p)}
+                      title={isTr ? "Ürün Analizi'ne aktar" : "Import to Product Analyzer"}
+                      className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg text-primary hover:bg-primary/10 border border-primary/30 transition-colors"
+                    >
+                      <Download className="h-3 w-3" />
+                      {isTr ? "İçe Aktar" : "Import"}
+                    </button>
+                    <a href={p.url} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </div>
@@ -256,7 +285,7 @@ export default function StoreSpy() {
           {[
             { icon: "🔗", title: isTr ? "URL Yapıştır" : "Paste URL", desc: isTr ? "Herhangi bir Shopify mağaza linkini gir" : "Enter any Shopify store link" },
             { icon: "🔍", title: isTr ? "Anında Çeker" : "Fetches Instantly", desc: isTr ? "Mağazadaki tüm ürünleri ve fiyatları gerçek zamanlı çeker" : "Pulls all products and prices in real time" },
-            { icon: "🎯", title: isTr ? "Fırsatları Bul" : "Find Opportunities", desc: isTr ? "Fiyat aralığını ve popüler kategorileri gör, kendi stratejini kur" : "See price range and popular categories to shape your strategy" },
+            { icon: "⬇️", title: isTr ? "Tek Tıkla Aktar" : "One-Click Import", desc: isTr ? "Beğendiğin ürünü direkt Ürün Analizi'ne gönder, kâr marjını hesapla" : "Send any product straight to Product Analyzer and calculate your margin" },
           ].map((s) => (
             <div key={s.title} className="rounded-xl p-5 text-center"
               style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
