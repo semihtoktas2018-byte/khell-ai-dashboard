@@ -20,6 +20,7 @@ import {
 } from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
 import { useLocale } from "@/contexts/LocaleContext";
+import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -163,6 +164,10 @@ export default function ProductPageGenerator() {
 
   return (
     <div className="space-y-6">
+      <SEO
+        title="Ürün Sayfası Oluşturucu — KHELL AI"
+        description="Ürün sayfası HTML'ini AI ile oluştur: başlık, açıklama, satış açısı ve incelemelerle Shopify uyumlu şablon."
+      />
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

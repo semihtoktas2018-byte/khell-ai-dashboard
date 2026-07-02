@@ -9,6 +9,7 @@ import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
+import SEO from "@/components/SEO";
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;
@@ -236,6 +237,10 @@ export default function TrendingProducts() {
 
   return (
     <div className="space-y-6">
+      <SEO
+        title="Trend Ürünler — KHELL AI"
+        description="CJ Dropshipping'te en çok sipariş alan trend ürünler. Maliyet, satış ve marjı canlı görüntüle."
+      />
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl" style={{ background: "linear-gradient(145deg, hsl(24 95% 53% / 0.18), hsl(24 95% 53% / 0.06))", border: "1px solid hsl(24 95% 53% / 0.3)", boxShadow: "0 4px 16px hsl(24 95% 53% / 0.15)" }}>
