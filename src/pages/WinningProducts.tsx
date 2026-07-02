@@ -11,10 +11,9 @@ import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 
-const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
-const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;
+const FREE_TRACK_LIMIT = 2;
 
 interface CJProduct {
   pid: string;
@@ -24,21 +23,6 @@ interface CJProduct {
   sellPrice?: string;
   productUrl?: string;
   categoryName?: string;
-}
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
 }
 
 function getDisplayName(p: CJProduct): string {
@@ -93,6 +77,8 @@ const COPY = {
     searchTiktok: "TikTok'ta Ara",
     track: "Takibe Al",
     tracking: "Takipte",
+    trackLimitTitle: "Sınırsız Fiyat Takibi PRO'da",
+    trackLimitDesc: "Ücretsiz hesapta en fazla 2 ürün takip edebilirsin. Sınırsız takip için PRO'ya geç.",
   },
   en: {
     title: "Winning Products",
@@ -130,6 +116,8 @@ const COPY = {
     searchTiktok: "Search on TikTok",
     track: "Track Price",
     tracking: "Tracking",
+    trackLimitTitle: "Unlimited Price Tracking with PRO",
+    trackLimitDesc: "Free accounts can track up to 2 products. Upgrade to PRO for unlimited tracking.",
   },
   fr: {
     title: "Produits gagnants",
@@ -167,6 +155,8 @@ const COPY = {
     searchTiktok: "Chercher sur TikTok",
     track: "Suivre le prix",
     tracking: "Suivi",
+    trackLimitTitle: "Suivi de prix illimité avec PRO",
+    trackLimitDesc: "Les comptes gratuits peuvent suivre jusqu'à 2 produits. Passez à PRO pour un suivi illimité.",
   },
 } as const;
 
@@ -180,6 +170,7 @@ export default function WinningProducts() {
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [newPids, setNewPids] = useState<Set<string>>(new Set());
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTrackPaywall, setShowTrackPaywall] = useState(false);
   const [showNewOnly, setShowNewOnly] = useState(false);
   const navigate = useNavigate();
   const { locale, currency } = useLocale();
@@ -204,6 +195,10 @@ export default function WinningProducts() {
       setTrackedPids((prev) => { const next = new Set(prev); next.delete(p.pid); return next; });
       await supabase.from("tracked_products").delete().eq("user_id", user.id).eq("pid", p.pid);
     } else {
+      if (!isPro && trackedPids.size >= FREE_TRACK_LIMIT) {
+        setShowTrackPaywall(true);
+        return;
+      }
       setTrackedPids((prev) => new Set(prev).add(p.pid));
       await supabase.from("tracked_products").upsert({
         user_id: user.id,
@@ -234,13 +229,16 @@ export default function WinningProducts() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getAccessToken();
       const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 4);
       const results: CJProduct[] = [];
       for (const term of randomTerms) {
-        const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=8&sortField=recentOrders&sortType=DESC&productNameEn=${encodeURIComponent(term)}`;
-        const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-        const data = await res.json();
+        const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
+          body: {
+            path: "/api2.0/v1/product/list",
+            query: { pageNum: "1", pageSize: "8", sortField: "recentOrders", sortType: "DESC", productNameEn: term },
+          },
+        });
+        if (fnErr) continue;
         if (data?.data?.list) results.push(...data.data.list);
       }
       const unique = Array.from(new Map(results.map((p) => [p.pid, p])).values());
@@ -476,6 +474,20 @@ export default function WinningProducts() {
               {c.goPro} — {proPriceLabel}
             </a>
             <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">{c.later}</button>
+          </motion.div>
+        </div>
+      )}
+
+      {showTrackPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">📊</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">{c.trackLimitTitle}</h2>
+            <p className="text-sm text-muted-foreground mb-6">{c.trackLimitDesc}</p>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {c.goPro} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowTrackPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">{c.later}</button>
           </motion.div>
         </div>
       )}
