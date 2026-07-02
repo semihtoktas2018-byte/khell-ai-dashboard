@@ -163,7 +163,7 @@ const COPY = {
 function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c, user, isNew }: {
   p: any; i: number; translations: Record<string, string>; trackedPids: Set<string>;
   toggleTrack: (p: any, cost: number, img: string, name: string) => void;
-  navigate: (path: string) => void; c: typeof COPY["tr"]; user: any; isNew: boolean;
+  navigate: (path: string) => void; c: (typeof COPY)[keyof typeof COPY]; user: any; isNew: boolean;
 }) {
   function getMarginLabel(margin: number): { label: string; color: string; bg: string } {
     if (margin >= 60) return { label: c.highMargin, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/30" };
