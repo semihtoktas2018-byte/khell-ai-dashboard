@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface DecisionInput {
   product_name: string;
   product_price: number;
@@ -122,12 +124,7 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
 }
 
 export async function runDecisionEngineAI(input: DecisionInput): Promise<string> {
-  const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "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";
   const base = runDecisionEngine(input);
-
-  if (!ANTHROPIC_KEY) {
-    return "";
-  }
 
   const prompt = `Sen bir e-ticaret ve dropshipping uzmanısın. Aşağıdaki ürün için kısa ve net bir AI değerlendirmesi yaz.
 
@@ -150,21 +147,16 @@ Türkçe olarak 3-4 cümle yaz:
 Kısa, direkt ve pratik ol. "AI olarak" gibi ifadeler kullanma.`;
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_KEY,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke("anthropic-proxy", {
+      body: {
         model: "claude-haiku-4-5",
         max_tokens: 300,
         messages: [{ role: "user", content: prompt }],
-      }),
+      },
     });
-    const data = await res.json();
+
+    if (error) throw error;
+
     return data.content?.[0]?.text || "";
   } catch {
     return "";
