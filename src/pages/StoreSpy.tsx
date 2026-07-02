@@ -93,7 +93,7 @@ export default function StoreSpy() {
       title: isTr ? "Ürün aktarıldı" : "Product imported",
       description: isTr ? `${p.name} — Ürün Analizi'ne gönderildi` : `${p.name} — sent to Product Analyzer`,
     });
-    navigate(`/product-analyzer?${params.toString()}`);
+    navigate(`/dashboard/analyzer?${params.toString()}`);
   };
 
   const minPrice = result ? Math.min(...result.products.map((p) => p.price)) : 0;
