@@ -12,6 +12,7 @@ import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;
+const FREE_TRACK_LIMIT = 2;
 
 interface CJProduct {
   pid: string;
@@ -67,6 +68,8 @@ const COPY = {
     createPage: "Sayfa Oluştur",
     track: "Takibe Al",
     tracking: "Takipte",
+    trackLimitTitle: "Sınırsız Fiyat Takibi PRO'da",
+    trackLimitDesc: "Ücretsiz hesapta en fazla 2 ürün takip edebilirsin. Sınırsız takip için PRO'ya geç.",
   },
   en: {
     proFeature: "PRO Feature",
@@ -97,6 +100,8 @@ const COPY = {
     createPage: "Create Page",
     track: "Track Price",
     tracking: "Tracking",
+    trackLimitTitle: "Unlimited Price Tracking with PRO",
+    trackLimitDesc: "Free accounts can track up to 2 products. Upgrade to PRO for unlimited tracking.",
   },
   fr: {
     proFeature: "Fonction PRO",
@@ -127,6 +132,8 @@ const COPY = {
     createPage: "Créer une page",
     track: "Suivre le prix",
     tracking: "Suivi",
+    trackLimitTitle: "Suivi de prix illimité avec PRO",
+    trackLimitDesc: "Les comptes gratuits peuvent suivre jusqu'à 2 produits. Passez à PRO pour un suivi illimité.",
   },
 } as const;
 
@@ -139,6 +146,7 @@ export default function TrendingProducts() {
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [newPids, setNewPids] = useState<Set<string>>(new Set());
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTrackPaywall, setShowTrackPaywall] = useState(false);
   const navigate = useNavigate();
   const { isPro } = useAnalysisHistory();
   const { locale } = useLocale();
@@ -161,6 +169,10 @@ export default function TrendingProducts() {
       setTrackedPids((prev) => { const next = new Set(prev); next.delete(p.pid); return next; });
       await supabase.from("tracked_products").delete().eq("user_id", user.id).eq("pid", p.pid);
     } else {
+      if (!isPro && trackedPids.size >= FREE_TRACK_LIMIT) {
+        setShowTrackPaywall(true);
+        return;
+      }
       setTrackedPids((prev) => new Set(prev).add(p.pid));
       await supabase.from("tracked_products").upsert({
         user_id: user.id,
@@ -380,6 +392,20 @@ export default function TrendingProducts() {
               {c.goPro} — {proPriceLabel}
             </a>
             <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">{c.later}</button>
+          </motion.div>
+        </div>
+      )}
+
+      {showTrackPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">📊</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">{c.trackLimitTitle}</h2>
+            <p className="text-sm text-muted-foreground mb-6">{c.trackLimitDesc}</p>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {c.goPro} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowTrackPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">{c.later}</button>
           </motion.div>
         </div>
       )}
