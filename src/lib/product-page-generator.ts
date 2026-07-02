@@ -31,6 +31,8 @@ export interface ProductPageContent {
   facebookHooks: string[];
 }
 
+import { supabase } from "@/integrations/supabase/client";
+
 export async function generateProductPageAI(input: ProductPageInput): Promise<ProductPageContent> {
   const marginPct = input.margin.toFixed(0);
   const profit = (input.sellingPrice - input.cost).toFixed(2);
@@ -75,22 +77,14 @@ SADECE JSON döndür, başka hiçbir şey yazma:
   "metaDescription": "160 karakter meta description"
 }`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": "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",
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
+  const { data, error } = await supabase.functions.invoke("anthropic-proxy", {
+    body: {
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1500,
       messages: [{ role: "user", content: prompt }],
-    }),
+    },
   });
-
-  const data = await response.json();
+  if (error) throw error;
   const text = data.content?.map((i: { type: string; text?: string }) => i.text || "").join("") || "";
   const clean = text.replace(/```json|```/g, "").trim();
   const match = clean.match(/\{[\s\S]*\}/);

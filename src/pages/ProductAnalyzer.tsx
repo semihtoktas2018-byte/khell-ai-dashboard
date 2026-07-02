@@ -17,10 +17,10 @@ import CompetitorAnalysis from "@/components/CompetitorAnalysis";
 import TrendScore from "@/components/TrendScore";
 import ProfitSimulator from "@/components/ProfitSimulator";
 import SEO from "@/components/SEO";
+import { supabase } from "@/integrations/supabase/client";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "0ff10b71d3msh3f8b4edd825040fp100f8djsn435e5bc57335";
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ";
 const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || "93c44c1933cf646eb";
 
@@ -49,18 +49,11 @@ interface AliProduct {
 }
 
 async function fetchAliExpressData(keyword: string): Promise<AliProduct | null> {
-  if (!RAPIDAPI_KEY) return null;
   try {
-    const res = await fetch(
-      `https://aliexpress-business-api.p.rapidapi.com/textsearch.php?keyWord=${encodeURIComponent(keyword)}&pageSize=20&pageIndex=1&country=TR&currency=USD&lang=en&filter=orders&sortBy=asc`,
-      {
-        headers: {
-          "x-rapidapi-host": "aliexpress-business-api.p.rapidapi.com",
-          "x-rapidapi-key": RAPIDAPI_KEY,
-        },
-      }
-    );
-    const data = await res.json();
+    const { data, error } = await supabase.functions.invoke("aliexpress-proxy", {
+      body: { keyword },
+    });
+    if (error) return null;
     const items: any[] = data?.data?.itemList || [];
     if (!items.length) return null;
     const totalCount = data?.data?.totalCount || 0;

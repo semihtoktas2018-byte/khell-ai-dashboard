@@ -10,8 +10,6 @@ import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 
-const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
-const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;
 
@@ -23,21 +21,6 @@ interface CJProduct {
   sellPrice?: string;
   productUrl?: string;
   categoryName?: string;
-}
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) throw new Error(data?.message || "Token alınamadı");
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
 }
 
 function getDisplayName(p: CJProduct): string {
@@ -195,10 +178,13 @@ export default function TrendingProducts() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getAccessToken();
-      const url = "https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=24&sortField=recentOrders&sortType=DESC";
-      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-      const data = await res.json();
+      const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
+        body: {
+          path: "/api2.0/v1/product/list",
+          query: { pageNum: "1", pageSize: "24", sortField: "recentOrders", sortType: "DESC" },
+        },
+      });
+      if (fnErr) throw fnErr;
       if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
       setItems(data.data.list);
       const pids = data.data.list.map((p: CJProduct) => p.pid);
