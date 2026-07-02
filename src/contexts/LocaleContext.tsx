@@ -9,6 +9,7 @@ interface LocaleContextType {
   currency: (val: number) => string;
   currencySymbol: string;
   country: string; // "TR", "US", "FR", "NL", "DE", "UK" vs.
+  usdToTry: number;
 }
 
 const translations: Record<Locale, Record<string, string>> = {
@@ -1368,7 +1369,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LocaleContext.Provider value={{ locale, setLocale, t, currency, currencySymbol, country }}>
+    <LocaleContext.Provider value={{ locale, setLocale, t, currency, currencySymbol, country, usdToTry }}>
       {children}
     </LocaleContext.Provider>
   );
