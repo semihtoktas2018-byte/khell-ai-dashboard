@@ -32,6 +32,9 @@ const EXAMPLE_STORES = [
   { domain: "allbirds.com", emoji: "👟" },
   { domain: "gymshark.com", emoji: "💪" },
   { domain: "colourpop.com", emoji: "💄" },
+  { domain: "kigili.com", emoji: "🇹🇷" },
+  { domain: "kismetbymilka.com", emoji: "💍" },
+  { domain: "manuatelier.com", emoji: "👜" },
   { domain: "chubbiesshorts.com", emoji: "🩳" },
   { domain: "brooklinen.com", emoji: "🛏️" },
   { domain: "deathwishcoffee.com", emoji: "☕" },
@@ -49,8 +52,10 @@ export default function StoreSpy() {
   const [error, setError] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const FREE_USE_KEY = "khell_storespy_used";
-  const hasUsedFree = () => localStorage.getItem(FREE_USE_KEY) === "true";
+  const FREE_USE_KEY = "khell_storespy_used_count";
+  const FREE_LIMIT = 2;
+  const getFreeUsed = () => parseInt(localStorage.getItem(FREE_USE_KEY) || "0", 10);
+  const hasUsedFree = () => getFreeUsed() >= FREE_LIMIT;
   const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
   const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
 
@@ -71,7 +76,7 @@ export default function StoreSpy() {
         setError(data.error);
       } else {
         setResult(data as StoreResult);
-        if (!isPro) localStorage.setItem(FREE_USE_KEY, "true");
+        if (!isPro) localStorage.setItem(FREE_USE_KEY, String(getFreeUsed() + 1));
       }
     } catch (e: any) {
       setError(isTr ? "Mağaza analiz edilemedi. Bağlantıyı kontrol edip tekrar dene." : "Could not analyze store. Check the link and try again.");
@@ -143,8 +148,8 @@ export default function StoreSpy() {
           {isPro
             ? (isTr ? "PRO — Sınırsız mağaza analizi" : "PRO — Unlimited store analysis")
             : hasUsedFree()
-              ? (isTr ? "Ücretsiz hakkın kullanıldı — PRO'ya geç" : "Free analysis used — upgrade to PRO")
-              : (isTr ? "1 ücretsiz analiz hakkın var" : "You have 1 free analysis")}
+              ? (isTr ? "Ücretsiz haklar bitti — PRO'ya geç" : "Free analyses used — upgrade to PRO")
+              : (isTr ? `${FREE_LIMIT - getFreeUsed()} ücretsiz analiz hakkın var` : `${FREE_LIMIT - getFreeUsed()} free analyses left`)}
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">
           {isTr ? "Şu an sadece Shopify mağazaları destekleniyor" : "Currently only Shopify stores are supported"}
