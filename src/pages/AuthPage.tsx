@@ -63,9 +63,9 @@ export default function AuthPage() {
           <span className="text-xl font-bold text-foreground tracking-tight">KHELL AI</span>
         </div>
 
-        <h2 className="text-lg font-semibold text-foreground text-center mb-1">
-          {isLogin ? "Tekrar Hoşgeldiniz" : "Hesap Oluşturun"}
-        </h2>
+        <h1 className="text-xl font-semibold text-foreground text-center mb-1">
+          {isLogin ? "Giriş Yap" : "Hesap Oluştur"}
+        </h1>
         <p className="text-sm text-muted-foreground text-center mb-6">
           {isLogin ? "Hesabınıza giriş yapın" : "Ücretsiz hesap oluşturun"}
         </p>
