@@ -160,6 +160,74 @@ const COPY = {
   },
 } as const;
 
+function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c, user, isNew }: {
+  p: any; i: number; translations: Record<string, string>; trackedPids: Set<string>;
+  toggleTrack: (p: any, cost: number, img: string, name: string) => void;
+  navigate: (path: string) => void; c: typeof COPY["tr"]; user: any; isNew: boolean;
+}) {
+  function getMarginLabel(margin: number): { label: string; color: string; bg: string } {
+    if (margin >= 60) return { label: c.highMargin, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/30" };
+    if (margin >= 40) return { label: c.goodMargin, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/30" };
+    return { label: c.lowMargin, color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" };
+  }
+  const marginMeta = getMarginLabel(p._margin);
+  const img = p.productImage?.split(",")[0] || "";
+  const rawName = getDisplayName(p);
+  const displayName = translations[rawName] || rawName;
+  const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
+  const isPick = isEditorPick(rawName);
+  const isTracked = trackedPids.has(p.pid);
+  const trackButton = user ? (
+    <button
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleTrack(p, p._cost, img, displayName); }}
+      title={isTracked ? c.tracking : c.track}
+      className="absolute bottom-2 right-2 z-10 h-7 w-7 rounded-full flex items-center justify-center transition-colors"
+      style={{
+        background: isTracked ? "hsl(199 89% 60%)" : "hsl(222 47% 6% / 0.85)",
+        border: `1px solid ${isTracked ? "hsl(199 89% 60%)" : "hsl(217 32% 30% / 0.6)"}`,
+        backdropFilter: "blur(6px)",
+      }}>
+      {isTracked ? <BellRing className="h-3.5 w-3.5 text-white" /> : <Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+    </button>
+  ) : null;
+  return (
+    <motion.div key={p.pid || i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }}
+      className="rounded-xl overflow-hidden flex flex-col group transition-shadow duration-300"
+      style={{ background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))", backdropFilter: "blur(12px)", border: "1px solid hsl(217 32% 22% / 0.7)" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.border = `1px solid ${marginAccent}55`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 14px 36px ${marginAccent}22`; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
+      <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`} target="_blank" rel="noreferrer" className="block aspect-square bg-background overflow-hidden relative">
+        {img ? <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>}
+        {isPick && <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white" style={{ background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))", boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)" }}>⭐ {c.editorPick}</span>}
+        <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md" style={{ background: "hsl(222 47% 6% / 0.85)", backdropFilter: "blur(6px)", border: `1px solid ${marginAccent}55`, color: marginAccent }}>{marginMeta.label}</span>
+        {trackButton}
+      </a>
+      <div className="p-4 space-y-2 flex-1 flex flex-col">
+        <div className="flex items-center gap-1.5">
+          {isNew && <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0" style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}>🆕 {c.newBadge}</span>}
+          <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+          <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}><p className="text-muted-foreground">{c.supplier}</p><p className="font-mono font-bold text-foreground">${p._cost.toFixed(2)}</p></div>
+          <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(142 71% 45% / 0.1)", border: "1px solid hsl(142 71% 45% / 0.25)" }}><p className="text-muted-foreground">{c.estSale}</p><p className="font-mono font-bold text-emerald-400">${p._sale.toFixed(2)}</p></div>
+        </div>
+        <div className="flex items-center justify-between text-[10px] rounded-lg px-2 py-1.5" style={{ background: `${marginAccent}14`, border: `1px solid ${marginAccent}33` }}>
+          <span className="text-muted-foreground">{c.margin}</span>
+          <span className="font-mono font-bold" style={{ color: marginAccent }}>%{p._margin}</span>
+        </div>
+        <button onClick={() => navigate(`/dashboard/analyzer?productName=${encodeURIComponent(displayName)}&selling_price=${p._sale.toFixed(2)}&product_cost=${p._cost.toFixed(2)}`)} className="mt-auto w-full h-8 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1">
+          <BarChart3 className="h-3 w-3" /> {c.analyze}
+        </button>
+        <div className="grid grid-cols-2 gap-1.5">
+          <a href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>📘 {c.searchAd}</a>
+          <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(rawName)}`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(0 0% 100% / 0.06)", color: "hsl(215 20% 70%)", border: "1px solid hsl(217 32% 30% / 0.4)" }}>🎵 {c.searchTiktok}</a>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function WinningProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -286,65 +354,6 @@ export default function WinningProducts() {
   const visibleItems = isPro ? allFiltered : allFiltered.slice(0, FREE_LIMIT);
   const lockedItems = isPro ? [] : allFiltered.slice(FREE_LIMIT);
 
-  const ProductCard = ({ p, i }: { p: any; i: number }) => {
-    const marginMeta = getMarginLabel(p._margin);
-    const img = p.productImage?.split(",")[0] || "";
-    const rawName = getDisplayName(p);
-    const displayName = translations[rawName] || rawName;
-    const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
-    const isPick = isEditorPick(rawName);
-    const isTracked = trackedPids.has(p.pid);
-    const trackButton = user ? (
-      <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleTrack(p, p._cost, img, displayName); }}
-        title={isTracked ? c.tracking : c.track}
-        className="absolute bottom-2 right-2 z-10 h-7 w-7 rounded-full flex items-center justify-center transition-colors"
-        style={{
-          background: isTracked ? "hsl(199 89% 60%)" : "hsl(222 47% 6% / 0.85)",
-          border: `1px solid ${isTracked ? "hsl(199 89% 60%)" : "hsl(217 32% 30% / 0.6)"}`,
-          backdropFilter: "blur(6px)",
-        }}>
-        {isTracked ? <BellRing className="h-3.5 w-3.5 text-white" /> : <Bell className="h-3.5 w-3.5 text-muted-foreground" />}
-      </button>
-    ) : null;
-    return (
-      <motion.div key={p.pid || i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: i * 0.03, ...transition }} whileHover={{ y: -4 }}
-        className="rounded-xl overflow-hidden flex flex-col group transition-shadow duration-300"
-        style={{ background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))", backdropFilter: "blur(12px)", border: "1px solid hsl(217 32% 22% / 0.7)" }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.border = `1px solid ${marginAccent}55`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 14px 36px ${marginAccent}22`; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.border = "1px solid hsl(217 32% 22% / 0.7)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
-        <a href={p.productUrl || `https://cjdropshipping.com/product/-p-${p.pid}.html`} target="_blank" rel="noreferrer" className="block aspect-square bg-background overflow-hidden relative">
-          {img ? <img src={img} alt={displayName} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>}
-          {isPick && <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-md text-white" style={{ background: "linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%))", boxShadow: "0 4px 14px hsl(45 93% 47% / 0.45)" }}>⭐ {c.editorPick}</span>}
-          <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md" style={{ background: "hsl(222 47% 6% / 0.85)", backdropFilter: "blur(6px)", border: `1px solid ${marginAccent}55`, color: marginAccent }}>{marginMeta.label}</span>
-          {trackButton}
-        </a>
-        <div className="p-4 space-y-2 flex-1 flex flex-col">
-          <div className="flex items-center gap-1.5">
-            {newPids.has(p.pid) && <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0" style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}>🆕 {c.newBadge}</span>}
-            <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-            <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(217 32% 12% / 0.6)", border: "1px solid hsl(217 32% 20% / 0.5)" }}><p className="text-muted-foreground">{c.supplier}</p><p className="font-mono font-bold text-foreground">${p._cost.toFixed(2)}</p></div>
-            <div className="rounded-lg px-2 py-1.5" style={{ background: "hsl(142 71% 45% / 0.1)", border: "1px solid hsl(142 71% 45% / 0.25)" }}><p className="text-muted-foreground">{c.estSale}</p><p className="font-mono font-bold text-emerald-400">${p._sale.toFixed(2)}</p></div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] rounded-lg px-2 py-1.5" style={{ background: `${marginAccent}14`, border: `1px solid ${marginAccent}33` }}>
-            <span className="text-muted-foreground">{c.margin}</span>
-            <span className="font-mono font-bold" style={{ color: marginAccent }}>%{p._margin}</span>
-          </div>
-          <button onClick={() => navigate(`/dashboard/analyzer?productName=${encodeURIComponent(displayName)}&selling_price=${p._sale.toFixed(2)}&product_cost=${p._cost.toFixed(2)}`)} className="mt-auto w-full h-8 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1">
-            <BarChart3 className="h-3 w-3" /> {c.analyze}
-          </button>
-          <div className="grid grid-cols-2 gap-1.5">
-            <a href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>📘 {c.searchAd}</a>
-            <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(rawName)}`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(0 0% 100% / 0.06)", color: "hsl(215 20% 70%)", border: "1px solid hsl(217 32% 30% / 0.4)" }}>🎵 {c.searchTiktok}</a>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
   return (
     <div className="space-y-6">
       <SEO title="Kazanan Ürünler | KHELL AI" description="CJ Dropshipping'den gerçek zamanlı yüksek kârlı ürünler." />
@@ -415,7 +424,7 @@ export default function WinningProducts() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {visibleItems.map((p: any, i: number) => <ProductCard key={p.pid || i} p={p} i={i} />)}
+            {visibleItems.map((p: any, i: number) => <ProductCard key={p.pid || i} p={p} i={i} translations={translations} trackedPids={trackedPids} toggleTrack={toggleTrack} navigate={navigate} c={c} user={user} isNew={newPids.has(p.pid)} />)}
             {lockedItems.map((p: any, i: number) => (
               <motion.div key={`locked-${p.pid || i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (FREE_LIMIT + i) * 0.03, ...transition }}
                 className="rounded-xl overflow-hidden flex flex-col relative cursor-pointer"
