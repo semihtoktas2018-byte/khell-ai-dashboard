@@ -38,7 +38,7 @@ const EXAMPLE_STORES = [
 ];
 
 export default function StoreSpy() {
-  const { locale } = useLocale();
+  const { locale, usdToTry } = useLocale();
   const isTr = locale === "tr";
   const { isPro } = useAnalysisHistory();
   const navigate = useNavigate();
@@ -83,10 +83,13 @@ export default function StoreSpy() {
   const handleImport = (p: StoreProduct) => {
     // Rakip fiyatı referans alıp %35 kâr payı bırakacak bir maliyet öneriyoruz —
     // kullanıcı Ürün Analizi sayfasında bu rakamları kendi verisiyle düzeltebilir.
-    const suggestedCost = Math.round(p.price * 0.5 * 100) / 100;
+    // Store Spy fiyatları hep USD gelir, Ürün Analizi'nin beklediği para birimine çeviriyoruz.
+    const rate = locale === "tr" ? usdToTry : 1;
+    const sellingPrice = Math.round(p.price * rate * 100) / 100;
+    const suggestedCost = Math.round(p.price * 0.5 * rate * 100) / 100;
     const params = new URLSearchParams({
       productName: p.name,
-      selling_price: String(p.price),
+      selling_price: String(sellingPrice),
       product_cost: String(suggestedCost),
     });
     toast({
