@@ -173,6 +173,7 @@ export default function ProductAnalyzer() {
     }
     if (!canAnalyze) {
       setShowPaywall(true);
+      setShowResult(false);
       return;
     }
     addAnalysis({
