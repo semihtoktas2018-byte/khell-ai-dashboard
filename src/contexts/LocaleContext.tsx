@@ -8,6 +8,7 @@ interface LocaleContextType {
   t: (key: string) => string;
   currency: (val: number) => string;
   currencySymbol: string;
+  country: string; // "TR", "US", "FR", "NL", "DE", "UK" vs.
 }
 
 const translations: Record<Locale, Record<string, string>> = {
@@ -1240,10 +1241,33 @@ const translations: Record<Locale, Record<string, string>> = {
   },
 };
 
-function detectCountry(): Locale {
+const TZ_TO_COUNTRY: Record<string, string> = {
+  "Europe/Istanbul": "TR",
+  "Europe/Paris": "FR",
+  "Europe/Amsterdam": "NL",
+  "Europe/Berlin": "DE",
+  "Europe/London": "UK",
+  "America/New_York": "US",
+  "America/Chicago": "US",
+  "America/Denver": "US",
+  "America/Los_Angeles": "US",
+};
+
+function detectCountryCode(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (tz && tz.startsWith("Europe/Istanbul")) return "tr";
+    if (tz && TZ_TO_COUNTRY[tz]) return TZ_TO_COUNTRY[tz];
+    if (tz && tz.startsWith("America/")) return "US";
+    if (tz && tz.startsWith("Europe/")) return "UK";
+  } catch {}
+  return "US";
+}
+
+function detectCountry(): Locale {
+  try {
+    const code = detectCountryCode();
+    if (code === "TR") return "tr";
+    if (code === "FR") return "fr";
     const lang = navigator.language || "";
     if (lang.startsWith("tr")) return "tr";
     if (lang.startsWith("fr")) return "fr";
@@ -1259,6 +1283,34 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     if (saved === "tr" || saved === "en" || saved === "fr") return saved;
     return detectCountry();
   });
+
+  const [country, setCountry] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem("khell_country");
+      if (saved) return saved;
+    } catch {}
+    return detectCountryCode();
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("khell_country");
+      if (saved) return;
+    } catch {}
+
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        const code = data?.country_code;
+        if (typeof code === "string" && code.length === 2) {
+          setCountry(code);
+          try {
+            localStorage.setItem("khell_country", code);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const RATE_CACHE_KEY = "khell_usd_try_rate";
   const RATE_CACHE_TIME_KEY = "khell_usd_try_rate_time";
@@ -1316,7 +1368,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LocaleContext.Provider value={{ locale, setLocale, t, currency, currencySymbol }}>
+    <LocaleContext.Provider value={{ locale, setLocale, t, currency, currencySymbol, country }}>
       {children}
     </LocaleContext.Provider>
   );
