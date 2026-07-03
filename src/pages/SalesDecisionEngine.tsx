@@ -229,7 +229,7 @@ export default function SalesDecisionEngine() {
             <div className="rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
               <Zap className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">{t("sde.enterInfo")}</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">{t("sde.resultHere")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("sde.resultHere")}</p>
             </div>
           )}
         </div>

@@ -27,7 +27,7 @@ export default function LoadingSteps({ isTr = true, steps }: Props) {
           <div
             key={s}
             className={`flex items-center gap-2.5 text-xs transition-all ${
-              done ? "text-foreground/80" : active ? "text-foreground" : "text-muted-foreground/60"
+              done ? "text-foreground/80" : active ? "text-foreground" : "text-muted-foreground"
             }`}
           >
             {done ? (
