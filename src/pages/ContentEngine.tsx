@@ -238,7 +238,7 @@ export default function ContentEngine() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{t("ce.uploadHint")}</p>
-                    <p className="text-xs mt-1 text-muted-foreground/60">JPG, PNG, WEBP</p>
+                    <p className="text-xs mt-1 text-muted-foreground">JPG, PNG, WEBP</p>
                   </div>
                 </div>
               </div>
