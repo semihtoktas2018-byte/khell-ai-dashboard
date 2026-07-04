@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw, Crown, Bell, BellRing } from "lucide-react";
+import { Package, Loader2, Radio, BarChart3, FileText, Flame, TrendingUp, RefreshCw, Crown, Bell, BellRing, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -358,6 +358,13 @@ export default function TrendingProducts() {
                       <button onClick={() => navigate(`/dashboard/analyzer?name=${encodeURIComponent(rawName)}&cost=${cost}&price=${estSale.toFixed(2)}`)} className="h-7 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1"><BarChart3 className="h-3 w-3" /> {c.analyze}</button>
                       <button onClick={() => navigate(`/dashboard/product-page-generator?name=${encodeURIComponent(rawName)}&image=${encodeURIComponent(img)}&price=${estSale.toFixed(2)}`)} className="h-7 rounded-md bg-orange-500/15 text-orange-500 text-[10px] font-semibold hover:bg-orange-500/25 transition-colors flex items-center justify-center gap-1"><FileText className="h-3 w-3" /> {c.createPage}</button>
                     </div>
+                    <button
+                      onClick={() => navigate(`/dashboard/content-engine?productName=${encodeURIComponent(rawName)}&imageUrl=${encodeURIComponent(img)}${p.categoryName ? `&niche=${encodeURIComponent(p.categoryName.split("/")[0].trim())}` : ""}`)}
+                      className="w-full h-7 rounded-md text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors"
+                      style={{ background: "hsl(38 92% 50% / 0.15)", color: "hsl(38 92% 60%)", border: "1px solid hsl(38 92% 50% / 0.3)" }}
+                    >
+                      <Video className="h-3 w-3" /> {locale === "tr" ? "Video Reklam Oluştur" : "Generate Video Ad"}
+                    </button>
                   </div>
                 </motion.div>
               );
