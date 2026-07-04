@@ -114,8 +114,9 @@ export default function Suppliers() {
 
   const [productQuery, setProductQuery] = useState("");
   const [comparing, setComparing] = useState(false);
-  const [compareResult, setCompareResult] = useState<{ count: number; minPrice: number; maxPrice: number } | null>(null);
+  const [compareResult, setCompareResult] = useState<{ count: number; minPrice: number; maxPrice: number; items: any[] } | null>(null);
   const [compareError, setCompareError] = useState(false);
+  const [showCompareList, setShowCompareList] = useState(false);
 
   const handleCompare = async () => {
     const name = productQuery.trim();
@@ -123,6 +124,7 @@ export default function Suppliers() {
     setComparing(true);
     setCompareError(false);
     setCompareResult(null);
+    setShowCompareList(false);
     try {
       const { data, error } = await supabase.functions.invoke("cj-proxy", {
         body: { path: "/api2.0/v1/product/list", query: { pageNum: "1", pageSize: "20", productNameEn: name } },
@@ -135,6 +137,7 @@ export default function Suppliers() {
         count: data?.data?.total ?? list.length,
         minPrice: Math.min(...prices),
         maxPrice: Math.max(...prices),
+        items: list,
       });
     } catch {
       setCompareError(true);
@@ -227,9 +230,34 @@ export default function Suppliers() {
                   <span className="text-sm font-bold text-foreground flex items-center gap-1.5">📦 CJ Dropshipping</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Canlı Veri</span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-1">{compareResult.count} eşleşen ürün bulundu</p>
+                <button onClick={() => setShowCompareList((v) => !v)} className="text-xs text-muted-foreground mb-1 underline decoration-dotted hover:text-foreground transition-colors">
+                  {compareResult.count} eşleşen ürün bulundu {showCompareList ? "▲" : "▼"}
+                </button>
                 <p className="text-lg font-black font-mono text-foreground">${compareResult.minPrice.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">– ${compareResult.maxPrice.toFixed(2)}</span></p>
                 <p className="text-[10px] text-muted-foreground mt-1">7-15 gün teslimat · Min. 1 adet</p>
+
+                {showCompareList && (
+                  <div className="mt-3 pt-3 border-t border-border/40 space-y-1.5 max-h-60 overflow-y-auto">
+                    {compareResult.items.map((item: any, i: number) => {
+                      const img = item.productImage?.split(",")[0] || "";
+                      const name = item.productNameEn || item.productName || "CJ Ürün";
+                      const price = parseFloat(item.sellPrice || "0");
+                      return (
+                        <a
+                          key={item.pid || i}
+                          href={item.productUrl || `https://cjdropshipping.com/product/-p-${item.pid}.html`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-2 rounded-lg bg-background/40 px-2 py-1.5 hover:bg-background/70 transition-colors"
+                        >
+                          {img ? <img src={img} alt="" className="h-8 w-8 rounded object-cover shrink-0" /> : <div className="h-8 w-8 rounded bg-muted shrink-0" />}
+                          <span className="text-[11px] text-foreground truncate flex-1">{name}</span>
+                          <span className="text-[11px] font-mono font-bold text-foreground shrink-0">${price.toFixed(2)}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="rounded-xl p-4 border relative overflow-hidden" style={{ background: "hsl(217 32% 15% / 0.3)", borderColor: "hsl(217 32% 25% / 0.5)" }}>
