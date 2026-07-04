@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface ContentEngineInput {
   productName: string;
   imageFile: File;
@@ -163,10 +165,8 @@ Rules:
 - NO generic phrases like "amazing product" or "great quality". Be specific and emotional.
 - priceRange must be exactly one of: "low", "mid", "premium"`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const { data: proxyData, error: proxyErr } = await supabase.functions.invoke("anthropic-proxy", {
+    body: {
       model: "claude-sonnet-4-6",
       max_tokens: 1000,
       messages: [
@@ -181,12 +181,11 @@ Rules:
           ],
         },
       ],
-    }),
+    },
   });
 
-  if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-  const data = await response.json();
+  if (proxyErr) throw new Error(proxyErr.message || "API error");
+  const data = proxyData;
   const text = data.content.map((i: { type: string; text?: string }) => i.text || "").join("");
   const clean = text.replace(/```json|```/g, "").trim();
   const parsed = JSON.parse(clean);
