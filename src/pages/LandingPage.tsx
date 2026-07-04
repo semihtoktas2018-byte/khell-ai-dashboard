@@ -6,6 +6,7 @@ import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
 import FeatureShowcase from "@/components/FeatureShowcase";
 import ProductRevealDemo from "@/components/ProductRevealDemo";
+import LiveTeaserAnalyzer from "@/components/LiveTeaserAnalyzer";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -273,6 +274,13 @@ export default function LandingPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <FeatureShowcase />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Live Teaser — gerçek veriyle, kayıt gerektirmeyen mini analiz */}
+      <section className="py-16 px-6">
+        <div className="container mx-auto">
+          <LiveTeaserAnalyzer isTr={isTr} />
         </div>
       </section>
 
