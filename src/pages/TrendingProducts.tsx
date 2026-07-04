@@ -39,6 +39,18 @@ const MOCK: CJProduct[] = Array.from({ length: 12 }).map((_, i) => ({
   sellPrice: (5 + i * 1.3).toFixed(2),
 }));
 
+// Çeşitli kategorilerden ilginç/farklı ürünler yakalamak için — sadece giyime
+// kilitlenmemek adına Kazanan Ürünler'deki kategori havuzunun aynısı kullanılıyor.
+const TREND_SEARCH_TERMS = [
+  "wireless earbuds", "smart watch", "power bank", "bluetooth speaker",
+  "led strip light", "desk organizer", "kitchen gadget", "cooling fan",
+  "air purifier", "candle holder", "massage gun", "electric toothbrush",
+  "posture corrector", "facial roller", "fitness band", "yoga mat",
+  "water bottle", "camping gear", "pet grooming", "dog leash",
+  "car organizer", "dash cam", "desk lamp", "pencil case",
+  "baby monitor", "kids toy", "portable blender", "air fryer accessories",
+];
+
 const COPY = {
   tr: {
     proFeature: "PRO Özellik",
@@ -191,21 +203,29 @@ export default function TrendingProducts() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
-        body: {
-          path: "/api2.0/v1/product/list",
-          query: { pageNum: "1", pageSize: "24", sortField: "recentOrders", sortType: "DESC" },
-        },
-      });
-      if (fnErr) throw fnErr;
-      if (!data?.data?.list) throw new Error(data?.message || "Veri alınamadı");
-      setItems(data.data.list);
-      const pids = data.data.list.map((p: CJProduct) => p.pid);
+      const randomTerms = [...TREND_SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 7);
+      const results: CJProduct[] = [];
+      for (const term of randomTerms) {
+        const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
+          body: {
+            path: "/api2.0/v1/product/list",
+            query: { pageNum: "1", pageSize: "6", productNameEn: term },
+          },
+        });
+        if (fnErr) continue;
+        if (data?.data?.list) results.push(...data.data.list);
+      }
+      if (results.length === 0) throw new Error("Veri alınamadı");
+      const unique = Array.from(new Map(results.map((p) => [p.pid, p])).values())
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 24);
+      setItems(unique);
+      const pids = unique.map((p: CJProduct) => p.pid);
       setNewPids(getNewPids("trending", pids));
       markSeen("trending", pids);
       setLastUpdated(new Date());
       setCountdown(REFRESH_INTERVAL / 1000);
-      const names = data.data.list.map((p: CJProduct) => getDisplayName(p)).filter(Boolean);
+      const names = unique.map((p: CJProduct) => getDisplayName(p)).filter(Boolean);
       translateProducts(names).then(setTranslations).catch(() => {});
     } catch (e: any) {
       setError(e?.message || "Hata");
@@ -248,7 +268,7 @@ export default function TrendingProducts() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">CJ Trend Ürünler <span>🔥</span></h1>
-            <p className="text-xs text-muted-foreground">En çok sipariş alan ürünler — canlı CJdropshipping verisi</p>
+            <p className="text-xs text-muted-foreground">Farklı kategorilerden ilginç ürünler — canlı CJdropshipping verisi</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
