@@ -26,11 +26,6 @@ const steps: Step[] = [
     title: "3. Kazanan Ürünler",
     desc: "En yüksek kârlı, kanıtlanmış ürünler burada — direkt analiz edip satışa başlayabilirsin.",
   },
-  {
-    target: "pro-access",
-    title: "4. PRO Erişim",
-    desc: "Günde 3 ücretsiz analiz hakkın var. Daha fazlasına ihtiyacın olursa buradan yükseltebilirsin.",
-  },
 ];
 
 function getRect(target: string): DOMRect | null {
