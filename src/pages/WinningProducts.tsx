@@ -24,6 +24,31 @@ interface CJProduct {
   sellPrice?: string;
   productUrl?: string;
   categoryName?: string;
+  defaultArea?: string;
+}
+
+// CJ'nin verdiği depo bilgisine göre tahmini kargo hızı — ekstra API çağrısı gerekmez,
+// zaten üründe gelen defaultArea alanından hesaplanır.
+function shippingSpeedMeta(defaultArea: string | undefined, isTr: boolean): { label: string; color: string; bg: string } | null {
+  if (!defaultArea) return null;
+  const area = defaultArea.toLowerCase();
+  const isFastWarehouse = /us|usa|america|uk|united kingdom|eu|europe|germany|de warehouse/.test(area);
+  const isChina = /china/.test(area);
+  if (isFastWarehouse) return {
+    label: isTr ? `🚀 Hızlı Kargo (${defaultArea})` : `🚀 Fast Shipping (${defaultArea})`,
+    color: "hsl(142 71% 55%)",
+    bg: "hsl(142 71% 45% / 0.12)",
+  };
+  if (isChina) return {
+    label: isTr ? `🐢 Standart Kargo (${defaultArea})` : `🐢 Standard Shipping (${defaultArea})`,
+    color: "hsl(38 92% 60%)",
+    bg: "hsl(38 92% 50% / 0.12)",
+  };
+  return {
+    label: `📦 ${defaultArea}`,
+    color: "hsl(215 20% 65%)",
+    bg: "hsl(217 32% 20% / 0.3)",
+  };
 }
 
 function getDisplayName(p: CJProduct): string {
@@ -198,6 +223,7 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
   const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
   const isPick = isEditorPick(rawName);
   const isTracked = trackedPids.has(p.pid);
+  const shipMeta = shippingSpeedMeta(p.defaultArea, isTr);
   const trackButton = user ? (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleTrack(p, p._cost, img, displayName); }}
@@ -237,6 +263,11 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
           <span className="text-muted-foreground">{c.margin}</span>
           <span className="font-mono font-bold" style={{ color: marginAccent }}>%{p._margin}</span>
         </div>
+        {shipMeta && (
+          <div className="text-[9px] font-semibold text-center py-1 rounded-md" style={{ color: shipMeta.color, background: shipMeta.bg }}>
+            {shipMeta.label}
+          </div>
+        )}
         <button onClick={() => navigate(`/dashboard/analyzer?productName=${encodeURIComponent(displayName)}&selling_price=${p._sale.toFixed(2)}&product_cost=${p._cost.toFixed(2)}`)} className="mt-auto w-full h-8 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1">
           <BarChart3 className="h-3 w-3" /> {c.analyze}
         </button>
