@@ -177,22 +177,8 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Feature Showcase */}
-      <section className="pt-40 pb-4 px-6">
-        <div className="container mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-center mb-6">
-            <h2 className="text-xl font-bold text-foreground">
-              {isTr ? "Gerçek Entegrasyonlar, Gerçek Veri" : isFr ? "Vraies intégrations, vraies données" : "Real Integrations, Real Data"}
-            </h2>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <FeatureShowcase />
-          </motion.div>
-        </div>
-      </section>
-
       {/* Hero */}
-      <section className="relative pt-8 pb-20 px-6">
+      <section className="relative pt-40 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
@@ -272,6 +258,20 @@ export default function LandingPage() {
                 </div>
               </div>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Feature Showcase */}
+      <section className="py-16 px-6">
+        <div className="container mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
+            <h2 className="text-xl font-bold text-foreground">
+              {isTr ? "Gerçek Entegrasyonlar, Gerçek Veri" : isFr ? "Vraies intégrations, vraies données" : "Real Integrations, Real Data"}
+            </h2>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <FeatureShowcase />
           </motion.div>
         </div>
       </section>
