@@ -23,6 +23,24 @@ interface CJProduct {
   sellPrice?: string;
   productUrl?: string;
   categoryName?: string;
+  shippingCountryCodes?: string[];
+}
+
+function shippingSpeedMeta(codes: string[] | undefined, isTr: boolean): { label: string; color: string; bg: string } | null {
+  if (!codes || codes.length === 0) return null;
+  const localWarehouse = codes.find((c) => !c.includes("_") && c !== "CN");
+  if (localWarehouse) return {
+    label: isTr ? `🚀 Yerel Depo (${localWarehouse}) — Hızlı Kargo` : `🚀 Local Warehouse (${localWarehouse}) — Fast Shipping`,
+    color: "hsl(142 71% 55%)",
+    bg: "hsl(142 71% 45% / 0.12)",
+  };
+  const fromChina = codes.some((c) => c.startsWith("CN_"));
+  if (fromChina) return {
+    label: isTr ? "🐢 Çin'den Kargo — Standart Süre" : "🐢 Ships from China — Standard Time",
+    color: "hsl(38 92% 60%)",
+    bg: "hsl(38 92% 50% / 0.12)",
+  };
+  return null;
 }
 
 function getDisplayName(p: CJProduct): string {
@@ -313,6 +331,7 @@ export default function TrendingProducts() {
               const displayName = translations[rawName] || rawName;
               const marginAccent = margin >= 60 ? "hsl(142 71% 50%)" : margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
               const isPick = isEditorPick(rawName);
+              const shipMeta = shippingSpeedMeta(p.shippingCountryCodes, locale === "tr");
               return (
                 <motion.div key={p.pid || i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }} whileHover={{ y: -3 }}
                   className="group relative rounded-xl overflow-hidden flex flex-col transition-shadow duration-300"
@@ -350,6 +369,11 @@ export default function TrendingProducts() {
                       <span className="text-muted-foreground">{c.margin}</span>
                       <span className="font-mono font-bold" style={{ color: marginAccent }}>%{margin}</span>
                     </div>
+                    {shipMeta && (
+                      <div className="text-[9px] font-semibold text-center py-1 rounded-md" style={{ color: shipMeta.color, background: shipMeta.bg }}>
+                        {shipMeta.label}
+                      </div>
+                    )}
                     <div className="grid grid-cols-2 gap-1.5">
                       <a href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1 transition-colors" style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>📘 {c.searchAd}</a>
                       <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(rawName)}`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1 transition-colors" style={{ background: "hsl(0 0% 100% / 0.06)", color: "hsl(215 20% 70%)", border: "1px solid hsl(217 32% 30% / 0.4)" }}>🎵 {c.searchTiktok}</a>
