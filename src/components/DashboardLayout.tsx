@@ -3,7 +3,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package, Wallet, Store, Tag,
+  LayoutDashboard, Calculator, TrendingUp, Truck, Bookmark, ChevronLeft, Zap, Menu, Shield, LogOut, Flame, FileText, Brain, Globe, Video, Sun, Moon, Bell, X, Package, Wallet, Store, Tag, Award,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -73,6 +73,7 @@ const navKeys = [
   { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer" },
   { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning" },
   { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending" },
+  { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award },
   { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck },
   { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield },
   { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText },
