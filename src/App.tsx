@@ -25,6 +25,7 @@ import ProductPageGenerator from "./pages/ProductPageGenerator";
 import SalesDecisionEngine from "./pages/SalesDecisionEngine";
 import ContentEngine from "./pages/ContentEngine";
 import TrendingProducts from "./pages/TrendingProducts";
+import BestSellers from "./pages/BestSellers";
 import OrderLog from "./pages/OrderLog";
 import StoreSpy from "./pages/StoreSpy";
 import PriceTracker from "./pages/PriceTracker";
@@ -83,6 +84,7 @@ const App = () => {
                           <Route path="analyzer" element={<ProductAnalyzer />} />
                           <Route path="winning" element={<WinningProducts />} />
                           <Route path="trending" element={<TrendingProducts />} />
+                          <Route path="best-sellers" element={<BestSellers />} />
                           <Route path="suppliers" element={<Suppliers />} />
                           <Route path="saved" element={<SavedProducts />} />
                           <Route path="order-log" element={<OrderLog />} />
