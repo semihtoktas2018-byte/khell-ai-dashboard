@@ -207,7 +207,7 @@ export default function LandingPage() {
               {t("landing.heroSubtext")}
             </motion.p>
 
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
               <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
@@ -215,6 +215,10 @@ export default function LandingPage() {
                 <Video className="h-4 w-4 mr-2 inline" />
                 {t("landing.ctaVideo")}
               </button>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="mb-16">
+              <LiveTeaserAnalyzer isTr={isTr} />
             </motion.div>
 
             <motion.div variants={fadeUp} className="relative mx-auto max-w-3xl">
@@ -260,13 +264,6 @@ export default function LandingPage() {
               </div>
             </motion.div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Live Teaser — gerçek veriyle, kayıt gerektirmeyen mini analiz, hero'nun hemen altında */}
-      <section className="py-10 px-6">
-        <div className="container mx-auto">
-          <LiveTeaserAnalyzer isTr={isTr} />
         </div>
       </section>
 
