@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -258,7 +259,9 @@ export default function DashboardLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
 
           <footer className="mt-10 pt-8 border-t border-border/60 space-y-4">
             <div className="text-center py-6 rounded-xl" style={{ background: "linear-gradient(135deg, hsl(217 91% 60% / 0.12), hsl(199 89% 55% / 0.08))", border: "1px solid hsl(217 91% 60% / 0.25)" }}>
