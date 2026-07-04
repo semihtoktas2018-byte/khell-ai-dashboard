@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package, Star } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package, Star, Radio } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
@@ -195,6 +195,22 @@ export default function LandingPage() {
                 {isTr ? "CJdropshipping entegrasyonu aktif — gerçek ürün verisi" : isFr ? "Intégration CJdropshipping active — vraies données produit" : "CJdropshipping integration active — real product data"}
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
               </a>
+
+              <motion.span
+                animate={{
+                  boxShadow: [
+                    "0 0 12px hsl(45 93% 55% / 0.4)",
+                    "0 0 28px hsl(45 93% 55% / 0.75)",
+                    "0 0 12px hsl(45 93% 55% / 0.4)",
+                  ],
+                }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wide text-black"
+                style={{ background: "linear-gradient(135deg, hsl(45 93% 58%), hsl(38 92% 52%))" }}
+              >
+                <Radio className="h-3.5 w-3.5" />
+                {isTr ? "⚡ 5 Dakikada Bir Yenilenen Gerçek CJ Verisi" : isFr ? "⚡ Vraies données CJ actualisées toutes les 5 minutes" : "⚡ Real CJ Data Refreshed Every 5 Minutes"}
+              </motion.span>
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
