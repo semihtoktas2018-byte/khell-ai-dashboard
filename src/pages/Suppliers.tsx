@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Star, CheckCircle, Clock, Zap, Shield, TrendingUp, Package, ExternalLink, Award, AlertTriangle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Star, CheckCircle, Clock, Zap, Shield, TrendingUp, Package, ExternalLink, Award, AlertTriangle, Loader2, Lock } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -111,6 +112,37 @@ export default function Suppliers() {
   const [filter, setFilter] = useState("all");
   const { t } = useLocale();
 
+  const [productQuery, setProductQuery] = useState("");
+  const [comparing, setComparing] = useState(false);
+  const [compareResult, setCompareResult] = useState<{ count: number; minPrice: number; maxPrice: number } | null>(null);
+  const [compareError, setCompareError] = useState(false);
+
+  const handleCompare = async () => {
+    const name = productQuery.trim();
+    if (!name || comparing) return;
+    setComparing(true);
+    setCompareError(false);
+    setCompareResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("cj-proxy", {
+        body: { path: "/api2.0/v1/product/list", query: { pageNum: "1", pageSize: "20", productNameEn: name } },
+      });
+      if (error) throw error;
+      const list = data?.data?.list || [];
+      if (list.length === 0) throw new Error("no results");
+      const prices = list.map((p: any) => parseFloat(p.sellPrice || "0")).filter((p: number) => p > 0);
+      setCompareResult({
+        count: data?.data?.total ?? list.length,
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices),
+      });
+    } catch {
+      setCompareError(true);
+    } finally {
+      setComparing(false);
+    }
+  };
+
   const filtered = PLATFORMS.filter((p) => {
     if (filter === "recommended" && !p.recommended) return false;
     if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
@@ -161,6 +193,57 @@ export default function Suppliers() {
             <p className="text-[11px] text-muted-foreground mt-1">{s.label}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Ürün Bazlı Tedarikçi Karşılaştırması */}
+      <div className="card-glow rounded-2xl p-6 space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Search className="h-4 w-4 text-primary" /> Ürün Bazlı Karşılaştır
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">Sattığın ürünün adını yaz, hangi tedarikçide ne fiyata bulunduğunu gör.</p>
+        </div>
+        <div className="flex gap-2">
+          <input
+            value={productQuery}
+            onChange={(e) => setProductQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleCompare(); }}
+            placeholder="Örn: kablosuz kulaklık"
+            className="input-dark flex-1"
+          />
+          <button onClick={handleCompare} disabled={comparing || !productQuery.trim()} className="btn-primary px-5 flex items-center gap-1.5 disabled:opacity-50">
+            {comparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Karşılaştır
+          </button>
+        </div>
+
+        {compareError && <p className="text-xs text-destructive">Sonuç bulunamadı, farklı bir isim dene.</p>}
+
+        <AnimatePresence>
+          {compareResult && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl p-4 border" style={{ background: "hsl(217 91% 60% / 0.08)", borderColor: "hsl(217 91% 60% / 0.3)" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-foreground flex items-center gap-1.5">📦 CJ Dropshipping</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Canlı Veri</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-1">{compareResult.count} eşleşen ürün bulundu</p>
+                <p className="text-lg font-black font-mono text-foreground">${compareResult.minPrice.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">– ${compareResult.maxPrice.toFixed(2)}</span></p>
+                <p className="text-[10px] text-muted-foreground mt-1">7-15 gün teslimat · Min. 1 adet</p>
+              </div>
+
+              <div className="rounded-xl p-4 border relative overflow-hidden" style={{ background: "hsl(217 32% 15% / 0.3)", borderColor: "hsl(217 32% 25% / 0.5)" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-foreground flex items-center gap-1.5">🛒 AliExpress</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-3 gap-1.5 text-center">
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">Bu entegrasyon yakında ekleniyor</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Platform Karşılaştırması */}
