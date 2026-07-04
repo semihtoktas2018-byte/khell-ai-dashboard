@@ -187,8 +187,17 @@ Rules:
   if (proxyErr) throw new Error(proxyErr.message || "API error");
   const data = proxyData;
   const text = data.content.map((i: { type: string; text?: string }) => i.text || "").join("");
-  const clean = text.replace(/```json|```/g, "").trim();
-  const parsed = JSON.parse(clean);
+  const cleaned = text.replace(/```json|```/g, "").trim();
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    // Model bazen JSON'un öncesine/sonrasına küçük bir açıklama ekleyebiliyor.
+    // İlk { ile son } arasını alıp tekrar deniyoruz.
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("AI yanıtı ayrıştırılamadı");
+    parsed = JSON.parse(match[0]);
+  }
 
   return {
     captions: parsed.captions,
