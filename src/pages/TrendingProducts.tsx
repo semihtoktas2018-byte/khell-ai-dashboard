@@ -273,7 +273,7 @@ export default function TrendingProducts() {
       {error && <div className="rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs px-3 py-2">{c.apiError}: {error} — {c.mockNote}</div>}
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-lg border border-border/50 bg-accent/20 overflow-hidden">
               <div className="aspect-square bg-muted animate-pulse" />
@@ -283,7 +283,7 @@ export default function TrendingProducts() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
             {visibleItems.map((p, i) => {
               const cost = parseFloat(p.sellPrice || "0") || 0;
               const estSale = cost * 3;
@@ -317,7 +317,7 @@ export default function TrendingProducts() {
                       </button>
                     )}
                   </div>
-                  <div className="p-3 space-y-2 flex-1 flex flex-col">
+                  <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
                     <div className="flex items-center gap-1.5">
                       {newPids.has(p.pid) && <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0" style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}>🆕 {c.newBadge}</span>}
                       <p className="text-xs font-medium text-foreground line-clamp-2 min-h-[2rem]">{displayName}</p>
