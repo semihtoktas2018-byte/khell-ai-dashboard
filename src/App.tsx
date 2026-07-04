@@ -12,6 +12,7 @@ import { OrderLogProvider } from "@/contexts/OrderLogContext";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import LandingPage from "./pages/LandingPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 import AuthPage from "./pages/AuthPage";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -73,7 +74,8 @@ const App = () => {
                       {showSplash && <SplashScreen onDone={dismissSplash} />}
                     </AnimatePresence>
                     <BrowserRouter>
-                      <Routes>
+                      <ErrorBoundary>
+                        <Routes>
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/auth" element={<AuthPage />} />
                         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
@@ -93,6 +95,7 @@ const App = () => {
                         </Route>
                         <Route path="*" element={<NotFound />} />
                       </Routes>
+                      </ErrorBoundary>
                       <FloatingWhatsApp />
                     </BrowserRouter>
                   </OrderLogProvider>
