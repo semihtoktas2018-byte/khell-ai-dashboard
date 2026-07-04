@@ -47,9 +47,15 @@ function parseCsvLine(line: string): string[] {
 
 export default function OrderLog() {
   const { orders, addOrder, deleteOrder, totals } = useOrderLog();
-  const { currency, locale } = useLocale();
+  const { locale, currencySymbol } = useLocale();
+
+  // Satış Defteri'ndeki rakamlar gerçek satış kayıtları — global $ → yerel para birimi
+  // çevrimi burada uygulanmaz, kullanıcı zaten kendi para biriminde (₺) giriyor.
+  const currency = (val: number): string =>
+    `${currencySymbol}${val.toLocaleString(locale === "tr" ? "tr-TR" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const chartData = useMemo(() => {
@@ -219,23 +225,51 @@ export default function OrderLog() {
             <TrendingUp className="h-4 w-4 text-emerald-500" /> Ürün Kârlılığı
           </h3>
           <div className="space-y-2">
-            {productProfitability.map((p) => (
-              <div key={p.productName} className="flex items-center justify-between rounded-lg bg-accent/30 px-3 py-2.5 gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">{p.productName}</p>
-                  <p className="text-[11px] text-muted-foreground">{p.unitsSold} adet satıldı</p>
+            {productProfitability.map((p) => {
+              const isOpen = expandedProduct === p.productName;
+              const productOrders = orders.filter((o) => o.productName === p.productName);
+              return (
+                <div key={p.productName} className="rounded-lg bg-accent/30 overflow-hidden">
+                  <button
+                    onClick={() => setExpandedProduct(isOpen ? null : p.productName)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 gap-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="min-w-0 flex-1 text-left">
+                      <p className="text-sm font-medium text-foreground truncate">{p.productName}</p>
+                      <p className="text-[11px] text-muted-foreground">{p.unitsSold} adet satıldı · {productOrders.length} sipariş</p>
+                    </div>
+                    <span
+                      className="text-sm font-bold font-mono shrink-0 px-2.5 py-1 rounded-md"
+                      style={{
+                        color: p.profit >= 0 ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)",
+                        background: p.profit >= 0 ? "hsl(142 71% 45% / 0.12)" : "hsl(0 84% 60% / 0.12)",
+                      }}
+                    >
+                      {p.profit >= 0 ? "+" : ""}{currency(p.profit)}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-3 pb-3 space-y-1.5 border-t border-border/40 pt-2">
+                      {productOrders.map((o) => {
+                        const revenue = o.unitSellingPrice * o.quantity;
+                        const cost = o.unitCost * o.quantity + o.otherCosts;
+                        const profit = revenue - cost;
+                        return (
+                          <div key={o.id} className="flex items-center justify-between text-[11px] px-2 py-1.5 rounded bg-background/40">
+                            <span className="text-muted-foreground">
+                              {o.quantity} adet · {new Date(o.date).toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US")}
+                            </span>
+                            <span className="font-mono font-semibold" style={{ color: profit >= 0 ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)" }}>
+                              {currency(profit)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                <span
-                  className="text-sm font-bold font-mono shrink-0 px-2.5 py-1 rounded-md"
-                  style={{
-                    color: p.profit >= 0 ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)",
-                    background: p.profit >= 0 ? "hsl(142 71% 45% / 0.12)" : "hsl(0 84% 60% / 0.12)",
-                  }}
-                >
-                  {p.profit >= 0 ? "+" : ""}{currency(p.profit)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </motion.div>
       )}
@@ -325,17 +359,17 @@ export default function OrderLog() {
                   <input type="number" className="input-dark w-full" value={form.quantity} onChange={(e) => setForm((p) => ({ ...p, quantity: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Birim Satış Fiyatı ($)</label>
-                  <input type="number" className="input-dark w-full" value={form.unitSellingPrice} onChange={(e) => setForm((p) => ({ ...p, unitSellingPrice: e.target.value }))} placeholder="29.99" />
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Birim Satış Fiyatı ({currencySymbol})</label>
+                  <input type="number" className="input-dark w-full" value={form.unitSellingPrice} onChange={(e) => setForm((p) => ({ ...p, unitSellingPrice: e.target.value }))} placeholder="299.99" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Birim Maliyet ($)</label>
-                  <input type="number" className="input-dark w-full" value={form.unitCost} onChange={(e) => setForm((p) => ({ ...p, unitCost: e.target.value }))} placeholder="8.50" />
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Birim Maliyet ({currencySymbol})</label>
+                  <input type="number" className="input-dark w-full" value={form.unitCost} onChange={(e) => setForm((p) => ({ ...p, unitCost: e.target.value }))} placeholder="85.00" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Diğer Maliyet (kargo+reklam, $)</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Diğer Maliyet (kargo+reklam, {currencySymbol})</label>
                   <input type="number" className="input-dark w-full" value={form.otherCosts} onChange={(e) => setForm((p) => ({ ...p, otherCosts: e.target.value }))} placeholder="0" />
                 </div>
               </div>
