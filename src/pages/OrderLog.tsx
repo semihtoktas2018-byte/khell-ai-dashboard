@@ -66,6 +66,25 @@ export default function OrderLog() {
     });
   }, [orders, locale]);
 
+  const productProfitability = useMemo(() => {
+    const map = new Map<string, { revenue: number; cost: number; profit: number; unitsSold: number }>();
+    orders.forEach((o) => {
+      const revenue = o.unitSellingPrice * o.quantity;
+      const cost = o.unitCost * o.quantity + o.otherCosts;
+      const profit = revenue - cost;
+      const existing = map.get(o.productName) || { revenue: 0, cost: 0, profit: 0, unitsSold: 0 };
+      map.set(o.productName, {
+        revenue: existing.revenue + revenue,
+        cost: existing.cost + cost,
+        profit: existing.profit + profit,
+        unitsSold: existing.unitsSold + o.quantity,
+      });
+    });
+    return Array.from(map.entries())
+      .map(([productName, v]) => ({ productName, ...v }))
+      .sort((a, b) => b.profit - a.profit);
+  }, [orders]);
+
   const handleSubmit = () => {
     const quantity = parseInt(form.quantity) || 0;
     const unitSellingPrice = parseFloat(form.unitSellingPrice) || 0;
@@ -192,6 +211,34 @@ export default function OrderLog() {
           </motion.div>
         ))}
       </div>
+
+      {/* Ürün Kârlılığı — Ozzmoo tarzı ürün bazlı net kâr dökümü */}
+      {productProfitability.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-emerald-500" /> Ürün Kârlılığı
+          </h3>
+          <div className="space-y-2">
+            {productProfitability.map((p) => (
+              <div key={p.productName} className="flex items-center justify-between rounded-lg bg-accent/30 px-3 py-2.5 gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{p.productName}</p>
+                  <p className="text-[11px] text-muted-foreground">{p.unitsSold} adet satıldı</p>
+                </div>
+                <span
+                  className="text-sm font-bold font-mono shrink-0 px-2.5 py-1 rounded-md"
+                  style={{
+                    color: p.profit >= 0 ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)",
+                    background: p.profit >= 0 ? "hsl(142 71% 45% / 0.12)" : "hsl(0 84% 60% / 0.12)",
+                  }}
+                >
+                  {p.profit >= 0 ? "+" : ""}{currency(p.profit)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Kümülatif kâr grafiği */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-glow rounded-xl p-5">
