@@ -357,7 +357,9 @@ export default function WinningProducts() {
     setLoading(true);
     setError(null);
     try {
-      const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 8);
+      // Terim sayısını ve arka arkaya istek hızını düşürüyoruz — CJ'nin rate limit'ine
+      // takılıp 429/500 hatası almamak için her istek arasına küçük bir bekleme koyuyoruz.
+      const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 6);
       const results: CJProduct[] = [];
       for (const term of randomTerms) {
         const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
@@ -368,6 +370,7 @@ export default function WinningProducts() {
         });
         if (fnErr) continue;
         if (data?.data?.list) results.push(...data.data.list);
+        await new Promise((resolve) => setTimeout(resolve, 350));
       }
       const unique = Array.from(new Map(results.map((p) => [p.pid, p])).values());
       const withMargin = unique
