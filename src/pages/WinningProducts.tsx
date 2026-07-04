@@ -48,6 +48,16 @@ function shippingSpeedMeta(codes: string[] | undefined, isTr: boolean): { label:
   return null;
 }
 
+// Sabit "maliyet x 3" yerine fiyat aralığına göre değişen, daha gerçekçi çarpanlar.
+// Ucuz ürünlerde kâr marjı yüzdesi daha yüksek çıkar, pahalı ürünlerde düşer.
+function getMarkupMultiplier(cost: number): number {
+  if (cost < 5) return 4.5;
+  if (cost < 15) return 3.5;
+  if (cost < 40) return 2.8;
+  if (cost < 100) return 2.3;
+  return 1.8;
+}
+
 function getDisplayName(p: CJProduct): string {
   if (p.productNameEn && p.productNameEn.trim() && !/[\u4e00-\u9fff]/.test(p.productNameEn)) return p.productNameEn;
   if (p.productName && !/[\u4e00-\u9fff]/.test(p.productName)) return p.productName;
@@ -376,7 +386,7 @@ export default function WinningProducts() {
       const withMargin = unique
         .map((p) => {
           const cost = parseFloat(p.sellPrice || "0") || 0;
-          const estSale = cost * 3;
+          const estSale = cost * getMarkupMultiplier(cost);
           const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
           return { ...p, _cost: cost, _sale: estSale, _margin: margin };
         })
