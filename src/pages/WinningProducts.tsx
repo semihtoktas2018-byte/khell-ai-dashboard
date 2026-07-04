@@ -24,31 +24,28 @@ interface CJProduct {
   sellPrice?: string;
   productUrl?: string;
   categoryName?: string;
-  defaultArea?: string;
+  shippingCountryCodes?: string[];
+  isFreeShipping?: boolean;
 }
 
-// CJ'nin verdiği depo bilgisine göre tahmini kargo hızı — ekstra API çağrısı gerekmez,
-// zaten üründe gelen defaultArea alanından hesaplanır.
-function shippingSpeedMeta(defaultArea: string | undefined, isTr: boolean): { label: string; color: string; bg: string } | null {
-  if (!defaultArea) return null;
-  const area = defaultArea.toLowerCase();
-  const isFastWarehouse = /us|usa|america|uk|united kingdom|eu|europe|germany|de warehouse/.test(area);
-  const isChina = /china/.test(area);
-  if (isFastWarehouse) return {
-    label: isTr ? `🚀 Hızlı Kargo (${defaultArea})` : `🚀 Fast Shipping (${defaultArea})`,
+// CJ'nin verdiği shippingCountryCodes alanına göre tahmini kargo hızı — ekstra API
+// çağrısı gerekmez. "CN_US" gibi çift kodlar Çin'den gönderim, tek başına "US" gibi
+// bir kod ise o ülkede yerel depo olduğunu (hızlı kargo) gösterir.
+function shippingSpeedMeta(codes: string[] | undefined, isTr: boolean): { label: string; color: string; bg: string } | null {
+  if (!codes || codes.length === 0) return null;
+  const localWarehouse = codes.find((c) => !c.includes("_"));
+  if (localWarehouse) return {
+    label: isTr ? `🚀 Yerel Depo (${localWarehouse}) — Hızlı Kargo` : `🚀 Local Warehouse (${localWarehouse}) — Fast Shipping`,
     color: "hsl(142 71% 55%)",
     bg: "hsl(142 71% 45% / 0.12)",
   };
-  if (isChina) return {
-    label: isTr ? `🐢 Standart Kargo (${defaultArea})` : `🐢 Standard Shipping (${defaultArea})`,
+  const fromChina = codes.some((c) => c.startsWith("CN_"));
+  if (fromChina) return {
+    label: isTr ? "🐢 Çin'den Kargo — Standart Süre" : "🐢 Ships from China — Standard Time",
     color: "hsl(38 92% 60%)",
     bg: "hsl(38 92% 50% / 0.12)",
   };
-  return {
-    label: `📦 ${defaultArea}`,
-    color: "hsl(215 20% 65%)",
-    bg: "hsl(217 32% 20% / 0.3)",
-  };
+  return null;
 }
 
 function getDisplayName(p: CJProduct): string {
@@ -223,7 +220,7 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
   const marginAccent = p._margin >= 60 ? "hsl(142 71% 50%)" : p._margin >= 40 ? "hsl(199 89% 60%)" : "hsl(38 92% 55%)";
   const isPick = isEditorPick(rawName);
   const isTracked = trackedPids.has(p.pid);
-  const shipMeta = shippingSpeedMeta(p.defaultArea, isTr);
+  const shipMeta = shippingSpeedMeta(p.shippingCountryCodes, isTr);
   const trackButton = user ? (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleTrack(p, p._cost, img, displayName); }}
