@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Package, Radio, BarChart3, RefreshCw, TrendingUp, Filter, Bell, BellRing, Lock, Crown } from "lucide-react";
+import { Package, Radio, BarChart3, RefreshCw, TrendingUp, Filter, Bell, BellRing, Lock, Crown, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -239,6 +239,16 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
         </div>
         <button onClick={() => navigate(`/dashboard/analyzer?productName=${encodeURIComponent(displayName)}&selling_price=${p._sale.toFixed(2)}&product_cost=${p._cost.toFixed(2)}`)} className="mt-auto w-full h-8 rounded-md bg-primary/15 text-primary text-[10px] font-semibold hover:bg-primary/25 transition-colors flex items-center justify-center gap-1">
           <BarChart3 className="h-3 w-3" /> {c.analyze}
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault(); e.stopPropagation();
+            navigate(`/dashboard/content-engine?productName=${encodeURIComponent(displayName)}&imageUrl=${encodeURIComponent(img)}${p.categoryName ? `&niche=${encodeURIComponent(p.categoryName.split("/")[0].trim())}` : ""}`);
+          }}
+          className="w-full h-7 rounded-md text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors"
+          style={{ background: "hsl(38 92% 50% / 0.15)", color: "hsl(38 92% 60%)", border: "1px solid hsl(38 92% 50% / 0.3)" }}
+        >
+          <Video className="h-3 w-3" /> {isTr ? "Video Reklam Oluştur" : "Generate Video Ad"}
         </button>
         <div className="grid grid-cols-2 gap-1.5">
           <a href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>📘 {c.searchAd}</a>
