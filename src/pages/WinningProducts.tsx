@@ -35,10 +35,30 @@ function getDisplayName(p: CJProduct): string {
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 const SEARCH_TERMS = [
-  "wireless earbuds", "led strip light", "portable blender", "phone holder",
-  "massage gun", "smart watch", "posture corrector", "pet grooming",
-  "laptop stand", "kitchen gadget", "car organizer", "fitness band",
-  "ring light", "cooling fan", "electric toothbrush", "desk organizer",
+  // Elektronik & Aksesuar
+  "wireless earbuds", "smart watch", "phone holder", "power bank",
+  "bluetooth speaker", "laptop stand", "webcam cover", "fast charger",
+  "ring light", "selfie stick", "phone case", "screen protector",
+  // Ev & Yaşam
+  "led strip light", "desk organizer", "kitchen gadget", "cooling fan",
+  "air purifier", "storage box", "candle holder", "wall clock",
+  "shower head", "closet organizer", "curtain lights", "essential oil diffuser",
+  // Kişisel Bakım & Sağlık
+  "massage gun", "electric toothbrush", "posture corrector", "hair straightener",
+  "facial roller", "nail kit", "back massager", "sleep mask",
+  // Spor & Outdoor
+  "fitness band", "yoga mat", "resistance bands", "water bottle",
+  "camping gear", "hiking backpack", "bike accessories", "jump rope",
+  // Evcil Hayvan
+  "pet grooming", "dog leash", "cat toy", "pet carrier",
+  // Araç
+  "car organizer", "car vacuum", "car phone mount", "dash cam",
+  // Ofis & Okul
+  "desk lamp", "planner notebook", "pencil case", "office chair cushion",
+  // Bebek & Çocuk
+  "baby monitor", "kids toy", "baby carrier", "night light kids",
+  // Mutfak
+  "portable blender", "air fryer accessories", "coffee maker", "knife set",
 ];
 
 const COPY = {
@@ -299,7 +319,7 @@ export default function WinningProducts() {
     setLoading(true);
     setError(null);
     try {
-      const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 4);
+      const randomTerms = [...SEARCH_TERMS].sort(() => Math.random() - 0.5).slice(0, 8);
       const results: CJProduct[] = [];
       for (const term of randomTerms) {
         const { data, error: fnErr } = await supabase.functions.invoke("cj-proxy", {
