@@ -33,7 +33,7 @@ interface CJProduct {
 // bir kod ise o ülkede yerel depo olduğunu (hızlı kargo) gösterir.
 function shippingSpeedMeta(codes: string[] | undefined, isTr: boolean): { label: string; color: string; bg: string } | null {
   if (!codes || codes.length === 0) return null;
-  const localWarehouse = codes.find((c) => !c.includes("_"));
+  const localWarehouse = codes.find((c) => !c.includes("_") && c !== "CN");
   if (localWarehouse) return {
     label: isTr ? `🚀 Yerel Depo (${localWarehouse}) — Hızlı Kargo` : `🚀 Local Warehouse (${localWarehouse}) — Fast Shipping`,
     color: "hsl(142 71% 55%)",
