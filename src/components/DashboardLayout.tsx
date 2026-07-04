@@ -150,51 +150,21 @@ export default function DashboardLayout() {
         </nav>
 
         {!collapsed && (
-          <div className="px-4 py-4 border-t border-border space-y-3">
-            <a
-              href="https://www.shopier.com/bamironlinestore/46009500"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-tour="pro-access"
-              className="flex flex-col items-center w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white py-3 px-3 transition-all shadow-lg shadow-amber-500/20"
-            >
-              <span className="text-xs font-bold flex items-center gap-1.5">🔥 PRO ACCESS</span>
-              <span className="text-[10px] opacity-90 mt-0.5">{isTr ? "Sınırsız Analiz" : "Unlimited Analyses"}</span>
-              <span className="text-[10px] opacity-90">{isTr ? "Kazanan Ürünleri Bul" : "Find Winning Products"}</span>
-              <span className="mt-2 text-xs font-bold bg-white/20 rounded-md px-3 py-1">Upgrade Now</span>
-            </a>
-            <a
-              href="https://signal-magic-grab.lovable.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 w-full rounded-lg border py-2.5 px-3 transition-all"
-              style={{
-                background: "linear-gradient(135deg, rgba(155,92,255,0.14), rgba(245,182,41,0.10))",
-                borderColor: "rgba(245,182,41,0.35)",
-              }}
-            >
-              <span className="text-lg shrink-0">🪙</span>
-              <span className="min-w-0 text-left">
-                <span className="block text-[11px] font-bold text-foreground leading-tight">
-                  {isTr ? "Kripto sinyalleriyle ilgileniyor musun?" : "Interested in crypto signals?"}
-                </span>
-                <span className="block text-[10px] leading-tight" style={{ color: "#f5b629" }}>
-                  {isTr ? "KELTOŞ Paraya Koş'a göz at →" : "Check out KELTOŞ →"}
-                </span>
-              </span>
-            </a>
+          <div className="px-4 py-4 border-t border-border">
             {user && (
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
+              <div className="flex items-center gap-2.5 rounded-lg bg-accent/40 px-3 py-2.5">
+                <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(199 89% 55%))" }}>
+                  {(user.name || user.email || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-foreground truncate">{user.name}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
                 </div>
-                <button onClick={handleLogout} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                <button onClick={handleLogout} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">A BAMİR Online Store's Production</p>
           </div>
         )}
       </motion.aside>
@@ -289,6 +259,35 @@ export default function DashboardLayout() {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <Outlet />
+
+          <footer className="mt-10 pt-8 border-t border-border/60 space-y-4">
+            <div className="text-center py-6 rounded-xl" style={{ background: "linear-gradient(135deg, hsl(217 91% 60% / 0.12), hsl(199 89% 55% / 0.08))", border: "1px solid hsl(217 91% 60% / 0.25)" }}>
+              <p className="text-lg sm:text-xl font-black tracking-wide bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                A BAMİR ONLINE STORE'S PRODUCTION
+              </p>
+            </div>
+
+            <a
+              href="https://signal-magic-grab.lovable.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 w-full rounded-xl py-5 px-4 transition-transform hover:scale-[1.01]"
+              style={{
+                background: "linear-gradient(135deg, rgba(155,92,255,0.18), rgba(245,182,41,0.14))",
+                border: "1px solid rgba(245,182,41,0.4)",
+              }}
+            >
+              <span className="text-2xl shrink-0">🪙</span>
+              <span className="text-center">
+                <span className="block text-sm font-bold text-foreground">
+                  {isTr ? "Kripto sinyalleriyle ilgileniyor musun?" : "Interested in crypto signals?"}
+                </span>
+                <span className="block text-sm font-black" style={{ color: "#f5b629" }}>
+                  {isTr ? "KELTOŞ Paraya Koş'a göz at →" : "Check out KELTOŞ →"}
+                </span>
+              </span>
+            </a>
+          </footer>
         </main>
       </div>
     </div>
