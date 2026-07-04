@@ -10,6 +10,7 @@ import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
+import AdDaysTracker from "@/components/AdDaysTracker";
 
 const REFRESH_INTERVAL = 30 * 60 * 1000;
 const FREE_LIMIT = 4;
@@ -160,10 +161,10 @@ const COPY = {
   },
 } as const;
 
-function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c, user, isNew }: {
+function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c, user, isNew, isTr }: {
   p: any; i: number; translations: Record<string, string>; trackedPids: Set<string>;
   toggleTrack: (p: any, cost: number, img: string, name: string) => void;
-  navigate: (path: string) => void; c: (typeof COPY)[keyof typeof COPY]; user: any; isNew: boolean;
+  navigate: (path: string) => void; c: (typeof COPY)[keyof typeof COPY]; user: any; isNew: boolean; isTr: boolean;
 }) {
   function getMarginLabel(margin: number): { label: string; color: string; bg: string } {
     if (margin >= 60) return { label: c.highMargin, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/30" };
@@ -223,6 +224,7 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
           <a href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(rawName)}&search_type=keyword_unordered`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(217 91% 60% / 0.1)", color: "hsl(217 91% 65%)", border: "1px solid hsl(217 91% 60% / 0.25)" }}>📘 {c.searchAd}</a>
           <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(rawName)}`} target="_blank" rel="noreferrer" className="h-6 rounded-md text-[9px] font-medium flex items-center justify-center gap-1" style={{ background: "hsl(0 0% 100% / 0.06)", color: "hsl(215 20% 70%)", border: "1px solid hsl(217 32% 30% / 0.4)" }}>🎵 {c.searchTiktok}</a>
         </div>
+        <AdDaysTracker pid={p.pid} isTr={isTr} />
       </div>
     </motion.div>
   );
@@ -424,7 +426,7 @@ export default function WinningProducts() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {visibleItems.map((p: any, i: number) => <ProductCard key={p.pid || i} p={p} i={i} translations={translations} trackedPids={trackedPids} toggleTrack={toggleTrack} navigate={navigate} c={c} user={user} isNew={newPids.has(p.pid)} />)}
+            {visibleItems.map((p: any, i: number) => <ProductCard key={p.pid || i} p={p} i={i} translations={translations} trackedPids={trackedPids} toggleTrack={toggleTrack} navigate={navigate} c={c} user={user} isNew={newPids.has(p.pid)} isTr={locale === "tr"} />)}
             {lockedItems.map((p: any, i: number) => (
               <motion.div key={`locked-${p.pid || i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (FREE_LIMIT + i) * 0.03, ...transition }}
                 className="rounded-xl overflow-hidden flex flex-col relative cursor-pointer"
