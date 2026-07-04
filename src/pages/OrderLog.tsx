@@ -203,7 +203,7 @@ export default function OrderLog() {
       {/* Özet kartları */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Toplam Gelir", value: currency(totals.revenue), icon: DollarSign, color: "hsl(217 91% 60%)" },
+          { label: "Toplam Gelir", value: currency(totals.revenue), icon: Wallet, color: "hsl(217 91% 60%)" },
           { label: "Toplam Maliyet", value: currency(totals.cost), icon: Package, color: "hsl(38 92% 55%)" },
           { label: "Net Kâr", value: currency(totals.profit), icon: TrendingUp, color: totals.profit >= 0 ? "hsl(142 71% 50%)" : "hsl(0 84% 62%)" },
           { label: "Satılan Adet", value: String(totals.unitsSold), icon: Package, color: "hsl(199 89% 60%)" },
