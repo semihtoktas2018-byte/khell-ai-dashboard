@@ -12,7 +12,7 @@ import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import AdDaysTracker from "@/components/AdDaysTracker";
 
-const REFRESH_INTERVAL = 30 * 60 * 1000;
+const REFRESH_INTERVAL = 5 * 60 * 1000;
 const FREE_LIMIT = 4;
 const FREE_TRACK_LIMIT = 2;
 
