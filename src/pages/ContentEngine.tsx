@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export default function ContentEngine() {
   const { t, locale } = useLocale();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
 
   const [productName, setProductName] = useState("");
   const [niche, setNiche] = useState("");
@@ -29,6 +31,7 @@ export default function ContentEngine() {
   const [result, setResult] = useState<ContentEngineOutput | null>(null);
   const [error, setError] = useState(false);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [autoLoadingImage, setAutoLoadingImage] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -38,6 +41,49 @@ export default function ContentEngine() {
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
   };
+
+  // Kazanan/Trend Ürünler'den "Video Reklam Oluştur" ile gelindiğinde
+  // ürün adı + görseli otomatik doldurup üretimi kendiliğinden başlatır.
+  useEffect(() => {
+    const incomingName = searchParams.get("productName");
+    const incomingImage = searchParams.get("imageUrl");
+    const incomingNiche = searchParams.get("niche");
+    if (!incomingName && !incomingImage) return;
+
+    if (incomingName) setProductName(incomingName);
+    if (incomingNiche) setNiche(incomingNiche);
+
+    if (incomingImage) {
+      setAutoLoadingImage(true);
+      fetch(incomingImage)
+        .then((res) => {
+          if (!res.ok) throw new Error("Görsel alınamadı");
+          return res.blob();
+        })
+        .then((blob) => {
+          const file = new File([blob], "urun-gorseli.jpg", { type: blob.type || "image/jpeg" });
+          setImageFiles([file]);
+          setImagePreviews([URL.createObjectURL(file)]);
+        })
+        .catch(() => {
+          toast({
+            title: t("ce.error"),
+            description: locale === "tr" ? "Ürün görseli otomatik yüklenemedi, elle yükleyebilirsin." : "Couldn't auto-load the product image, please upload manually.",
+            variant: "destructive",
+          });
+        })
+        .finally(() => setAutoLoadingImage(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Hem ürün adı hem görsel hazır olduğunda (otomatik yüklendiğinde) üretimi kendiliğinden başlat
+  useEffect(() => {
+    if (productName.trim() && imageFiles.length > 0 && searchParams.get("productName") && !result && !loading) {
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageFiles]);
 
   const removeImage = (idx: number) => {
     const newFiles = imageFiles.filter((_, i) => i !== idx);
@@ -226,7 +272,14 @@ export default function ContentEngine() {
               </div>
             )}
 
-            {imagePreviews.length === 0 && (
+            {autoLoadingImage && (
+              <div className="flex items-center gap-2 text-xs text-amber-500 mb-2">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                {locale === "tr" ? "Ürün görseli otomatik yükleniyor..." : "Auto-loading product image..."}
+              </div>
+            )}
+
+            {imagePreviews.length === 0 && !autoLoadingImage && (
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-amber-500/50 transition-colors"
