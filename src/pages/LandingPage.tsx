@@ -263,6 +263,13 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Live Teaser — gerçek veriyle, kayıt gerektirmeyen mini analiz, hero'nun hemen altında */}
+      <section className="py-10 px-6">
+        <div className="container mx-auto">
+          <LiveTeaserAnalyzer isTr={isTr} />
+        </div>
+      </section>
+
       {/* Feature Showcase */}
       <section className="py-16 px-6">
         <div className="container mx-auto">
@@ -274,13 +281,6 @@ export default function LandingPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <FeatureShowcase />
           </motion.div>
-        </div>
-      </section>
-
-      {/* Live Teaser — gerçek veriyle, kayıt gerektirmeyen mini analiz */}
-      <section className="py-16 px-6">
-        <div className="container mx-auto">
-          <LiveTeaserAnalyzer isTr={isTr} />
         </div>
       </section>
 
