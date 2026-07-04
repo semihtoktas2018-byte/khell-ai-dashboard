@@ -84,11 +84,11 @@ export default function AuthPage() {
           )}
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-posta" required className="input-dark w-full pl-10" />
+            <input type="email" name="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-posta" required className="input-dark w-full pl-10" />
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre" required minLength={6} className="input-dark w-full pl-10" />
+           <input type="password" name="password" autoComplete={isLogin ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre" required minLength={6} className="input-dark w-full pl-10" />
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
             {loading ? "İşleniyor..." : isLogin ? "Giriş Yap" : "Kayıt Ol"}
