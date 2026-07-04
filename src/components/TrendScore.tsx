@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Flame, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrendScoreProps {
   expandTrigger?: number;
@@ -7,24 +8,6 @@ interface TrendScoreProps {
   googleApiKey: string;
   googleCx: string;
   isTr?: boolean;
-}
-
-const CJ_EMAIL = import.meta.env.VITE_CJ_EMAIL || "bamir.global@gmail.com";
-const CJ_API_KEY = import.meta.env.VITE_CJ_API_KEY || "26689fbeeb5045f89ec8764c32aaada0";
-
-let cachedToken: { token: string; exp: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && cachedToken.exp > Date.now()) return cachedToken.token;
-  const res = await fetch("https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
-  });
-  const data = await res.json();
-  if (!data?.data?.accessToken) throw new Error("Token alınamadı");
-  cachedToken = { token: data.data.accessToken, exp: Date.now() + 1000 * 60 * 60 * 12 };
-  return cachedToken.token;
 }
 
 // KHELL Skoru etiketleri — Minea'nın "hidden gem" mantığına benzer kademeler
@@ -73,11 +56,15 @@ export default function TrendScore({ productName, googleApiKey, googleCx, expand
     setMarketCount(null);
     setRedditCount(null);
 
+    // CJ verisi artık cj-proxy Edge Function üzerinden, key frontend'de yok
     try {
-      const token = await getAccessToken();
-      const url = `https://developers.cjdropshipping.com/api2.0/v1/product/list?pageNum=1&pageSize=20&productNameEn=${encodeURIComponent(productName)}`;
-      const res = await fetch(url, { headers: { "CJ-Access-Token": token } });
-      const data = await res.json();
+      const { data, error } = await supabase.functions.invoke("cj-proxy", {
+        body: {
+          path: "/api2.0/v1/product/list",
+          query: { pageNum: "1", pageSize: "20", productNameEn: productName },
+        },
+      });
+      if (error) throw error;
       const count = data?.data?.total ?? data?.data?.list?.length ?? 0;
       setCjCount(count);
     } catch {
@@ -99,16 +86,13 @@ export default function TrendScore({ productName, googleApiKey, googleCx, expand
       }
     }
 
+    // Reddit artık reddit-proxy Edge Function üzerinden (tarayıcıdan CORS/403 engeline takılıyordu)
     try {
-      const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(productName)}&limit=25&sort=new&t=month`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const count = data?.data?.children?.length ?? null;
-        setRedditCount(count);
-      } else {
-        setRedditCount(null);
-      }
+      const { data, error } = await supabase.functions.invoke("reddit-proxy", {
+        body: { query: productName },
+      });
+      if (error) throw error;
+      setRedditCount(typeof data?.count === "number" ? data.count : null);
     } catch {
       setRedditCount(null);
     }
