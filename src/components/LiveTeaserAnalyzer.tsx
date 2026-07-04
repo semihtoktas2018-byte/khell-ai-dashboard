@@ -37,18 +37,30 @@ export default function LiveTeaserAnalyzer({ isTr = true }: LiveTeaserAnalyzerPr
   };
 
   return (
-    <div
-      className="rounded-2xl p-6 sm:p-8 max-w-xl mx-auto"
+    <motion.div
+      animate={{
+        boxShadow: [
+          "0 20px 60px hsl(217 91% 60% / 0.15), 0 0 0 1px hsl(217 91% 60% / 0.25)",
+          "0 20px 80px hsl(217 91% 60% / 0.35), 0 0 0 1px hsl(217 91% 60% / 0.5)",
+          "0 20px 60px hsl(217 91% 60% / 0.15), 0 0 0 1px hsl(217 91% 60% / 0.25)",
+        ],
+      }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+      className="rounded-2xl p-6 sm:p-9 max-w-xl mx-auto"
       style={{
-        background: "linear-gradient(160deg, hsl(222 47% 9% / 0.85), hsl(222 47% 5% / 0.9))",
-        border: "1px solid hsl(217 91% 60% / 0.25)",
-        boxShadow: "0 20px 60px hsl(217 91% 60% / 0.12)",
+        background: "linear-gradient(160deg, hsl(222 47% 9% / 0.9), hsl(222 47% 5% / 0.95))",
+        border: "1px solid hsl(217 91% 60% / 0.35)",
       }}
     >
-      <p className="text-center text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "hsl(217 91% 70%)" }}>
-        {isTr ? "✨ Ücretsiz Dene — Kayıt Gerekmez" : "✨ Try Free — No Signup Needed"}
-      </p>
-      <h3 className="text-center text-lg sm:text-xl font-bold text-foreground mb-4">
+      <motion.p
+        animate={{ opacity: [0.6, 1, 0.6] }}
+        transition={{ duration: 1.8, repeat: Infinity }}
+        className="text-center text-xs font-bold uppercase tracking-widest mb-1.5"
+        style={{ color: "hsl(38 92% 60%)" }}
+      >
+        {isTr ? "⚡ ÜCRETSİZ DENE — KAYIT GEREKMEZ" : "⚡ TRY FREE — NO SIGNUP NEEDED"}
+      </motion.p>
+      <h3 className="text-center text-xl sm:text-2xl font-black text-foreground mb-5">
         {isTr ? "Bir ürün adı yaz, gerçek zamanlı veriyle mini analiz gör" : "Enter a product name, see a live mini analysis"}
       </h3>
 
@@ -58,10 +70,15 @@ export default function LiveTeaserAnalyzer({ isTr = true }: LiveTeaserAnalyzerPr
           onChange={(e) => setProductName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") handleAnalyze(); }}
           placeholder={isTr ? "Örn: kablosuz kulaklık" : "e.g. wireless earbuds"}
-          className="input-dark flex-1"
+          className="input-dark flex-1 h-12 text-base"
         />
-        <button onClick={handleAnalyze} disabled={loading || !productName.trim()} className="btn-primary px-5 flex items-center gap-1.5 disabled:opacity-50">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+        <button
+          onClick={handleAnalyze}
+          disabled={loading}
+          className="px-6 h-12 rounded-lg flex items-center gap-2 font-bold text-white shrink-0 transition-transform hover:scale-105 disabled:opacity-70"
+          style={{ background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(199 89% 55%))", boxShadow: "0 6px 20px hsl(217 91% 60% / 0.4)" }}
+        >
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
           {isTr ? "Analiz Et" : "Analyze"}
         </button>
       </div>
@@ -110,6 +127,6 @@ export default function LiveTeaserAnalyzer({ isTr = true }: LiveTeaserAnalyzerPr
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
