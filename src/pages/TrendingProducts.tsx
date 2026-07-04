@@ -11,7 +11,7 @@ import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import SEO from "@/components/SEO";
 
-const REFRESH_INTERVAL = 30 * 60 * 1000;
+const REFRESH_INTERVAL = 5 * 60 * 1000;
 const FREE_LIMIT = 4;
 const FREE_TRACK_LIMIT = 2;
 
@@ -58,7 +58,7 @@ const COPY = {
     goPro: "Pro'ya Geç",
     liveData: "CANLI VERİ",
     lastUpdate: "Son güncelleme",
-    autoRefresh: "30 dk'da bir otomatik yenilenir",
+    autoRefresh: "5 dk'da bir otomatik yenilenir",
     proUnlocks: (n: number) => `${n} ürün PRO ile açılır`,
     bannerTitle: (n: number) => `+${n} Trend Ürün PRO ile Açılır`,
     bannerDesc: "Rakipler fark etmeden önce en çok satan ürünleri sen gör",
