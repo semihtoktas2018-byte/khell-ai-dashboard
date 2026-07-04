@@ -224,7 +224,7 @@ function ProductCard({ p, i, translations, trackedPids, toggleTrack, navigate, c
         <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded-md" style={{ background: "hsl(222 47% 6% / 0.85)", backdropFilter: "blur(6px)", border: `1px solid ${marginAccent}55`, color: marginAccent }}>{marginMeta.label}</span>
         {trackButton}
       </a>
-      <div className="p-4 space-y-2 flex-1 flex flex-col">
+      <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
         <div className="flex items-center gap-1.5">
           {isNew && <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0" style={{ background: "hsl(199 89% 60% / 0.18)", color: "hsl(199 89% 65%)", border: "1px solid hsl(199 89% 60% / 0.4)" }}>🆕 {c.newBadge}</span>}
           <h3 className="text-xs font-semibold text-foreground line-clamp-2 min-h-[2rem]">{displayName}</h3>
@@ -435,7 +435,7 @@ export default function WinningProducts() {
       {error && <div className="rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs px-3 py-2">{c.apiError}: {error}</div>}
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border/50 bg-accent/20 overflow-hidden">
               <div className="aspect-square bg-muted animate-pulse" />
@@ -445,7 +445,7 @@ export default function WinningProducts() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
             {visibleItems.map((p: any, i: number) => <ProductCard key={p.pid || i} p={p} i={i} translations={translations} trackedPids={trackedPids} toggleTrack={toggleTrack} navigate={navigate} c={c} user={user} isNew={newPids.has(p.pid)} isTr={locale === "tr"} />)}
             {lockedItems.map((p: any, i: number) => (
               <motion.div key={`locked-${p.pid || i}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (FREE_LIMIT + i) * 0.03, ...transition }}
