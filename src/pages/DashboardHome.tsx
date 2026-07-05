@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap } from "lucide-react";
+import { BarChart3, TrendingUp, AlertTriangle, DollarSign, Zap, ShoppingBag, ArrowRight } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { getVerdict } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
@@ -85,6 +85,43 @@ export default function DashboardHome() {
 
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
+      </motion.div>
+
+      <motion.div variants={fadeUp}>
+        <button
+          onClick={() => navigate("/dashboard/ebay")}
+          className="group relative w-full overflow-hidden rounded-2xl px-5 py-4 text-left transition-all hover:scale-[1.01]"
+          style={{
+            background: "linear-gradient(110deg, hsl(217 91% 60% / 0.18), hsl(271 91% 60% / 0.12) 45%, hsl(217 91% 60% / 0.18))",
+            border: "1px solid hsl(217 91% 60% / 0.4)",
+            boxShadow: "0 0 30px hsl(217 91% 60% / 0.25)",
+          }}
+        >
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+            style={{ background: "linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.12), transparent)" }} />
+          <div className="relative flex items-center gap-4">
+            <div className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center animate-pulse"
+              style={{ background: "hsl(217 91% 60% / 0.2)", boxShadow: "0 0 16px hsl(217 91% 60% / 0.5)" }}>
+              <ShoppingBag className="h-6 w-6 text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black tracking-wider text-blue-400 bg-blue-500/20 rounded px-1.5 py-0.5">
+                  {locale === "tr" ? "🆕 YENİ" : "🆕 NEW"}
+                </span>
+                <h3 className="text-base font-black text-white truncate">
+                  {locale === "tr" ? "eBay Ürün Araştırma" : "eBay Product Research"}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {locale === "tr"
+                  ? "Milyonlarca eBay ilanında fiyat, satıcı ve rakip analizi — gerçek zamanlı!"
+                  : "Price, seller & competition analysis across millions of eBay listings — real-time!"}
+              </p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-blue-400 shrink-0 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </button>
       </motion.div>
 
       <motion.div variants={fadeUp}>
