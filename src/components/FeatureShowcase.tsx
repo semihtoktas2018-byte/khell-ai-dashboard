@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Database, Music2, Megaphone, Sparkles, TrendingUp } from "lucide-react";
+import { Database, Music2, Megaphone, Sparkles, TrendingUp, ShoppingBag } from "lucide-react";
 
 const SLIDE_MS = 3000;
 
@@ -10,6 +10,13 @@ const slides = [
     badge: "GERÇEK VERİ",
     title: "CJ Dropshipping ile Canlı Bağlantı",
     desc: "Uydurma örnek değil — gerçek tedarikçi fiyatları, gerçek sipariş hacmi, anlık güncellenen veri.",
+    accent: "hsl(217 91% 60%)",
+  },
+  {
+    icon: ShoppingBag,
+    badge: "YENİ · eBay",
+    title: "eBay'de Gerçek Zamanlı Ürün Araştırma",
+    desc: "Milyonlarca eBay ilanında fiyat, satıcı puanı ve rakip sayısını canlı çek — kazanan ürünü saniyede yakala.",
     accent: "hsl(217 91% 60%)",
   },
   {
