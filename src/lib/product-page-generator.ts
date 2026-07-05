@@ -9,6 +9,7 @@ export interface ProductPageInput {
   trendScore: number;
   riskLevel: string;
   salesAngle: SalesAngle;
+  locale?: "tr" | "en" | "fr";
 }
 
 export interface ProductPageContent {
@@ -44,37 +45,46 @@ export async function generateProductPageAI(input: ProductPageInput): Promise<Pr
     budget: "Bütçe Dostu / Fırsat Odaklı",
   };
 
-  const prompt = `Sen bir e-ticaret dropshipping uzmanısın. Bir ürün satış sayfası için yüksek dönüşümlü Türkçe içerik üreteceksin.
+  const languageNames: Record<string, string> = {
+    tr: "Turkish (Türkçe)",
+    en: "English",
+    fr: "French (Français)",
+  };
+  const targetLanguage = languageNames[input.locale || "tr"] || languageNames.tr;
 
-ÜRÜN BİLGİLERİ:
-- Ürün Adı: ${input.name}
-- Kategori: ${input.category}
-- Satış Fiyatı: $${input.sellingPrice}
-- Maliyet: $${input.cost}
-- Net Kâr: $${profit}
-- Kâr Marjı: %${marginPct}
-- Trend Skoru: ${input.trendScore}/100
-- Risk Seviyesi: ${input.riskLevel}
-- Satış Açısı: ${angleLabels[input.salesAngle]}
+  const prompt = `You are an e-commerce dropshipping expert. You will write high-converting sales page content for a product listing.
 
-SADECE JSON döndür, başka hiçbir şey yazma:
+IMPORTANT: Write ALL text content (title, descriptions, benefits, everything) entirely in ${targetLanguage}. Do not mix languages. The JSON keys below must stay in English exactly as shown, but every value must be written in ${targetLanguage}.
+
+PRODUCT INFO:
+- Product Name: ${input.name}
+- Category: ${input.category}
+- Selling Price: $${input.sellingPrice}
+- Cost: $${input.cost}
+- Net Profit: $${profit}
+- Profit Margin: ${marginPct}%
+- Trend Score: ${input.trendScore}/100
+- Risk Level: ${input.riskLevel}
+- Sales Angle: ${angleLabels[input.salesAngle]}
+
+Return ONLY JSON, nothing else:
 
 {
-  "title": "Güçlü, SEO dostu ürün başlığı (max 80 karakter)",
-  "shortDescription": "2-3 cümle, duygusal hook ile başlayan kısa açıklama",
-  "longDescription": "4-5 cümle, ürünün hayatı nasıl değiştirdiğini anlatan detaylı açıklama",
-  "benefits": ["Fayda 1","Fayda 2","Fayda 3","Fayda 4","Fayda 5"],
-  "specs": ["Kategori: ${input.category}","Fiyat: $${input.sellingPrice}","Özellik 1","Özellik 2","Kargo: Hızlı teslimat","Garanti: Memnuniyet garantisi"],
-  "targetAudience": "Kime uygun - 2 cümle",
-  "whyNow": "Neden şimdi alınmalı - 2 cümle",
-  "ctaText": "Güçlü CTA metni, emoji ile başlayan, max 60 karakter",
-  "urgency": ["🔴 Stok mesajı","⏰ Zaman mesajı","🏆 Sosyal kanıt mesajı"],
-  "trustReview": {"name": "Türk isim","text": "Gerçekçi müşteri yorumu","rating": 4.8},
+  "title": "Strong, SEO-friendly product title (max 80 characters)",
+  "shortDescription": "2-3 sentences, starting with an emotional hook",
+  "longDescription": "4-5 sentences describing how the product changes the buyer's life",
+  "benefits": ["Benefit 1","Benefit 2","Benefit 3","Benefit 4","Benefit 5"],
+  "specs": ["Category: ${input.category}","Price: $${input.sellingPrice}","Feature 1","Feature 2","Shipping: Fast delivery","Warranty: Satisfaction guarantee"],
+  "targetAudience": "Who it's for — 2 sentences",
+  "whyNow": "Why buy now — 2 sentences",
+  "ctaText": "Strong CTA text, starting with an emoji, max 60 characters",
+  "urgency": ["🔴 Stock message","⏰ Urgency message","🏆 Social proof message"],
+  "trustReview": {"name": "A realistic customer name in ${targetLanguage}-speaking culture","text": "Realistic customer review","rating": 4.8},
   "tiktokHooks": ["Hook 1","Hook 2","Hook 3"],
   "facebookHooks": ["Hook 1","Hook 2","Hook 3"],
-  "shopifyTitle": "Shopify SEO başlığı",
+  "shopifyTitle": "Shopify SEO title",
   "seoTitle": "Google SEO title",
-  "metaDescription": "160 karakter meta description"
+  "metaDescription": "160 character meta description"
 }`;
 
   const { data, error } = await supabase.functions.invoke("anthropic-proxy", {
@@ -95,6 +105,19 @@ SADECE JSON döndür, başka hiçbir şey yazma:
   const stockNum = Math.floor(3 + rand * 15);
   const reviewCount = Math.floor(280 + rand * 720);
 
+  const loc = input.locale || "tr";
+  const fallbackCta = { tr: "🛒 Şimdi Sipariş Ver", en: "🛒 Order Now", fr: "🛒 Commander maintenant" }[loc];
+  const fallbackUrgency = {
+    tr: [`🔴 Sınırlı stok — Yalnızca ${stockNum} adet kaldı!`, `⏰ Bugüne özel indirim — Gece yarısına kadar geçerli!`, `🏆 Son 30 günde ${soldNum}+ satış yapıldı!`],
+    en: [`🔴 Limited stock — Only ${stockNum} left!`, `⏰ Today's special discount — Valid until midnight!`, `🏆 ${soldNum}+ sold in the last 30 days!`],
+    fr: [`🔴 Stock limité — Seulement ${stockNum} restants !`, `⏰ Réduction spéciale du jour — Valable jusqu'à minuit !`, `🏆 ${soldNum}+ ventes lors des 30 derniers jours !`],
+  }[loc];
+  const fallbackReview = {
+    tr: { name: "Ayşe K.", text: "Harika ürün!", rating: 4.8 },
+    en: { name: "Sarah M.", text: "Amazing product!", rating: 4.8 },
+    fr: { name: "Camille B.", text: "Produit incroyable !", rating: 4.8 },
+  }[loc];
+
   return {
     title: parsed.title || input.name,
     shortDescription: parsed.shortDescription || "",
@@ -103,13 +126,9 @@ SADECE JSON döndür, başka hiçbir şey yazma:
     specs: parsed.specs || [],
     targetAudience: parsed.targetAudience || "",
     whyNow: parsed.whyNow || "",
-    ctaText: parsed.ctaText || "🛒 Şimdi Sipariş Ver",
-    urgency: parsed.urgency || [
-      `🔴 Sınırlı stok — Yalnızca ${stockNum} adet kaldı!`,
-      `⏰ Bugüne özel indirim — Gece yarısına kadar geçerli!`,
-      `🏆 Son 30 günde ${soldNum}+ satış yapıldı!`,
-    ],
-    trustReview: parsed.trustReview || { name: "Ayşe K.", text: "Harika ürün!", rating: 4.8 },
+    ctaText: parsed.ctaText || fallbackCta,
+    urgency: parsed.urgency || fallbackUrgency,
+    trustReview: parsed.trustReview || fallbackReview,
     trustStats: {
       rating: parsed.trustReview?.rating || 4.8,
       reviewCount,
@@ -118,19 +137,21 @@ SADECE JSON döndür, başka hiçbir şey yazma:
     tiktokHooks: parsed.tiktokHooks || [],
     facebookHooks: parsed.facebookHooks || [],
     shopifyTitle: parsed.shopifyTitle || input.name,
-    shopifyBody: buildShopifyBody(parsed),
+    shopifyBody: buildShopifyBody(parsed, loc),
     seoTitle: parsed.seoTitle || `${input.name} | KHELL AI`,
     metaDescription: parsed.metaDescription || "",
   };
 }
 
-function buildShopifyBody(p: Record<string, unknown>): string {
+function buildShopifyBody(p: Record<string, unknown>, loc: "tr" | "en" | "fr" = "tr"): string {
   const benefits = Array.isArray(p.benefits) ? p.benefits : [];
+  const whyHeader = { tr: "Neden Bu Ürünü Seçmelisiniz?", en: "Why Choose This Product?", fr: "Pourquoi choisir ce produit ?" }[loc];
+  const benefitsHeader = { tr: "Faydaları", en: "Benefits", fr: "Avantages" }[loc];
   return `<h2>${p.title || ""}</h2>
 <p>${p.shortDescription || ""}</p>
-<h3>Neden Bu Ürünü Seçmelisiniz?</h3>
+<h3>${whyHeader}</h3>
 <p>${p.longDescription || ""}</p>
-<h3>Faydaları</h3>
+<h3>${benefitsHeader}</h3>
 <ul>
 ${benefits.map((b: unknown) => `<li>${b}</li>`).join("\n")}
 </ul>
