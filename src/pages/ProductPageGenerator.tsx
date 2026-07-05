@@ -46,7 +46,7 @@ export default function ProductPageGenerator() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const hasAutoFilled = useRef(false);
-  const { currencySymbol, t } = useLocale();
+  const { currencySymbol, t, locale } = useLocale();
 
   const salesAnglesI18n: { value: SalesAngle; key: string; icon: string }[] = [
     { value: "problem", key: "ppg.problemSolving", icon: "🛡️" },
@@ -76,7 +76,7 @@ export default function ProductPageGenerator() {
     if (!input.name.trim()) { toast({ title: "Hata", description: "Ürün adı giriniz", variant: "destructive" }); return; }
     if (input.sellingPrice <= 0) { toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" }); return; }
     const margin = input.sellingPrice > 0 ? ((input.sellingPrice - input.cost) / input.sellingPrice) * 100 : 0;
-    const finalInput = { ...input, margin };
+    const finalInput = { ...input, margin, locale };
     setIsLoadingAI(true);
     try {
       const result = await generateProductPageAI(finalInput);
@@ -292,9 +292,9 @@ export default function ProductPageGenerator() {
         {content && (
           <motion.div key="content" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={transition} className="space-y-4">
 
-            <ContentBlock icon={<Tag className="h-4 w-4 text-primary" />} title="Ürün Başlığı" copyField="title" content={content.title} onCopy={handleCopy} copiedField={copiedField} />
-            <ContentBlock icon={<ShoppingBag className="h-4 w-4 text-primary" />} title="Kısa Satış Açıklaması" copyField="short" content={content.shortDescription} onCopy={handleCopy} copiedField={copiedField} />
-            <ContentBlock icon={<FileText className="h-4 w-4 text-primary" />} title="Uzun Ürün Açıklaması" copyField="long" content={content.longDescription} onCopy={handleCopy} copiedField={copiedField} />
+            <ContentBlock icon={<Tag className="h-4 w-4 text-primary" />} title={t("ppg.titleField")} copyField="title" content={content.title} onCopy={handleCopy} copiedField={copiedField} />
+            <ContentBlock icon={<ShoppingBag className="h-4 w-4 text-primary" />} title={t("ppg.shortDescField")} copyField="short" content={content.shortDescription} onCopy={handleCopy} copiedField={copiedField} />
+            <ContentBlock icon={<FileText className="h-4 w-4 text-primary" />} title={t("ppg.longDescField")} copyField="long" content={content.longDescription} onCopy={handleCopy} copiedField={copiedField} />
 
             {/* Benefits */}
             <Card>
@@ -330,8 +330,8 @@ export default function ProductPageGenerator() {
               </CardContent>
             </Card>
 
-            <ContentBlock icon={<Target className="h-4 w-4 text-primary" />} title="Kime Uygun" copyField="audience" content={content.targetAudience} onCopy={handleCopy} copiedField={copiedField} />
-            <ContentBlock icon={<Clock className="h-4 w-4 text-primary" />} title="Neden Şimdi Alınmalı" copyField="whynow" content={content.whyNow} onCopy={handleCopy} copiedField={copiedField} />
+            <ContentBlock icon={<Target className="h-4 w-4 text-primary" />} title={t("ppg.targetAudienceField")} copyField="audience" content={content.targetAudience} onCopy={handleCopy} copiedField={copiedField} />
+            <ContentBlock icon={<Clock className="h-4 w-4 text-primary" />} title={t("ppg.whyNowField")} copyField="whynow" content={content.whyNow} onCopy={handleCopy} copiedField={copiedField} />
 
             {/* CTA */}
             <Card className="border-primary/30">
@@ -441,9 +441,9 @@ export default function ProductPageGenerator() {
             <div className="pt-4">
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4"><Globe className="h-5 w-5 text-primary" />Shopify Export</h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <ContentBlock icon={<Tag className="h-4 w-4 text-primary" />} title="Shopify Ürün Başlığı" copyField="shopTitle" content={content.shopifyTitle} onCopy={handleCopy} copiedField={copiedField} />
-                <ContentBlock icon={<Globe className="h-4 w-4 text-primary" />} title="SEO Title Önerisi" copyField="seoTitle" content={content.seoTitle} onCopy={handleCopy} copiedField={copiedField} />
-                <ContentBlock icon={<FileText className="h-4 w-4 text-primary" />} title="Meta Description" copyField="metaDesc" content={content.metaDescription} onCopy={handleCopy} copiedField={copiedField} />
+                <ContentBlock icon={<Tag className="h-4 w-4 text-primary" />} title={t("ppg.shopifyTitleField")} copyField="shopTitle" content={content.shopifyTitle} onCopy={handleCopy} copiedField={copiedField} />
+                <ContentBlock icon={<Globe className="h-4 w-4 text-primary" />} title={t("ppg.seoTitleField")} copyField="seoTitle" content={content.seoTitle} onCopy={handleCopy} copiedField={copiedField} />
+                <ContentBlock icon={<FileText className="h-4 w-4 text-primary" />} title={t("ppg.metaDescField")} copyField="metaDesc" content={content.metaDescription} onCopy={handleCopy} copiedField={copiedField} />
                 <Card className="lg:col-span-2">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
