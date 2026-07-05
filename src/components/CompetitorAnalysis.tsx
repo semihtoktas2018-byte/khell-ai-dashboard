@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Target, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, Loader2, ChevronDown, ChevronUp, Tag } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompetitorAnalysisProps {
   expandTrigger?: number;
@@ -18,6 +19,14 @@ interface MarketResult {
   error: boolean;
 }
 
+interface EbayResult {
+  total: number | null;
+  lowestPrice: number | null;
+  currency: string | null;
+  loading: boolean;
+  error: boolean;
+}
+
 const MARKETS = [
   { name: "Trendyol", emoji: "🟠", site: "trendyol.com" },
   { name: "Hepsiburada", emoji: "🟡", site: "hepsiburada.com" },
@@ -29,6 +38,14 @@ function getLevel(count: number | null, isTr: boolean): { label: string; color: 
   if (count === null) return { label: isTr ? "Veri yok" : "No data", color: "text-muted-foreground", bg: "bg-muted/20" };
   if (count <= 15) return { label: isTr ? "Az Rakip 🟢" : "Low Competition 🟢", color: "text-green-400", bg: "bg-green-500/10" };
   if (count <= 50) return { label: isTr ? "Orta Rekabet 🟡" : "Medium Competition 🟡", color: "text-yellow-400", bg: "bg-yellow-500/10" };
+  return { label: isTr ? "Yüksek Rekabet 🔴" : "High Competition 🔴", color: "text-red-400", bg: "bg-red-500/10" };
+}
+
+// eBay listeleme sayısına göre rekabet seviyesi (gerçek veri)
+function getEbayLevel(total: number | null, isTr: boolean): { label: string; color: string; bg: string } {
+  if (total === null) return { label: isTr ? "Veri yok" : "No data", color: "text-muted-foreground", bg: "bg-muted/20" };
+  if (total <= 500) return { label: isTr ? "Az Rakip 🟢" : "Low Competition 🟢", color: "text-green-400", bg: "bg-green-500/10" };
+  if (total <= 5000) return { label: isTr ? "Orta Rekabet 🟡" : "Medium Competition 🟡", color: "text-yellow-400", bg: "bg-yellow-500/10" };
   return { label: isTr ? "Yüksek Rekabet 🔴" : "High Competition 🔴", color: "text-red-400", bg: "bg-red-500/10" };
 }
 
@@ -51,30 +68,70 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
   const [results, setResults] = useState<MarketResult[]>(
     MARKETS.map((m) => ({ ...m, count: null, loading: false, error: false }))
   );
+  const [ebay, setEbay] = useState<EbayResult>({
+    total: null,
+    lowestPrice: null,
+    currency: null,
+    loading: false,
+    error: false,
+  });
   const [started, setStarted] = useState(false);
   const hasName = productName.trim().length > 0;
 
-  const fetchAll = async () => {
-    if (!productName.trim() || !googleApiKey) return;
-    setStarted(true);
-    setResults(MARKETS.map((m) => ({ ...m, count: null, loading: true, error: false })));
+  const fetchEbay = async () => {
+    setEbay({ total: null, lowestPrice: null, currency: null, loading: true, error: false });
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("ebay-proxy", {
+        body: { q: productName, limit: 20, sort: "price" },
+      });
+      if (fnErr || !data || data.error) throw new Error("ebay error");
 
-    for (const market of MARKETS) {
-      try {
-        const query = encodeURIComponent(`${productName} site:${market.site}`);
-        const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${query}&num=1`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const totalResults = parseInt(data?.searchInformation?.totalResults || "0");
-        setResults((prev) =>
-          prev.map((r) => (r.site === market.site ? { ...r, count: totalResults, loading: false } : r))
-        );
-      } catch {
-        setResults((prev) =>
-          prev.map((r) => (r.site === market.site ? { ...r, error: true, loading: false } : r))
-        );
+      const items = data.items || [];
+      const prices = items
+        .map((it: any) => parseFloat(it.price))
+        .filter((p: number) => !isNaN(p));
+      const lowest = prices.length ? Math.min(...prices) : null;
+      const currency = items[0]?.currency || "USD";
+
+      setEbay({
+        total: data.total ?? items.length,
+        lowestPrice: lowest,
+        currency,
+        loading: false,
+        error: false,
+      });
+    } catch {
+      setEbay({ total: null, lowestPrice: null, currency: null, loading: false, error: true });
+    }
+  };
+
+  const fetchAll = async () => {
+    if (!productName.trim()) return;
+    setStarted(true);
+
+    // eBay gerçek veri (paralel başlat)
+    fetchEbay();
+
+    // Google tahmini platformlar
+    if (googleApiKey) {
+      setResults(MARKETS.map((m) => ({ ...m, count: null, loading: true, error: false })));
+      for (const market of MARKETS) {
+        try {
+          const query = encodeURIComponent(`${productName} site:${market.site}`);
+          const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${query}&num=1`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const totalResults = parseInt(data?.searchInformation?.totalResults || "0");
+          setResults((prev) =>
+            prev.map((r) => (r.site === market.site ? { ...r, count: totalResults, loading: false } : r))
+          );
+        } catch {
+          setResults((prev) =>
+            prev.map((r) => (r.site === market.site ? { ...r, error: true, loading: false } : r))
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
-      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   };
 
@@ -83,12 +140,14 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
     if (!hasName) {
       setStarted(false);
       setResults(MARKETS.map((m) => ({ ...m, count: null, loading: false, error: false })));
+      setEbay({ total: null, lowestPrice: null, currency: null, loading: false, error: false });
     }
   }, [open, productName]);
 
   const score = getScore(results);
-  const allDone = results.every((r) => !r.loading);
+  const allDone = results.every((r) => !r.loading) && !ebay.loading;
   const bestMarket = results.filter((r) => r.count !== null).sort((a, b) => (a.count || 0) - (b.count || 0))[0];
+  const ebayLevel = getEbayLevel(ebay.total, isTr);
 
   return (
     <div className="group rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent text-[11px] overflow-hidden transition-all duration-300 hover:border-blue-400/60 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)]">
@@ -129,11 +188,46 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
           {!hasName ? (
             <p className="text-muted-foreground text-center py-2">
               {isTr
-                ? "Yukarıdaki kutuya ürün adını yaz, 4 platformda rakip sayısı analiz edilsin 🎯"
-                : "Enter the product name above to analyze competitor count across 4 platforms 🎯"}
+                ? "Yukarıdaki kutuya ürün adını yaz, platformlarda + eBay'de rakip analizi yapılsın 🎯"
+                : "Enter the product name above to analyze competition across platforms + eBay 🎯"}
             </p>
           ) : (
             <>
+              {/* eBay - GERÇEK VERİ */}
+              <div className={`rounded-lg border border-blue-400/40 px-2.5 py-2 ${ebayLevel.bg}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-foreground flex items-center gap-1">
+                    <Tag className="h-3 w-3 text-blue-400" /> eBay
+                    <span className="text-[9px] font-semibold text-blue-400 bg-blue-500/15 rounded px-1 py-0.5 ml-1">
+                      {isTr ? "GERÇEK VERİ" : "LIVE DATA"}
+                    </span>
+                  </span>
+                  {ebay.loading ? (
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" /> {isTr ? "Yükleniyor..." : "Loading..."}
+                    </span>
+                  ) : ebay.error ? (
+                    <span className="text-muted-foreground">{isTr ? "Veri alınamadı" : "Data unavailable"}</span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-foreground">
+                        {ebay.total?.toLocaleString()} {isTr ? "ilan" : "listings"}
+                      </span>
+                      <span className={`font-semibold ${ebayLevel.color}`}>{ebayLevel.label}</span>
+                    </div>
+                  )}
+                </div>
+                {!ebay.loading && !ebay.error && ebay.lowestPrice !== null && (
+                  <div className="mt-1 text-muted-foreground">
+                    {isTr ? "En düşük fiyat:" : "Lowest price:"}{" "}
+                    <span className="font-bold text-green-400">
+                      {ebay.lowestPrice.toFixed(2)} {ebay.currency}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Google tahmini platformlar */}
               {results.map((r) => {
                 const level = getLevel(r.count, isTr);
                 return (
@@ -174,7 +268,9 @@ export default function CompetitorAnalysis({ productName, googleApiKey, googleCx
               )}
 
               <p className="text-muted-foreground text-center pt-0.5">
-                {isTr ? "Google arama sonuç sayısına göre tahmin · Gerçek zamanlı değil" : "Estimated from Google search result counts · Not real-time"}
+                {isTr
+                  ? "eBay gerçek zamanlı · Diğer platformlar Google sonuç tahmini"
+                  : "eBay real-time · Others estimated from Google results"}
               </p>
             </>
           )}
