@@ -39,11 +39,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const plan = (data?.plan as Plan | undefined) ?? "free";
     setUser(buildAppUser(su, plan));
   }, []);
+
+  // Giriş kaydı: last_login + login_count güncelle
+  const recordLogin = useCallback(async (su: SupabaseUser) => {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("login_count")
+        .eq("id", su.id)
+        .maybeSingle();
+      const current = (data?.login_count as number | undefined) ?? 0;
+      await supabase
+        .from("profiles")
+        .update({ last_login: new Date().toISOString(), login_count: current + 1 })
+        .eq("id", su.id);
+    } catch {
+      // sessiz geç, girişi bloklamasın
+    }
+  }, []);
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       if (newSession?.user) {
         setTimeout(() => { loadPlan(newSession.user); }, 0);
+        if (_event === "SIGNED_IN") {
+          setTimeout(() => { recordLogin(newSession.user); }, 0);
+        }
       } else {
         setUser(null);
       }
@@ -57,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     return () => { sub.subscription.unsubscribe(); };
-  }, [loadPlan]);
+  }, [loadPlan, recordLogin]);
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
