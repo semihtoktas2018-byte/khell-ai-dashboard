@@ -168,10 +168,10 @@ export default function LandingPage() {
               <Globe className="h-3.5 w-3.5" />
               {locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}
             </button>
-            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-ghost text-sm py-2 px-4">
+            <button onClick={() => navigate("/auth")} className="btn-ghost text-sm py-2 px-4">
               {t("landing.login")}
             </button>
-            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-sm py-2 px-4">
+            <button onClick={() => navigate("/auth")} className="btn-primary text-sm py-2 px-4">
               {t("landing.start")}
             </button>
           </div>
@@ -240,13 +240,26 @@ export default function LandingPage() {
               {t("landing.heroSubtext")}
             </motion.p>
 
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
               <button onClick={() => navigate("/dashboard/content-engine")} className="btn-ghost text-base px-8 py-3 border border-border">
                 <Video className="h-4 w-4 mr-2 inline" />
                 {t("landing.ctaVideo")}
+              </button>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="flex flex-col items-center gap-2 mb-10">
+              <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap justify-center">
+                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Ücretsiz başla" : isFr ? "Commencez gratuitement" : "Start free"}</span>
+                <span className="text-border">·</span>
+                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Kredi kartı gerekmez" : isFr ? "Aucune carte requise" : "No credit card"}</span>
+                <span className="text-border">·</span>
+                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Google ile 10 saniyede" : isFr ? "Google en 10 secondes" : "Google in 10 seconds"}</span>
+              </p>
+              <button onClick={() => navigate("/dashboard/analyzer")} className="text-xs text-primary/80 hover:text-primary underline underline-offset-2 transition-colors">
+                {isTr ? "veya kayıt olmadan hızlıca dene →" : isFr ? "ou essayez sans inscription →" : "or try without signing up →"}
               </button>
             </motion.div>
 
