@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Search, Loader2, Lock, Sparkles } from "lucide-react";
@@ -14,6 +14,13 @@ export default function LiveTeaserAnalyzer({ isTr = true }: LiveTeaserAnalyzerPr
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ count: number; score: number } | null>(null);
   const [error, setError] = useState(false);
+  const PLACEHOLDER_EXAMPLES = ["Stanley Cup", "Mini Fan", "Portable Blender", "LED Projector", "Pet Hair Remover", "Wireless Earbuds"];
+  const [phIndex, setPhIndex] = useState(0);
+  useEffect(() => {
+    if (productName) return;
+    const id = setInterval(() => setPhIndex((i) => (i + 1) % PLACEHOLDER_EXAMPLES.length), 3200);
+    return () => clearInterval(id);
+  }, [productName]);
 
   const handleAnalyze = async () => {
     const name = productName.trim();
@@ -69,7 +76,7 @@ export default function LiveTeaserAnalyzer({ isTr = true }: LiveTeaserAnalyzerPr
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") handleAnalyze(); }}
-          placeholder={isTr ? "Örn: kablosuz kulaklık" : "e.g. wireless earbuds"}
+          placeholder={`${isTr ? "Örn" : "e.g"}: ${PLACEHOLDER_EXAMPLES[phIndex]}`}
           className="input-dark flex-1 h-12 text-base"
         />
         <button
