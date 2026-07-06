@@ -183,8 +183,8 @@ export default function LandingPage() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
           {/* KHELL AI Arc Reactor Core */}
-          <div className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.5]">
-            <svg width="450" height="450" viewBox="0 0 480 480" className="max-w-[80vw]">
+          <div className="absolute top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.6]">
+            <svg width="330" height="330" viewBox="0 0 480 480" className="max-w-[60vw]">
               <defs>
                 <radialGradient id="arGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.7" />
