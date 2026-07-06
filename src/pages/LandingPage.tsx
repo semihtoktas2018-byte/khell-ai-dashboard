@@ -654,6 +654,54 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+
+          {/* Free vs Pro karşılaştırma tablosu */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl mx-auto mt-16">
+            <h3 className="text-center text-lg font-bold text-foreground mb-1">
+              {isTr ? "Free vs Pro" : isFr ? "Gratuit vs Pro" : "Free vs Pro"}
+            </h3>
+            <p className="text-center text-xs text-muted-foreground mb-6">
+              {isTr ? "Pro'ya geçince neler açılıyor?" : isFr ? "Que débloque Pro ?" : "What you unlock with Pro"}
+            </p>
+            <div className="rounded-2xl overflow-hidden border border-border">
+              <div className="grid grid-cols-[1fr_auto_auto] text-sm">
+                <div className="px-4 py-3 bg-card/50 font-semibold text-foreground">{isTr ? "Özellik" : "Feature"}</div>
+                <div className="px-4 py-3 bg-card/50 font-semibold text-center text-muted-foreground w-20">Free</div>
+                <div className="px-4 py-3 font-semibold text-center text-primary w-20" style={{ background: "hsl(217 91% 60% / 0.1)" }}>Pro</div>
+                {[
+                  { f: isTr ? "Günlük analiz" : "Daily analyses", free: isTr ? "3/gün" : "3/day", pro: isTr ? "Sınırsız" : "Unlimited" },
+                  { f: isTr ? "Kâr & risk skoru" : "Profit & risk score", free: true, pro: true },
+                  { f: isTr ? "Gerçek CJ verisi" : "Real CJ data", free: true, pro: true },
+                  { f: isTr ? "eBay araştırma" : "eBay research", free: isTr ? "2 deneme" : "2 tries", pro: isTr ? "Sınırsız" : "Unlimited" },
+                  { f: isTr ? "Kazanan ürünler" : "Winning products", free: false, pro: true },
+                  { f: isTr ? "Mağaza spy" : "Store spy", free: false, pro: true },
+                  { f: isTr ? "Fiyat takibi" : "Price tracking", free: false, pro: true },
+                  { f: isTr ? "AI içerik üretici" : "AI content engine", free: false, pro: true },
+                  { f: isTr ? "Öncelikli destek" : "Priority support", free: false, pro: true },
+                ].map((row, i) => (
+                  <div key={i} className="contents">
+                    <div className={`px-4 py-3 text-foreground ${i % 2 ? "bg-card/30" : ""}`}>{row.f}</div>
+                    <div className={`px-4 py-3 text-center ${i % 2 ? "bg-card/30" : ""}`}>
+                      {typeof row.free === "boolean"
+                        ? (row.free ? <Check className="h-4 w-4 text-winning inline" /> : <span className="text-muted-foreground/40">—</span>)
+                        : <span className="text-xs text-muted-foreground">{row.free}</span>}
+                    </div>
+                    <div className="px-4 py-3 text-center" style={{ background: "hsl(217 91% 60% / 0.06)" }}>
+                      {typeof row.pro === "boolean"
+                        ? (row.pro ? <Check className="h-4 w-4 text-winning inline" /> : <span className="text-muted-foreground/40">—</span>)
+                        : <span className="text-xs font-semibold text-primary">{row.pro}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="text-center mt-6">
+              <a href={isTr ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025"} target="_blank" rel="noopener noreferrer"
+                className="inline-block px-8 py-3 rounded-xl font-bold text-white btn-primary">
+                {isTr ? "Pro'ya Geç" : isFr ? "Passer à Pro" : "Go Pro"}
+              </a>
+            </div>
+          </motion.div>
         </div>
       </section>
 
