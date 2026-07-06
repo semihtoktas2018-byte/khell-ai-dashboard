@@ -240,6 +240,14 @@ export default function LandingPage() {
                 <circle r="10" fill="#ffffff">
                   <animate attributeName="r" values="9;12;9" dur="2s" repeatCount="indefinite" />
                 </circle>
+                <circle r="72" fill="#dbeafe">
+                  <animate attributeName="opacity" values="0;0;0.9;0" keyTimes="0;0.82;0.9;1" dur="5s" repeatCount="indefinite" />
+                </circle>
+                <circle fill="none" stroke="#ffffff" strokeWidth="4">
+                  <animate attributeName="r" values="30;170" keyTimes="0;1" dur="5s" begin="0s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0;0;0;1;0" keyTimes="0;0.8;0.85;0.88;1" dur="5s" repeatCount="indefinite" />
+                  <animate attributeName="stroke-width" values="6;0.5" keyTimes="0;1" dur="5s" repeatCount="indefinite" />
+                </circle>
               </g>
             </svg>
           </div>
