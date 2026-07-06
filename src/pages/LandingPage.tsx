@@ -185,17 +185,7 @@ export default function LandingPage() {
         </div>
         <div className="container mx-auto relative z-10">
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
-            <motion.div variants={fadeUp} className="mb-4 flex flex-col items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-winning pulse-glow" />
-                {t("landing.badge")}
-              </span>
-              <a href="/dashboard" className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors">
-                <Package className="h-3 w-3" />
-                {isTr ? "CJdropshipping entegrasyonu aktif — gerçek ürün verisi" : isFr ? "Intégration CJdropshipping active — vraies données produit" : "CJdropshipping integration active — real product data"}
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-              </a>
-
+            <motion.div variants={fadeUp} className="mb-6 flex flex-wrap items-center justify-center gap-2.5">
               <motion.a
                 href="/dashboard/ebay"
                 animate={{
@@ -206,11 +196,11 @@ export default function LandingPage() {
                   ],
                 }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wide text-white hover:scale-105 transition-transform"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:scale-105 transition-transform"
                 style={{ background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(224 76% 48%))" }}
               >
                 <ShoppingBag className="h-3.5 w-3.5" />
-                {isTr ? "🆕 YENİ · eBay Gerçek Zamanlı Ürün Araştırma" : isFr ? "🆕 NOUVEAU · Recherche produit eBay en temps réel" : "🆕 NEW · eBay Real-Time Product Research"}
+                {isTr ? "🔥 Gerçek Zamanlı eBay Verisi" : isFr ? "🔥 Données eBay en temps réel" : "🔥 Real-Time eBay Data"}
               </motion.a>
 
               <motion.span
@@ -222,11 +212,11 @@ export default function LandingPage() {
                   ],
                 }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wide text-black"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide text-black"
                 style={{ background: "linear-gradient(135deg, hsl(45 93% 58%), hsl(38 92% 52%))" }}
               >
                 <Radio className="h-3.5 w-3.5" />
-                {isTr ? "⚡ 5 Dakikada Bir Yenilenen Gerçek CJ Verisi" : isFr ? "⚡ Vraies données CJ actualisées toutes les 5 minutes" : "⚡ Real CJ Data Refreshed Every 5 Minutes"}
+                {isTr ? "⚡ AI Viral Video Üretici" : isFr ? "⚡ Générateur Vidéo Virale IA" : "⚡ AI Viral Video Generator"}
               </motion.span>
             </motion.div>
 
