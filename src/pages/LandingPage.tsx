@@ -180,8 +180,60 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative pt-40 pb-20 px-6">
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+          {/* KHELL AI Core */}
+          <div className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.55]">
+            <svg width="520" height="520" viewBox="0 0 400 400" className="max-w-[90vw]">
+              <defs>
+                <radialGradient id="khCoreGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
+                  <stop offset="45%" stopColor="#2563eb" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="khCoreFill" cx="50%" cy="45%" r="55%">
+                  <stop offset="0%" stopColor="#dbeafe" />
+                  <stop offset="35%" stopColor="#60a5fa" />
+                  <stop offset="75%" stopColor="#2563eb" />
+                  <stop offset="100%" stopColor="#1d4ed8" />
+                </radialGradient>
+                <linearGradient id="khRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#93c5fd" />
+                  <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="200" r="200" fill="url(#khCoreGlow)" />
+              <g transform="translate(200,200)">
+                <circle r="150" fill="none" stroke="url(#khRing)" strokeWidth="1.5" strokeDasharray="60 30 15 40" strokeLinecap="round" strokeOpacity="0.75">
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite" />
+                </circle>
+                <circle r="118" fill="none" stroke="url(#khRing)" strokeWidth="2" strokeDasharray="4 14" strokeLinecap="round" strokeOpacity="0.65">
+                  <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="14s" repeatCount="indefinite" />
+                </circle>
+                <polygon points="0,-92 80,-46 80,46 0,92 -80,46 -80,-46" fill="none" stroke="#60a5fa" strokeWidth="1.5" strokeOpacity="0.8">
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="26s" repeatCount="indefinite" />
+                </polygon>
+                <polygon points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35" fill="none" stroke="#93c5fd" strokeWidth="1" strokeOpacity="0.55">
+                  <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="18s" repeatCount="indefinite" />
+                </polygon>
+                <circle r="52" fill="url(#khCoreFill)">
+                  <animate attributeName="r" values="52;57;52" dur="3.5s" repeatCount="indefinite" />
+                </circle>
+                <circle r="52" fill="none" stroke="#dbeafe" strokeWidth="1" strokeOpacity="0.6" />
+                <g stroke="#eff6ff" strokeWidth="2" strokeLinecap="round" opacity="0.85">
+                  <line x1="0" y1="-34" x2="0" y2="-16" />
+                  <line x1="29" y1="-17" x2="14" y2="-8" />
+                  <line x1="29" y1="17" x2="14" y2="8" />
+                  <line x1="0" y1="34" x2="0" y2="16" />
+                  <line x1="-29" y1="17" x2="-14" y2="8" />
+                  <line x1="-29" y1="-17" x2="-14" y2="-8" />
+                </g>
+                <circle r="9" fill="#f0f9ff">
+                  <animate attributeName="opacity" values="0.8;1;0.8" dur="2.2s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            </svg>
+          </div>
         </div>
         <div className="container mx-auto relative z-10">
           <motion.div variants={stagger} initial="hidden" animate="visible" className="text-center max-w-4xl mx-auto">
