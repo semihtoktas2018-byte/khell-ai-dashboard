@@ -171,7 +171,7 @@ export default function LandingPage() {
             <button onClick={() => navigate("/auth")} className="btn-ghost text-sm py-2 px-4">
               {t("landing.login")}
             </button>
-            <button onClick={() => navigate("/auth")} className="btn-primary text-sm py-2 px-4">
+            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-sm py-2 px-4">
               {t("landing.start")}
             </button>
           </div>
@@ -247,7 +247,7 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
+              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
               <button onClick={() => navigate("/dashboard/content-engine")} className="btn-ghost text-base px-8 py-3 border border-border">
