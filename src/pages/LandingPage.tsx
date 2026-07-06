@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package, Star, Radio } from "lucide-react";
+import { BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target, Check, Globe, Video, Hash, Copy, Package, Star, Radio, ShoppingBag } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
@@ -195,6 +195,23 @@ export default function LandingPage() {
                 {isTr ? "CJdropshipping entegrasyonu aktif — gerçek ürün verisi" : isFr ? "Intégration CJdropshipping active — vraies données produit" : "CJdropshipping integration active — real product data"}
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
               </a>
+
+              <motion.a
+                href="/dashboard/ebay"
+                animate={{
+                  boxShadow: [
+                    "0 0 12px hsl(217 91% 60% / 0.4)",
+                    "0 0 28px hsl(217 91% 60% / 0.75)",
+                    "0 0 12px hsl(217 91% 60% / 0.4)",
+                  ],
+                }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wide text-white hover:scale-105 transition-transform"
+                style={{ background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(224 76% 48%))" }}
+              >
+                <ShoppingBag className="h-3.5 w-3.5" />
+                {isTr ? "🆕 YENİ · eBay Gerçek Zamanlı Ürün Araştırma" : isFr ? "🆕 NOUVEAU · Recherche produit eBay en temps réel" : "🆕 NEW · eBay Real-Time Product Research"}
+              </motion.a>
 
               <motion.span
                 animate={{
