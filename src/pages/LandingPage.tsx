@@ -187,15 +187,16 @@ export default function LandingPage() {
             <svg width="330" height="330" viewBox="0 0 480 480" className="max-w-[60vw]">
               <defs>
                 <radialGradient id="arGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.7" />
-                  <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#d9f9e5" stopOpacity="0.7" />
+                  <stop offset="30%" stopColor="#4ade80" stopOpacity="0.3" />
+                  <stop offset="65%" stopColor="#a855f7" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#6d28d9" stopOpacity="0" />
                 </radialGradient>
                 <radialGradient id="arCore" cx="50%" cy="50%" r="55%">
                   <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="40%" stopColor="#bfdbfe" />
-                  <stop offset="80%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#1d4ed8" />
+                  <stop offset="30%" stopColor="#fde68a" />
+                  <stop offset="60%" stopColor="#4ade80" />
+                  <stop offset="100%" stopColor="#a855f7" />
                 </radialGradient>
                 <linearGradient id="arCopper" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#fbbf7a" />
@@ -203,8 +204,16 @@ export default function LandingPage() {
                   <stop offset="100%" stopColor="#7c3f1d" />
                 </linearGradient>
                 <linearGradient id="arRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#64748b" />
-                  <stop offset="100%" stopColor="#1e293b" />
+                  <stop offset="0%" stopColor="#7c3aed" />
+                  <stop offset="45%" stopColor="#2a6a5a" />
+                  <stop offset="100%" stopColor="#1e1b3a" />
+                </linearGradient>
+                <linearGradient id="arTri" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="30%" stopColor="#22d3ee" />
+                  <stop offset="55%" stopColor="#4ade80" />
+                  <stop offset="78%" stopColor="#facc15" />
+                  <stop offset="100%" stopColor="#a855f7" />
                 </linearGradient>
               </defs>
               <circle cx="240" cy="240" r="230" fill="url(#arGlow)" />
@@ -225,21 +234,21 @@ export default function LandingPage() {
                   <g transform="rotate(300)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
                   <g transform="rotate(330)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
                 </g>
-                <circle r="118" fill="none" stroke="#334155" strokeWidth="8" />
-                <circle r="118" fill="#0b1220" />
-                <circle r="95" fill="none" stroke="#1e40af" strokeWidth="1" strokeOpacity="0.5">
+                <circle r="118" fill="none" stroke="#3b2a5a" strokeWidth="8" />
+                <circle r="118" fill="#0f0820" />
+                <circle r="95" fill="none" stroke="#4ade80" strokeWidth="1.5" strokeOpacity="0.55">
                   <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="22s" repeatCount="indefinite" />
                 </circle>
                 <circle r="78" fill="#0b1220" />
                 <circle r="78" fill="url(#arGlow)" />
-                <polygon points="0,-64 56,32 -56,32" fill="none" stroke="#dbeafe" strokeWidth="9" strokeLinejoin="round" opacity="1">
+                <polygon points="0,-64 56,32 -56,32" fill="none" stroke="url(#arTri)" strokeWidth="10" strokeLinejoin="round" opacity="1">
                   <animate attributeName="opacity" values="0.75;1;0.75" dur="3s" repeatCount="indefinite" />
                 </polygon>
                 <polygon points="0,-46 40,23 -40,23" fill="url(#arCore)" stroke="#ffffff" strokeWidth="1.5">
                   <animate attributeName="opacity" values="0.85;1;0.85" dur="2.4s" repeatCount="indefinite" />
                 </polygon>
-                <circle r="10" fill="#ffffff">
-                  <animate attributeName="r" values="9;12;9" dur="2s" repeatCount="indefinite" />
+                <circle r="11" fill="#fdf4ff">
+                  <animate attributeName="r" values="9;13;9" dur="2s" repeatCount="indefinite" />
                 </circle>
                 <circle r="118" fill="#ffffff">
                   <animate attributeName="opacity" values="0;0;0;1;0.15;1;0;0;0" keyTimes="0;0.7;0.74;0.75;0.78;0.8;0.84;0.9;1" dur="4.5s" repeatCount="indefinite" />
