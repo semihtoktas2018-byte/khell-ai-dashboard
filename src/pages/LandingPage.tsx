@@ -203,7 +203,8 @@ export default function LandingPage() {
                 {isTr ? "🔥 Gerçek Zamanlı eBay Verisi" : isFr ? "🔥 Données eBay en temps réel" : "🔥 Real-Time eBay Data"}
               </motion.a>
 
-              <motion.span
+              <motion.a
+                href="/dashboard/analyzer"
                 animate={{
                   boxShadow: [
                     "0 0 12px hsl(45 93% 55% / 0.4)",
@@ -212,12 +213,12 @@ export default function LandingPage() {
                   ],
                 }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide text-black"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide text-black hover:scale-105 transition-transform"
                 style={{ background: "linear-gradient(135deg, hsl(45 93% 58%), hsl(38 92% 52%))" }}
               >
                 <Radio className="h-3.5 w-3.5" />
                 {isTr ? "⚡ 5 Dakikada Bir Yenilenen Gerçek CJ Verisi" : isFr ? "⚡ Vraies données CJ actualisées toutes les 5 minutes" : "⚡ Real CJ Data Refreshed Every 5 Minutes"}
-              </motion.span>
+              </motion.a>
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
