@@ -230,11 +230,12 @@ export default function LandingPage() {
                 <circle r="95" fill="none" stroke="#1e40af" strokeWidth="1" strokeOpacity="0.5">
                   <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="22s" repeatCount="indefinite" />
                 </circle>
-                <circle r="72" fill="url(#arGlow)" />
-                <polygon points="0,-62 54,31 -54,31" fill="none" stroke="#93c5fd" strokeWidth="7" strokeLinejoin="round" opacity="0.9">
-                  <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite" />
+                <circle r="78" fill="#0b1220" />
+                <circle r="78" fill="url(#arGlow)" />
+                <polygon points="0,-64 56,32 -56,32" fill="none" stroke="#dbeafe" strokeWidth="9" strokeLinejoin="round" opacity="1">
+                  <animate attributeName="opacity" values="0.75;1;0.75" dur="3s" repeatCount="indefinite" />
                 </polygon>
-                <polygon points="0,-44 38,22 -38,22" fill="url(#arCore)">
+                <polygon points="0,-46 40,23 -40,23" fill="url(#arCore)" stroke="#ffffff" strokeWidth="1.5">
                   <animate attributeName="opacity" values="0.85;1;0.85" dur="2.4s" repeatCount="indefinite" />
                 </polygon>
                 <circle r="10" fill="#ffffff">
