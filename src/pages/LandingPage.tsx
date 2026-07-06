@@ -183,8 +183,8 @@ export default function LandingPage() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
           {/* KHELL AI Arc Reactor Core */}
-          <div className="absolute top-[27%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.7]">
-            <svg width="600" height="600" viewBox="0 0 480 480" className="max-w-[95vw]">
+          <div className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.5]">
+            <svg width="450" height="450" viewBox="0 0 480 480" className="max-w-[80vw]">
               <defs>
                 <radialGradient id="arGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.7" />
@@ -318,23 +318,42 @@ export default function LandingPage() {
               ))}
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
               <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
-              <button onClick={() => navigate("/dashboard/content-engine")} className="btn-ghost text-base px-8 py-3 border border-border">
-                <Video className="h-4 w-4 mr-2 inline" />
-                {t("landing.ctaVideo")}
+              <button
+                onClick={() => navigate("/dashboard/content-engine")}
+                className="group relative text-base px-8 py-3 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.03]"
+                style={{
+                  background: "linear-gradient(160deg, hsl(217 91% 60% / 0.15), hsl(224 76% 48% / 0.08))",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid hsl(217 91% 65% / 0.4)",
+                  boxShadow: "0 0 20px hsl(217 91% 60% / 0.25), inset 0 1px 0 hsl(0 0% 100% / 0.1)",
+                }}
+              >
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                  style={{ background: "linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.15), transparent)" }} />
+                <span className="relative flex items-center justify-center">
+                  <Video className="h-4 w-4 mr-2" />
+                  {t("landing.ctaVideo")}
+                </span>
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex justify-center mb-10">
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mb-2 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-1"><Check className="h-3 w-3 text-winning" /> {isTr ? "Sürekli geliştiriliyor" : isFr ? "Amélioré en continu" : "Continuously improved"}</span>
+              <span className="flex items-center gap-1"><Check className="h-3 w-3 text-winning" /> {isTr ? "Gerçek ürün verisi" : isFr ? "Vraies données produit" : "Real product data"}</span>
+              <span className="flex items-center gap-1"><Check className="h-3 w-3 text-winning" /> {isTr ? "Topluluk geri bildirimiyle" : isFr ? "Avec les retours de la communauté" : "Built with community feedback"}</span>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="flex justify-center mb-8">
               <button onClick={() => navigate("/dashboard/analyzer")} className="text-xs text-primary/80 hover:text-primary underline underline-offset-2 transition-colors">
                 {isTr ? "veya kayıt olmadan hızlıca dene →" : isFr ? "ou essayez sans inscription →" : "or try without signing up →"}
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="mb-16">
+            <motion.div variants={fadeUp} className="mb-10">
               <LiveTeaserAnalyzer isTr={isTr} />
             </motion.div>
 
@@ -380,6 +399,53 @@ export default function LandingPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Early Access + Topluluk kartları */}
+            <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mt-6">
+              <div className="rounded-2xl p-5 text-left"
+                style={{ background: "linear-gradient(160deg, hsl(217 91% 60% / 0.1), hsl(222 47% 6% / 0.8))", backdropFilter: "blur(12px)", border: "1px solid hsl(217 91% 60% / 0.28)" }}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-lg">🚀</span>
+                  <h3 className="text-sm font-bold text-white">{isTr ? "Erken Erişim" : isFr ? "Accès Anticipé" : "Early Access"}</h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isTr ? "KHELL AI sürekli gelişiyor. Erken katıl, erken fiyat avantajından yararlan ve geri bildirimlerinle platformun geleceğini birlikte şekillendir." : isFr ? "KHELL AI évolue en continu. Rejoignez tôt, profitez du tarif de lancement et façonnez l'avenir de la plateforme." : "KHELL AI is continuously evolving. Join early, benefit from early pricing, and help shape the future with your feedback."}
+                </p>
+              </div>
+              <div className="rounded-2xl p-5 text-left"
+                style={{ background: "linear-gradient(160deg, hsl(142 71% 45% / 0.1), hsl(222 47% 6% / 0.8))", backdropFilter: "blur(12px)", border: "1px solid hsl(142 71% 45% / 0.28)" }}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-lg">💡</span>
+                  <h3 className="text-sm font-bold text-white">{isTr ? "KHELL AI'ı Birlikte Büyütelim" : isFr ? "Construisons KHELL AI Ensemble" : "Build KHELL AI Together"}</h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isTr ? "Fikirlerin bizim için değerli. Her öneri tek tek incelenir ve KHELL AI'ı herkes için daha iyi hale getirmemize yardım eder." : isFr ? "Vos idées comptent. Chaque suggestion est examinée et aide à améliorer KHELL AI pour tous." : "Your ideas matter. Every suggestion is reviewed and helps improve KHELL AI for everyone."}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Gerçek istatistikler için hazır component — veri gelince STATS_READY=true yap */}
+            {(() => {
+              const STATS_READY = false;
+              const stats = { analyses: 0, users: 0, countries: 0, premium: 0 };
+              if (!STATS_READY) return null;
+              return (
+                <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-6 max-w-3xl mx-auto mt-6 py-4 rounded-2xl"
+                  style={{ background: "hsl(222 47% 6% / 0.6)", border: "1px solid hsl(217 32% 17%)" }}>
+                  {[
+                    { icon: "⭐", val: stats.analyses, label: isTr ? "Ürün Analizi" : "Analyses" },
+                    { icon: "🔥", val: stats.users, label: isTr ? "Aktif Kullanıcı" : "Active Users" },
+                    { icon: "🌍", val: stats.countries, label: isTr ? "Ülke" : "Countries" },
+                    { icon: "💎", val: stats.premium, label: isTr ? "Pro Üye" : "Pro Members" },
+                  ].map((s2) => (
+                    <div key={s2.label} className="text-center">
+                      <p className="text-xl font-black text-white">{s2.icon} {s2.val.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground">{s2.label}</p>
+                    </div>
+                  ))}
+                </motion.div>
+              );
+            })()}
           </motion.div>
         </div>
       </section>
@@ -545,6 +611,14 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <span className="text-4xl font-bold font-mono text-foreground">{plan.price}</span>
                   <span className="text-sm text-muted-foreground">{plan.period}</span>
+                  {plan.popular && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full"
+                        style={{ background: "hsl(38 92% 50% / 0.15)", color: "hsl(38 92% 60%)", border: "1px solid hsl(38 92% 50% / 0.35)" }}>
+                        🎁 {isTr ? "Erken Erişim Fiyatı" : isFr ? "Tarif Accès Anticipé" : "Early Access Pricing"}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((f) => (
