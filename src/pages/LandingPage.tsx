@@ -216,7 +216,7 @@ export default function LandingPage() {
                 style={{ background: "linear-gradient(135deg, hsl(45 93% 58%), hsl(38 92% 52%))" }}
               >
                 <Radio className="h-3.5 w-3.5" />
-                {isTr ? "⚡ AI Viral Video Üretici" : isFr ? "⚡ Générateur Vidéo Virale IA" : "⚡ AI Viral Video Generator"}
+                {isTr ? "⚡ 5 Dakikada Bir Yenilenen Gerçek CJ Verisi" : isFr ? "⚡ Vraies données CJ actualisées toutes les 5 minutes" : "⚡ Real CJ Data Refreshed Every 5 Minutes"}
               </motion.span>
             </motion.div>
 
