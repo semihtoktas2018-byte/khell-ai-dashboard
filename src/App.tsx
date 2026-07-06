@@ -32,6 +32,7 @@ import BestSellers from "./pages/BestSellers";
 import OrderLog from "./pages/OrderLog";
 import StoreSpy from "./pages/StoreSpy";
 import EbayResearch from "./pages/EbayResearch";
+import UsersAdmin from "./pages/UsersAdmin";
 import PriceTracker from "./pages/PriceTracker";
 import NotFound from "./pages/NotFound";
 import type { ReactNode } from "react";
@@ -101,6 +102,7 @@ const App = () => {
                           <Route path="content-engine" element={<ContentEngine />} />
                           <Route path="store-spy" element={<StoreSpy />} />
                           <Route path="ebay" element={<EbayResearch />} />
+                          <Route path="users" element={<UsersAdmin />} />
                           <Route path="price-tracker" element={<PriceTracker />} />
                         </Route>
                         <Route path="*" element={<NotFound />} />
