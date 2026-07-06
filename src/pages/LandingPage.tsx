@@ -182,54 +182,63 @@ export default function LandingPage() {
       <section className="relative pt-40 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
-          {/* KHELL AI Core */}
-          <div className="absolute top-[26%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.55]">
-            <svg width="520" height="520" viewBox="0 0 400 400" className="max-w-[90vw]">
+          {/* KHELL AI Arc Reactor Core */}
+          <div className="absolute top-[27%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.7]">
+            <svg width="600" height="600" viewBox="0 0 480 480" className="max-w-[95vw]">
               <defs>
-                <radialGradient id="khCoreGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
-                  <stop offset="45%" stopColor="#2563eb" stopOpacity="0.18" />
+                <radialGradient id="arGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.7" />
+                  <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.35" />
                   <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0" />
                 </radialGradient>
-                <radialGradient id="khCoreFill" cx="50%" cy="45%" r="55%">
-                  <stop offset="0%" stopColor="#dbeafe" />
-                  <stop offset="35%" stopColor="#60a5fa" />
-                  <stop offset="75%" stopColor="#2563eb" />
+                <radialGradient id="arCore" cx="50%" cy="50%" r="55%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="40%" stopColor="#bfdbfe" />
+                  <stop offset="80%" stopColor="#3b82f6" />
                   <stop offset="100%" stopColor="#1d4ed8" />
                 </radialGradient>
-                <linearGradient id="khRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#93c5fd" />
-                  <stop offset="100%" stopColor="#3b82f6" />
+                <linearGradient id="arCopper" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#fbbf7a" />
+                  <stop offset="50%" stopColor="#c2703c" />
+                  <stop offset="100%" stopColor="#7c3f1d" />
+                </linearGradient>
+                <linearGradient id="arRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#64748b" />
+                  <stop offset="100%" stopColor="#1e293b" />
                 </linearGradient>
               </defs>
-              <circle cx="200" cy="200" r="200" fill="url(#khCoreGlow)" />
-              <g transform="translate(200,200)">
-                <circle r="150" fill="none" stroke="url(#khRing)" strokeWidth="1.5" strokeDasharray="60 30 15 40" strokeLinecap="round" strokeOpacity="0.75">
-                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite" />
-                </circle>
-                <circle r="118" fill="none" stroke="url(#khRing)" strokeWidth="2" strokeDasharray="4 14" strokeLinecap="round" strokeOpacity="0.65">
-                  <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="14s" repeatCount="indefinite" />
-                </circle>
-                <polygon points="0,-92 80,-46 80,46 0,92 -80,46 -80,-46" fill="none" stroke="#60a5fa" strokeWidth="1.5" strokeOpacity="0.8">
-                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="26s" repeatCount="indefinite" />
-                </polygon>
-                <polygon points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35" fill="none" stroke="#93c5fd" strokeWidth="1" strokeOpacity="0.55">
-                  <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="18s" repeatCount="indefinite" />
-                </polygon>
-                <circle r="52" fill="url(#khCoreFill)">
-                  <animate attributeName="r" values="52;57;52" dur="3.5s" repeatCount="indefinite" />
-                </circle>
-                <circle r="52" fill="none" stroke="#dbeafe" strokeWidth="1" strokeOpacity="0.6" />
-                <g stroke="#eff6ff" strokeWidth="2" strokeLinecap="round" opacity="0.85">
-                  <line x1="0" y1="-34" x2="0" y2="-16" />
-                  <line x1="29" y1="-17" x2="14" y2="-8" />
-                  <line x1="29" y1="17" x2="14" y2="8" />
-                  <line x1="0" y1="34" x2="0" y2="16" />
-                  <line x1="-29" y1="17" x2="-14" y2="8" />
-                  <line x1="-29" y1="-17" x2="-14" y2="-8" />
+              <circle cx="240" cy="240" r="230" fill="url(#arGlow)" />
+              <g transform="translate(240,240)">
+                <circle r="185" fill="none" stroke="url(#arRing)" strokeWidth="18" />
+                <g>
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="40s" repeatCount="indefinite" />
+                  <g transform="rotate(0)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(30)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(60)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(90)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(120)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(150)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(180)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(210)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(240)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(270)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(300)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
+                  <g transform="rotate(330)"><rect x="-16" y="-172" width="32" height="52" rx="5" fill="#1e293b" stroke="#334155" strokeWidth="1"/><rect x="-13" y="-168" width="26" height="44" rx="3" fill="url(#arCopper)"/><line x1="-13" y1="-160" x2="13" y2="-160" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-152" x2="13" y2="-152" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-144" x2="13" y2="-144" stroke="#7c3f1d" strokeWidth="0.8"/><line x1="-13" y1="-136" x2="13" y2="-136" stroke="#7c3f1d" strokeWidth="0.8"/></g>
                 </g>
-                <circle r="9" fill="#f0f9ff">
-                  <animate attributeName="opacity" values="0.8;1;0.8" dur="2.2s" repeatCount="indefinite" />
+                <circle r="118" fill="none" stroke="#334155" strokeWidth="8" />
+                <circle r="118" fill="#0b1220" />
+                <circle r="95" fill="none" stroke="#1e40af" strokeWidth="1" strokeOpacity="0.5">
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="22s" repeatCount="indefinite" />
+                </circle>
+                <circle r="72" fill="url(#arGlow)" />
+                <polygon points="0,-62 54,31 -54,31" fill="none" stroke="#93c5fd" strokeWidth="7" strokeLinejoin="round" opacity="0.9">
+                  <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite" />
+                </polygon>
+                <polygon points="0,-44 38,22 -38,22" fill="url(#arCore)">
+                  <animate attributeName="opacity" values="0.85;1;0.85" dur="2.4s" repeatCount="indefinite" />
+                </polygon>
+                <circle r="10" fill="#ffffff">
+                  <animate attributeName="r" values="9;12;9" dur="2s" repeatCount="indefinite" />
                 </circle>
               </g>
             </svg>
