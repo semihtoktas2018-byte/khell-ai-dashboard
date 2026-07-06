@@ -676,10 +676,53 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-6">
-        <div className="container mx-auto flex items-center justify-between">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{t("nav.production")}</p>
-          <p className="text-xs text-muted-foreground">© 2026 KHELL AI</p>
+      <footer className="border-t border-border pt-12 pb-8 px-6">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="text-base font-bold text-foreground">KHELL AI</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {isTr ? "Dropshipper'lar için AI destekli ürün araştırma ve analiz platformu. Gerçek verilerle kazanan ürünü bul." : isFr ? "Plateforme d'analyse produit IA pour dropshippers. Trouvez le produit gagnant avec de vraies données." : "AI-powered product research platform for dropshippers. Find winning products with real data."}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wide">{isTr ? "Platform" : "Platform"}</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><button onClick={() => navigate("/dashboard/analyzer")} className="hover:text-primary transition-colors">{isTr ? "Ürün Analizi" : "Product Analysis"}</button></li>
+                <li><button onClick={() => navigate("/dashboard/ebay")} className="hover:text-primary transition-colors">{isTr ? "eBay Araştırma" : "eBay Research"}</button></li>
+                <li><button onClick={() => navigate("/dashboard/winning")} className="hover:text-primary transition-colors">{isTr ? "Kazanan Ürünler" : "Winning Products"}</button></li>
+                <li><button onClick={() => navigate("/auth")} className="hover:text-primary transition-colors">{isTr ? "Giriş Yap" : "Sign In"}</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wide">{isTr ? "Yasal" : "Legal"}</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><button onClick={() => navigate("/privacy")} className="hover:text-primary transition-colors">{isTr ? "Gizlilik Politikası" : "Privacy Policy"}</button></li>
+                <li><button onClick={() => navigate("/terms")} className="hover:text-primary transition-colors">{isTr ? "Kullanım Şartları" : "Terms of Service"}</button></li>
+                <li><button onClick={() => navigate("/refund")} className="hover:text-primary transition-colors">{isTr ? "İade ve Teslimat" : "Refund & Delivery"}</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-foreground mb-3 uppercase tracking-wide">{isTr ? "İletişim" : "Contact"}</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><a href="mailto:bamir.global@gmail.com" className="hover:text-primary transition-colors break-all">bamir.global@gmail.com</a></li>
+                <li><a href="https://wa.me/905446452430" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">WhatsApp</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{t("nav.production")}</p>
+            <p className="text-xs text-muted-foreground">© 2026 KHELL AI — Bamir Global</p>
+          </div>
         </div>
       </footer>
     </div>
