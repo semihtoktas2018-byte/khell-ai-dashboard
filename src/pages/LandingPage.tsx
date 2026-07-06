@@ -240,13 +240,16 @@ export default function LandingPage() {
                 <circle r="10" fill="#ffffff">
                   <animate attributeName="r" values="9;12;9" dur="2s" repeatCount="indefinite" />
                 </circle>
-                <circle r="72" fill="#dbeafe">
-                  <animate attributeName="opacity" values="0;0;0.9;0" keyTimes="0;0.82;0.9;1" dur="5s" repeatCount="indefinite" />
+                <circle r="118" fill="#ffffff">
+                  <animate attributeName="opacity" values="0;0;0;1;0.15;1;0;0;0" keyTimes="0;0.7;0.74;0.75;0.78;0.8;0.84;0.9;1" dur="4.5s" repeatCount="indefinite" />
                 </circle>
-                <circle fill="none" stroke="#ffffff" strokeWidth="4">
-                  <animate attributeName="r" values="30;170" keyTimes="0;1" dur="5s" begin="0s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="0;0;0;1;0" keyTimes="0;0.8;0.85;0.88;1" dur="5s" repeatCount="indefinite" />
-                  <animate attributeName="stroke-width" values="6;0.5" keyTimes="0;1" dur="5s" repeatCount="indefinite" />
+                <circle r="72" fill="#dbeafe">
+                  <animate attributeName="opacity" values="0;0;0;1;0.3;1;0" keyTimes="0;0.7;0.745;0.75;0.79;0.8;0.88" dur="4.5s" repeatCount="indefinite" />
+                </circle>
+                <circle fill="none" stroke="#ffffff" strokeWidth="8">
+                  <animate attributeName="r" values="40;185" keyTimes="0;1" dur="4.5s" begin="0s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.75;0.76;0.86" dur="4.5s" repeatCount="indefinite" />
+                  <animate attributeName="stroke-width" values="10;0.5" keyTimes="0;1" dur="4.5s" repeatCount="indefinite" />
                 </circle>
               </g>
             </svg>
