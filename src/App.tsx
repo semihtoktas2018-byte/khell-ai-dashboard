@@ -80,7 +80,7 @@ const App = () => {
                         <Routes>
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/auth" element={<AuthPage />} />
-                        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                        <Route path="/dashboard" element={<DashboardLayout />}>
                           <Route index element={<DashboardHome />} />
                           <Route path="analyzer" element={<ProductAnalyzer />} />
                           <Route path="winning" element={<WinningProducts />} />
