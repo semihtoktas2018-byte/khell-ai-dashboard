@@ -236,9 +236,24 @@ export default function LandingPage() {
               </span>
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="text-lg md:text-xl text-muted-foreground mb-8 tracking-tight">
+            <motion.p variants={fadeUp} className="text-lg md:text-xl text-muted-foreground mb-6 tracking-tight">
               {t("landing.heroSubtext")}
             </motion.p>
+
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-2.5 mb-8">
+              {[
+                isTr ? "Ücretsiz Başla" : isFr ? "Commencez Gratuitement" : "Start Free",
+                isTr ? "Kredi Kartı Gerekmez" : isFr ? "Aucune Carte Requise" : "No Credit Card",
+                isTr ? "Google ile 10 Saniyede" : isFr ? "Google en 10 Secondes" : "Google in 10 Seconds",
+              ].map((txt, i) => (
+                <span key={i}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-foreground"
+                  style={{ background: "hsl(142 71% 45% / 0.12)", border: "1px solid hsl(142 71% 45% / 0.35)" }}>
+                  <Check className="h-4 w-4 text-winning shrink-0" strokeWidth={3} />
+                  {txt}
+                </span>
+              ))}
+            </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
               <button onClick={() => navigate("/auth")} className="btn-primary text-base px-8 py-3">
@@ -250,14 +265,7 @@ export default function LandingPage() {
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex flex-col items-center gap-2 mb-10">
-              <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap justify-center">
-                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Ücretsiz başla" : isFr ? "Commencez gratuitement" : "Start free"}</span>
-                <span className="text-border">·</span>
-                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Kredi kartı gerekmez" : isFr ? "Aucune carte requise" : "No credit card"}</span>
-                <span className="text-border">·</span>
-                <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-winning" /> {isTr ? "Google ile 10 saniyede" : isFr ? "Google en 10 secondes" : "Google in 10 seconds"}</span>
-              </p>
+            <motion.div variants={fadeUp} className="flex justify-center mb-10">
               <button onClick={() => navigate("/dashboard/analyzer")} className="text-xs text-primary/80 hover:text-primary underline underline-offset-2 transition-colors">
                 {isTr ? "veya kayıt olmadan hızlıca dene →" : isFr ? "ou essayez sans inscription →" : "or try without signing up →"}
               </button>
