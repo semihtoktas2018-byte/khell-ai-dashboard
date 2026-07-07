@@ -184,9 +184,6 @@ export default function LandingPage() {
       <section className="relative pt-12 sm:pt-16 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
-          {/* Side glows — blue light bleeding in from the edges */}
-          <div className="absolute top-1/3 -left-32 w-[420px] h-[420px] rounded-full bg-blue-500/20 blur-[100px]" />
-          <div className="absolute top-1/2 -right-32 w-[420px] h-[420px] rounded-full bg-cyan-400/15 blur-[100px]" />
           {/* KHELL AI Arc Reactor Core */}
           <div className="absolute top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.6]">
             <svg width="330" height="330" viewBox="0 0 480 480" className="max-w-[60vw]">
@@ -307,6 +304,18 @@ export default function LandingPage() {
                 {isTr ? "⚡ 5 Dakikada Bir Yenilenen Gerçek CJ Verisi" : isFr ? "⚡ Vraies données CJ actualisées toutes les 5 minutes" : "⚡ Real CJ Data Refreshed Every 5 Minutes"}
               </motion.a>
             </motion.div>
+
+            <motion.p variants={fadeUp} className="flex flex-wrap items-center justify-center gap-2 text-sm md:text-base font-semibold text-muted-foreground mb-3">
+              <span className="italic font-black" style={{ color: "#f7941d" }}>CJ</span>
+              <span>Dropshipping +</span>
+              <span className="font-black tracking-tight">
+                <span style={{ color: "#e53238" }}>e</span>
+                <span style={{ color: "#0064d2" }}>b</span>
+                <span style={{ color: "#f5af02" }}>a</span>
+                <span style={{ color: "#86b817" }}>y</span>
+              </span>
+              <span>{isTr ? "gerçek zamanlı ürün verileri" : isFr ? "données produit en temps réel" : "real-time product data"}</span>
+            </motion.p>
 
             <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
               <span className="bg-gradient-to-b from-foreground to-muted-foreground bg-clip-text text-transparent">
