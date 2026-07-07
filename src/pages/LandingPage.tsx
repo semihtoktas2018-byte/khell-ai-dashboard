@@ -112,74 +112,76 @@ export default function LandingPage() {
           : "AI-powered dropshipping analytics platform. Find winning products with real CJ Dropshipping data and instant profit & risk scores."}
       />
 
-      {/* Dil İlanı Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="flex items-center justify-center gap-2 py-2 px-4 text-center"
-        style={{ background: "linear-gradient(90deg, hsl(271 91% 60% / 0.15), hsl(217 91% 60% / 0.15))", borderBottom: "1px solid hsl(271 91% 60% / 0.2)" }}
-      >
-        <p className="text-[11px] font-medium" style={{ color: "hsl(271 91% 75%)" }}>
-          {langBannerText}
-        </p>
-        <div className="flex gap-1 shrink-0">
-          {(["tr", "en", "fr"] as const).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLocale(l)}
-              className="text-[10px] font-bold px-2 py-0.5 rounded-md transition-all"
-              style={{
-                background: locale === l ? "hsl(271 91% 60% / 0.3)" : "transparent",
-                color: locale === l ? "hsl(271 91% 80%)" : "hsl(215 20% 55%)",
-                border: `1px solid ${locale === l ? "hsl(271 91% 60% / 0.5)" : "transparent"}`,
-              }}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </motion.div>
+      <div className="sticky top-0 z-50 bg-background">
+        {/* Dil İlanı Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-center justify-center gap-2 py-2 px-4 text-center"
+          style={{ background: "linear-gradient(90deg, hsl(271 91% 60% / 0.15), hsl(217 91% 60% / 0.15))", borderBottom: "1px solid hsl(271 91% 60% / 0.2)" }}
+        >
+          <p className="text-[11px] font-medium" style={{ color: "hsl(271 91% 75%)" }}>
+            {langBannerText}
+          </p>
+          <div className="flex gap-1 shrink-0">
+            {(["tr", "en", "fr"] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLocale(l)}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-md transition-all"
+                style={{
+                  background: locale === l ? "hsl(271 91% 60% / 0.3)" : "transparent",
+                  color: locale === l ? "hsl(271 91% 80%)" : "hsl(215 20% 55%)",
+                  border: `1px solid ${locale === l ? "hsl(271 91% 60% / 0.5)" : "transparent"}`,
+                }}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </motion.div>
 
-      {/* CJ Entegrasyon Banner */}
-      <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
-        <Package className="h-3 w-3 text-primary shrink-0" />
-        <p className="text-[11px] text-primary font-medium">
-          {isTr ? "CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif" : isFr ? "Intégré avec CJdropshipping — données produit en temps réel actives" : "Integrated with CJdropshipping — real-time product data active"}
-        </p>
-        <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+        {/* CJ Entegrasyon Banner */}
+        <div className="flex items-center justify-center gap-2 bg-primary/10 border-b border-primary/20 py-1.5 px-4">
+          <Package className="h-3 w-3 text-primary shrink-0" />
+          <p className="text-[11px] text-primary font-medium">
+            {isTr ? "CJdropshipping ile entegre — gerçek zamanlı ürün verisi aktif" : isFr ? "Intégré avec CJdropshipping — données produit en temps réel actives" : "Integrated with CJdropshipping — real-time product data active"}
+          </p>
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+        </div>
+
+        {/* Nav */}
+        <nav className="border-b border-border bg-background/80 backdrop-blur-md">
+          <div className="container mx-auto flex h-16 items-center justify-between px-3 sm:px-6 gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-3">
+              <BackButton />
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <Zap className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="text-sm sm:text-lg font-bold text-foreground tracking-tight whitespace-nowrap">KHELL AI</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              <button
+                onClick={() => setLocale(locale === "tr" ? "en" : locale === "en" ? "fr" : "tr")}
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline">{locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}</span>
+              </button>
+              <button onClick={() => navigate("/auth")} className="btn-ghost text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
+                {t("landing.login")}
+              </button>
+              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
+                {t("landing.start")}
+              </button>
+            </div>
+          </div>
+        </nav>
       </div>
 
-      {/* Nav */}
-      <nav className="fixed top-14 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-3 sm:px-6 gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            <BackButton />
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <Zap className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm sm:text-lg font-bold text-foreground tracking-tight truncate">KHELL AI</span>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            <button
-              onClick={() => setLocale(locale === "tr" ? "en" : locale === "en" ? "fr" : "tr")}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Globe className="h-3.5 w-3.5" />
-              <span className="hidden xs:inline">{locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}</span>
-            </button>
-            <button onClick={() => navigate("/auth")} className="btn-ghost text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
-              {t("landing.login")}
-            </button>
-            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
-              {t("landing.start")}
-            </button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero */}
-      <section className="relative pt-40 pb-20 px-6">
+      <section className="relative pt-12 sm:pt-16 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
           {/* KHELL AI Arc Reactor Core */}
