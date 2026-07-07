@@ -184,6 +184,9 @@ export default function LandingPage() {
       <section className="relative pt-12 sm:pt-16 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+          {/* Side glows — blue light bleeding in from the edges */}
+          <div className="absolute top-1/3 -left-32 w-[420px] h-[420px] rounded-full bg-blue-500/20 blur-[100px]" />
+          <div className="absolute top-1/2 -right-32 w-[420px] h-[420px] rounded-full bg-cyan-400/15 blur-[100px]" />
           {/* KHELL AI Arc Reactor Core */}
           <div className="absolute top-[24%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.6]">
             <svg width="330" height="330" viewBox="0 0 480 480" className="max-w-[60vw]">
