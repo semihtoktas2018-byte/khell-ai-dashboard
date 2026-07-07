@@ -133,11 +133,7 @@ export default function EbayResearch() {
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition}
-        className="rounded-2xl p-6 md:p-8"
-        style={{
-          background: "linear-gradient(135deg, hsl(222 47% 7%) 0%, hsl(222 47% 4%) 100%)",
-          border: "1px solid hsl(217 32% 17%)",
-        }}
+        className="panel-glow p-6 md:p-8"
       >
         <div className="flex items-center gap-3 mb-2">
           <div className="h-9 w-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
@@ -152,7 +148,7 @@ export default function EbayResearch() {
             </p>
           </div>
         </div>
-        <div className="mt-3 inline-block text-[11px] font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded-lg px-3 py-1.5">
+        <div className="mt-3 pill-glow">
           {isPro
             ? (isTr ? "PRO — sınırsız arama" : "PRO — unlimited search")
             : hasUsedFree()
@@ -163,11 +159,7 @@ export default function EbayResearch() {
 
       {/* Search box */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.1 }}
-        className="rounded-xl p-6"
-        style={{
-          background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))",
-          border: "1px solid hsl(217 91% 60% / 0.18)",
-        }}
+        className="panel-glow p-6"
       >
         <h3 className="text-sm font-semibold text-foreground mb-4">
           {isTr ? "Ürün Ara" : "Search Product"}
@@ -239,15 +231,14 @@ export default function EbayResearch() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="space-y-4">
 
           {/* Overview */}
-          <div className="rounded-xl p-5 grid grid-cols-2 sm:grid-cols-4 gap-4"
-            style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+          <div className="panel-glow p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: isTr ? "Toplam İlan" : "Total Listings", value: result.total.toLocaleString(), icon: Package, color: "text-blue-400" },
               { label: isTr ? "Ort. Fiyat" : "Avg. Price", value: `${curSymbol}${avgPrice.toFixed(2)}`, icon: DollarSign, color: "text-green-400" },
               { label: isTr ? "En Düşük" : "Lowest", value: `${curSymbol}${minPrice.toFixed(2)}`, icon: TrendingUp, color: "text-emerald-400" },
               { label: isTr ? "Fiyat Aralığı" : "Price Range", value: `${curSymbol}${minPrice.toFixed(0)}–${curSymbol}${maxPrice.toFixed(0)}`, icon: Tag, color: "text-amber-400" },
             ].map((s) => (
-              <div key={s.label} className="text-center">
+              <div key={s.label} className="stat-glow text-center">
                 <s.icon className={`h-5 w-5 mx-auto mb-1 ${s.color}`} />
                 <p className="text-lg font-bold text-white">{s.value}</p>
                 <p className="text-[10px] text-muted-foreground">{s.label}</p>
@@ -256,8 +247,7 @@ export default function EbayResearch() {
           </div>
 
           {/* Rekabet uyarısı */}
-          <div className="rounded-lg px-4 py-2.5 text-xs flex items-center gap-2"
-            style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+          <div className="panel-glow px-4 py-2.5 text-xs flex items-center gap-2">
             <span className="text-muted-foreground">
               {isTr ? "Rekabet:" : "Competition:"}{" "}
               <span className={`font-bold ${result.total <= 500 ? "text-green-400" : result.total <= 5000 ? "text-yellow-400" : "text-red-400"}`}>
@@ -271,8 +261,8 @@ export default function EbayResearch() {
           </div>
 
           {/* Product list */}
-          <div className="rounded-xl overflow-hidden" style={{ border: "1px solid hsl(217 32% 17%)" }}>
-            <div className="px-5 py-3 flex items-center justify-between" style={{ background: "hsl(222 47% 8%)" }}>
+          <div className="panel-glow overflow-hidden">
+            <div className="px-5 py-3 flex items-center justify-between border-b border-border">
               <h4 className="text-sm font-bold text-white">
                 {isTr ? "🛍️ eBay Ürünleri" : "🛍️ eBay Products"}
               </h4>
@@ -334,8 +324,7 @@ export default function EbayResearch() {
             { icon: "⚡", title: isTr ? "Anında Çeker" : "Fetches Instantly", desc: isTr ? "eBay'den fiyat, satıcı, rakip sayısını gerçek zamanlı çeker" : "Pulls price, seller and competition from eBay in real time" },
             { icon: "⬇️", title: isTr ? "Tek Tıkla Aktar" : "One-Click Import", desc: isTr ? "Beğendiğin ürünü direkt Ürün Analizi'ne gönder" : "Send any product straight to Product Analyzer" },
           ].map((s) => (
-            <div key={s.title} className="rounded-xl p-5 text-center"
-              style={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(217 32% 17%)" }}>
+            <div key={s.title} className="stat-glow p-5 text-center">
               <div className="text-3xl mb-3">{s.icon}</div>
               <h4 className="text-sm font-bold text-white mb-1">{s.title}</h4>
               <p className="text-xs text-muted-foreground">{s.desc}</p>
