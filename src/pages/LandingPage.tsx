@@ -152,26 +152,26 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="fixed top-14 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-3">
+        <div className="container mx-auto flex h-16 items-center justify-between px-3 sm:px-6 gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
             <BackButton />
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground tracking-tight">KHELL AI</span>
+            <span className="text-sm sm:text-lg font-bold text-foreground tracking-tight truncate">KHELL AI</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setLocale(locale === "tr" ? "en" : locale === "en" ? "fr" : "tr")}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
             >
               <Globe className="h-3.5 w-3.5" />
-              {locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}
+              <span className="hidden xs:inline">{locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}</span>
             </button>
-            <button onClick={() => navigate("/auth")} className="btn-ghost text-sm py-2 px-4">
+            <button onClick={() => navigate("/auth")} className="btn-ghost text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
               {t("landing.login")}
             </button>
-            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-sm py-2 px-4">
+            <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
               {t("landing.start")}
             </button>
           </div>
