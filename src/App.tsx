@@ -33,6 +33,7 @@ import BestSellers from "./pages/BestSellers";
 import OrderLog from "./pages/OrderLog";
 import StoreSpy from "./pages/StoreSpy";
 import EbayResearch from "./pages/EbayResearch";
+import AdSpy from "./pages/AdSpy";
 import UsersAdmin from "./pages/UsersAdmin";
 import PriceTracker from "./pages/PriceTracker";
 import NotFound from "./pages/NotFound";
@@ -40,6 +41,7 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import SplashScreen from "./components/SplashScreen";
+import PromoIntro from "./components/PromoIntro";
 
 const queryClient = new QueryClient();
 
@@ -59,11 +61,14 @@ const App = () => {
     }
   });
 
+  const [showPromo, setShowPromo] = useState(false);
+
   const dismissSplash = () => {
     try {
       sessionStorage.setItem("khell_splash_shown", "true");
     } catch {}
     setShowSplash(false);
+    setShowPromo(true);
   };
 
   return (
@@ -79,6 +84,7 @@ const App = () => {
                     <Sonner />
                     <AnimatePresence>
                       {showSplash && <SplashScreen onDone={dismissSplash} />}
+                      {showPromo && <PromoIntro onDone={() => setShowPromo(false)} />}
                     </AnimatePresence>
                     <BrowserRouter>
                       <ErrorBoundary>
@@ -103,6 +109,7 @@ const App = () => {
                           <Route path="content-engine" element={<ContentEngine />} />
                           <Route path="store-spy" element={<StoreSpy />} />
                           <Route path="ebay" element={<EbayResearch />} />
+                          <Route path="ad-spy" element={<AdSpy />} />
                           <Route path="users" element={<UsersAdmin />} />
                           <Route path="price-tracker" element={<PriceTracker />} />
                         </Route>
