@@ -75,6 +75,8 @@ const navKeys = [
   { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending", emoji: "🔥" },
   { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award, emoji: "🏆" },
   { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck, emoji: "🚚" },
+  { labelKey: "nav.cjLink", path: "https://cjdropshipping.com", icon: Truck, emoji: "📦", external: true },
+  { labelKey: "nav.ebayLink", path: "https://www.ebay.com", icon: ShoppingBag, emoji: "🛒", external: true },
   { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield, emoji: "⚠️" },
   { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText, emoji: "📄" },
   { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain, emoji: "🧠" },
@@ -142,7 +144,7 @@ export default function DashboardLayout() {
           {navKeys.map((item) => {
             const active = location.pathname === item.path;
             return (
-              <button key={item.path} onClick={() => { navigate(item.path); setMobileOpen(false); }}
+              <button key={item.path} onClick={() => { if (item.external) { window.open(item.path, "_blank", "noopener,noreferrer"); } else { navigate(item.path); setMobileOpen(false); } }}
                 data-tour={item.tourId}
                 className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
               >
