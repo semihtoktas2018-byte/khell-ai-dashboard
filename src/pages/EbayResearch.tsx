@@ -365,9 +365,11 @@ export default function EbayResearch() {
       )}
 
       {/* Footer imza */}
-      <p className="text-center text-[10px] text-muted-foreground/60 pt-2">
-        A BAMIR ONLINE STORE'S PRODUCTION
-      </p>
+      <div className="rounded-xl px-4 py-4 text-center" style={{ background: "hsl(222 47% 6%)", border: "1px solid hsl(217 32% 17%)" }}>
+        <p className="text-sm font-bold uppercase tracking-wide text-cyan-400">
+          A BAMIR ONLINE STORE'S PRODUCTION
+        </p>
+      </div>
     </div>
   );
 }
