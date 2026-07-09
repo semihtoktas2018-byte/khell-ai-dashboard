@@ -284,12 +284,6 @@ export default function DashboardLayout() {
           </ErrorBoundary>
 
           <footer className="mt-10 pt-8 border-t border-border/60 space-y-4">
-            <div className="text-center py-6 rounded-xl" style={{ background: "linear-gradient(135deg, hsl(217 91% 60% / 0.12), hsl(199 89% 55% / 0.08))", border: "1px solid hsl(217 91% 60% / 0.25)" }}>
-              <p className="text-lg sm:text-xl font-black tracking-wide bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                A BAMİR ONLINE STORE'S PRODUCTION
-              </p>
-            </div>
-
             <a
               href="https://signal-magic-grab.lovable.app"
               target="_blank"
