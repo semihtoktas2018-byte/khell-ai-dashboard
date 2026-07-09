@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +20,19 @@ import BamirFooter from "@/components/BamirFooter";
 
 export default function ContentEngine() {
   const { t, locale } = useLocale();
+  const { isPro } = useAnalysisHistory();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
+  const isTr = locale === "tr";
+
+  const FREE_USE_KEY = "khell_contentengine_used_count";
+  const FREE_LIMIT = 3;
+  const getFreeUsed = () => parseInt(localStorage.getItem(FREE_USE_KEY) || "0", 10);
+  const hasUsedFree = () => getFreeUsed() >= FREE_LIMIT;
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const [productName, setProductName] = useState("");
   const [niche, setNiche] = useState("");
@@ -102,6 +113,10 @@ export default function ContentEngine() {
       toast({ title: t("ce.error"), description: t("ce.errorImage"), variant: "destructive" });
       return;
     }
+    if (!isPro && hasUsedFree()) {
+      setShowPaywall(true);
+      return;
+    }
     setLoading(true);
     setError(false);
     setResult(null);
@@ -114,6 +129,7 @@ export default function ContentEngine() {
         locale,
       });
       setResult(output);
+      if (!isPro) localStorage.setItem(FREE_USE_KEY, String(getFreeUsed() + 1));
     } catch (err) {
       console.error("Content generation failed:", err);
       setError(true);
@@ -521,6 +537,38 @@ export default function ContentEngine() {
           </div>
         </div>
       )}
+
+      {/* Paywall */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <div className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">🎬</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">
+              {isTr ? "Sınırsız İçerik Motoru PRO'da" : "Unlimited Content Engine with PRO"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isTr ? "Ücretsiz kullanım hakkını doldurdun. Sınırsız içerik üretimi için PRO'ya geç." : "You've used your free generations. Upgrade to PRO for unlimited content generation."}
+            </p>
+            <div className="space-y-2 text-left mb-6">
+              {[
+                isTr ? "🎬 Sınırsız içerik üretimi" : "🎬 Unlimited content generation",
+                isTr ? "🛍️ Sınırsız eBay araştırma" : "🛍️ Unlimited eBay research",
+                isTr ? "🕵️ Sınırsız mağaza analizi" : "🕵️ Unlimited store analysis",
+                isTr ? "🔔 Fiyat takibi ve bildirimler" : "🔔 Price tracking & alerts",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-sm text-foreground"><span className="text-winning">✔</span> {f}</div>
+              ))}
+            </div>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {isTr ? "Pro'ya Geç" : "Go Pro"} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">
+              {isTr ? "Şimdi değil" : "Not now"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <BamirFooter />
     </div>
   );
