@@ -69,22 +69,22 @@ const changelog = [
 ];
 
 const navKeys = [
-  { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer" },
-  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning" },
-  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending" },
-  { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award },
-  { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck },
-  { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield },
-  { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText },
-  { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain },
-  { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video },
-  { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark },
-  { labelKey: "nav.orderLog", path: "/dashboard/order-log", icon: Wallet },
-  { labelKey: "nav.storeSpy", path: "/dashboard/store-spy", icon: Store },
-  { labelKey: "nav.ebay", path: "/dashboard/ebay", icon: ShoppingBag },
-  { labelKey: "nav.adSpy", path: "/dashboard/ad-spy", icon: Megaphone },
-  { labelKey: "nav.priceTracker", path: "/dashboard/price-tracker", icon: Tag },
+  { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard, emoji: "📊" },
+  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer", emoji: "🧮" },
+  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning", emoji: "📈" },
+  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending", emoji: "🔥" },
+  { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award, emoji: "🏆" },
+  { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck, emoji: "🚚" },
+  { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield, emoji: "⚠️" },
+  { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText, emoji: "📄" },
+  { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain, emoji: "🧠" },
+  { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video, emoji: "🎬" },
+  { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark, emoji: "🔖" },
+  { labelKey: "nav.orderLog", path: "/dashboard/order-log", icon: Wallet, emoji: "💰" },
+  { labelKey: "nav.storeSpy", path: "/dashboard/store-spy", icon: Store, emoji: "🕵️" },
+  { labelKey: "nav.ebay", path: "/dashboard/ebay", icon: ShoppingBag, emoji: "🛍️" },
+  { labelKey: "nav.adSpy", path: "/dashboard/ad-spy", icon: Megaphone, emoji: "📢" },
+  { labelKey: "nav.priceTracker", path: "/dashboard/price-tracker", icon: Tag, emoji: "🏷️" },
 ];
 
 function useChangelog() {
@@ -146,7 +146,7 @@ export default function DashboardLayout() {
                 data-tour={item.tourId}
                 className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
               >
-                <item.icon className="h-4 w-4 shrink-0" />
+                <span className="w-4 shrink-0 text-center text-[15px] leading-none">{item.emoji}</span>
                 {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
               </button>
             );
