@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { translateProducts } from "@/lib/translate";
 import { isEditorPick } from "@/lib/editorPicks";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocale } from "@/contexts/LocaleContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 
 interface CJProduct {
   pid: string;
@@ -24,9 +26,24 @@ export default function CJProductSearch() {
   const [results, setResults] = useState<CJProduct[]>([]);
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const isTr = locale === "tr";
+  const { isPro } = useAnalysisHistory();
+
+  const FREE_USE_KEY = "khell_cjsearch_used_count";
+  const FREE_LIMIT = 3;
+  const getFreeUsed = () => parseInt(localStorage.getItem(FREE_USE_KEY) || "0", 10);
+  const hasUsedFree = () => getFreeUsed() >= FREE_LIMIT;
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const search = async () => {
     if (!query.trim()) return;
+    if (!isPro && hasUsedFree()) {
+      setShowPaywall(true);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResults([]);
@@ -43,6 +60,7 @@ export default function CJProductSearch() {
         throw new Error(`Ürün Arama Hatası: ${data?.message} (code: ${data?.code})`);
       }
       setResults(data.data.list);
+      if (!isPro) localStorage.setItem(FREE_USE_KEY, String(getFreeUsed() + 1));
       // Ürün adlarını Türkçeye çevir
       const names = data.data.list.map((p: CJProduct) => p.productNameEn || p.productName).filter(Boolean);
       translateProducts(names).then(setTranslations).catch(() => {});
@@ -258,6 +276,37 @@ export default function CJProductSearch() {
         <p className="text-xs text-muted-foreground text-center py-4">
           CJdropshipping kataloğundan ürün arayın.
         </p>
+      )}
+
+      {/* Paywall */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <div className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">📦</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">
+              {isTr ? "Sınırsız CJ Araması PRO'da" : "Unlimited CJ Search with PRO"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isTr ? "Ücretsiz arama hakkını doldurdun. Sınırsız CJ ürün araması için PRO'ya geç." : "You've used your free searches. Upgrade to PRO for unlimited CJ product search."}
+            </p>
+            <div className="space-y-2 text-left mb-6">
+              {[
+                isTr ? "📦 Sınırsız CJ ürün araması" : "📦 Unlimited CJ product search",
+                isTr ? "🛍️ Sınırsız eBay araştırma" : "🛍️ Unlimited eBay research",
+                isTr ? "🎬 Sınırsız içerik üretimi" : "🎬 Unlimited content generation",
+                isTr ? "🔔 Fiyat takibi ve bildirimler" : "🔔 Price tracking & alerts",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-sm text-foreground"><span className="text-winning">✔</span> {f}</div>
+              ))}
+            </div>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {isTr ? "Pro'ya Geç" : "Go Pro"} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">
+              {isTr ? "Şimdi değil" : "Not now"}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
