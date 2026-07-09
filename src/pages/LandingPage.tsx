@@ -16,6 +16,11 @@ const featureIcons = [BarChart3, TrendingUp, Search, ShieldCheck, Zap, Target];
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const trackCTA = (label: string) => {
+    try {
+      (window as any).gtag?.("event", "cta_click", { cta_label: label, page: "landing" });
+    } catch {}
+  };
   const { t, locale, setLocale } = useLocale();
   const isTr = locale === "tr";
   const isFr = locale === "fr";
@@ -169,10 +174,10 @@ export default function LandingPage() {
                 <Globe className="h-3.5 w-3.5" />
                 <span className="hidden xs:inline">{locale === "tr" ? "TR" : locale === "en" ? "EN" : "FR"}</span>
               </button>
-              <button onClick={() => navigate("/auth")} className="btn-ghost text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
+              <button onClick={() => { trackCTA("nav_login"); navigate("/auth"); }} className="btn-ghost text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
                 {t("landing.login")}
               </button>
-              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
+              <button onClick={() => { trackCTA("nav_start"); navigate("/dashboard/analyzer"); }} className="btn-primary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 whitespace-nowrap">
                 {t("landing.start")}
               </button>
             </div>
@@ -343,7 +348,7 @@ export default function LandingPage() {
             </motion.div>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
-              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
+              <button onClick={() => { trackCTA("hero_main"); navigate("/dashboard/analyzer"); }} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
               <button
@@ -678,7 +683,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold text-foreground mb-4">{t("landing.ctaTitle")}</h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t("landing.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button onClick={() => navigate("/dashboard/analyzer")} className="btn-primary text-base px-8 py-3">
+              <button onClick={() => { trackCTA("bottom_cta"); navigate("/dashboard/analyzer"); }} className="btn-primary text-base px-8 py-3">
                 {t("landing.cta")}
               </button>
               <button onClick={() => navigate("/dashboard/content-engine")} className="btn-ghost text-base px-8 py-3 border border-border">
