@@ -20,6 +20,7 @@ import {
 } from "@/lib/product-page-generator";
 import { getViralProducts } from "@/lib/viral-products-data";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import SEO from "@/components/SEO";
 import BamirFooter from "@/components/BamirFooter";
 
@@ -48,6 +49,16 @@ export default function ProductPageGenerator() {
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const hasAutoFilled = useRef(false);
   const { currencySymbol, t, locale } = useLocale();
+  const { isPro } = useAnalysisHistory();
+  const isTr = locale === "tr";
+
+  const FREE_USE_KEY = "khell_pagegen_ai_used_count";
+  const FREE_LIMIT = 3;
+  const getFreeUsed = () => parseInt(localStorage.getItem(FREE_USE_KEY) || "0", 10);
+  const hasUsedFree = () => getFreeUsed() >= FREE_LIMIT;
+  const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const salesAnglesI18n: { value: SalesAngle; key: string; icon: string }[] = [
     { value: "problem", key: "ppg.problemSolving", icon: "🛡️" },
@@ -76,12 +87,17 @@ export default function ProductPageGenerator() {
   const handleGenerateAI = async () => {
     if (!input.name.trim()) { toast({ title: "Hata", description: "Ürün adı giriniz", variant: "destructive" }); return; }
     if (input.sellingPrice <= 0) { toast({ title: "Hata", description: "Satış fiyatı giriniz", variant: "destructive" }); return; }
+    if (!isPro && hasUsedFree()) {
+      setShowPaywall(true);
+      return;
+    }
     const margin = input.sellingPrice > 0 ? ((input.sellingPrice - input.cost) / input.sellingPrice) * 100 : 0;
     const finalInput = { ...input, margin, locale };
     setIsLoadingAI(true);
     try {
       const result = await generateProductPageAI(finalInput);
       setContent(result);
+      if (!isPro) localStorage.setItem(FREE_USE_KEY, String(getFreeUsed() + 1));
       toast({ title: "✅ AI İçerik Hazır!", description: "Claude tarafından üretildi" });
     } catch (err) {
       console.error("AI hatası:", err);
@@ -463,6 +479,38 @@ export default function ProductPageGenerator() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Paywall */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+          <div className="w-full max-w-md mx-4 rounded-2xl border border-border bg-card p-8 shadow-2xl text-center">
+            <div className="text-5xl mb-4">📄</div>
+            <h2 className="text-2xl font-black text-foreground mb-2">
+              {isTr ? "Sınırsız AI İçerik PRO'da" : "Unlimited AI Content with PRO"}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isTr ? "Ücretsiz AI kullanım hakkını doldurdun. Sınırsız AI ürün sayfası için PRO'ya geç." : "You've used your free AI generations. Upgrade to PRO for unlimited AI product pages."}
+            </p>
+            <div className="space-y-2 text-left mb-6">
+              {[
+                isTr ? "📄 Sınırsız AI ürün sayfası" : "📄 Unlimited AI product pages",
+                isTr ? "🎬 Sınırsız içerik üretimi" : "🎬 Unlimited content generation",
+                isTr ? "🛍️ Sınırsız eBay araştırma" : "🛍️ Unlimited eBay research",
+                isTr ? "🔔 Fiyat takibi ve bildirimler" : "🔔 Price tracking & alerts",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-2 text-sm text-foreground"><span className="text-winning">✔</span> {f}</div>
+              ))}
+            </div>
+            <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">
+              {isTr ? "Pro'ya Geç" : "Go Pro"} — {proPriceLabel}
+            </a>
+            <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4 block w-full">
+              {isTr ? "Şimdi değil" : "Not now"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <BamirFooter />
     </div>
   );
