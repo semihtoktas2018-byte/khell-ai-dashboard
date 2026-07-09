@@ -42,6 +42,7 @@ import { Navigate } from "react-router-dom";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import SplashScreen from "./components/SplashScreen";
 import PromoIntro from "./components/PromoIntro";
+import BotSignal from "./components/BotSignal";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
                   <OrderLogProvider>
                     <Toaster />
                     <Sonner />
+                    <BotSignal />
                     <AnimatePresence>
                       {showSplash && <SplashScreen onDone={dismissSplash} />}
                       {showPromo && <PromoIntro onDone={() => setShowPromo(false)} />}
