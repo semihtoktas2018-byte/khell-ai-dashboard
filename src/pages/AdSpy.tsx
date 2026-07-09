@@ -321,9 +321,8 @@ export default function AdSpy() {
         )}
       </motion.div>
 
-      <div className="flex items-center justify-center gap-2 py-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+      <div className="rounded-xl px-4 py-4 text-center" style={{ background: "hsl(222 47% 6%)", border: "1px solid hsl(217 32% 17%)" }}>
+        <p className="text-sm font-bold uppercase tracking-wide text-cyan-400">
           A BAMIR ONLINE STORE'S PRODUCTION
         </p>
       </div>
