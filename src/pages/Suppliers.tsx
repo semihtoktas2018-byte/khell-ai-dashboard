@@ -4,6 +4,7 @@ import { Search, Star, CheckCircle, Clock, Zap, Shield, TrendingUp, Package, Ext
 import { useLocale } from "@/contexts/LocaleContext";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -410,6 +411,7 @@ export default function Suppliers() {
           <Zap className="h-4 w-4" /> Ürün Analiz Et
         </a>
       </motion.div>
+      <BamirFooter />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { generateContent, type ContentEngineOutput } from "@/lib/content-engine";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 export default function ContentEngine() {
   const { t, locale } = useLocale();
@@ -520,6 +521,7 @@ export default function ContentEngine() {
           </div>
         </div>
       )}
+      <BamirFooter />
     </div>
   );
 }

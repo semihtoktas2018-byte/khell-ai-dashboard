@@ -8,6 +8,7 @@ import { runDecisionEngine, runDecisionEngineAI, type DecisionInput, type Decisi
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 const categories = [
   "Furniture", "Home Decor", "Luxury Decor", "Fashion", "Jewelry", "Watches",
@@ -233,6 +234,7 @@ export default function SalesDecisionEngine() {
             </div>
           )}
         </div>
+        <BamirFooter />
       </div>
     </div>
   );

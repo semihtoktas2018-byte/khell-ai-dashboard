@@ -7,6 +7,7 @@ import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const FREE_TRACK_LIMIT = 2;
@@ -268,6 +269,7 @@ export default function PriceTracker() {
           </motion.div>
         </div>
       )}
+      <BamirFooter />
     </div>
   );
 }

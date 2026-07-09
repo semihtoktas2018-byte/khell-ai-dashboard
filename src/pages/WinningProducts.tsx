@@ -11,6 +11,7 @@ import { isEditorPick } from "@/lib/editorPicks";
 import { getNewPids, markSeen } from "@/lib/newProductTracker";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import AdDaysTracker from "@/components/AdDaysTracker";
+import BamirFooter from "@/components/BamirFooter";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000;
 const FREE_LIMIT = 4;
@@ -573,6 +574,7 @@ export default function WinningProducts() {
           </motion.div>
         </div>
       )}
+      <BamirFooter />
     </div>
   );
 }

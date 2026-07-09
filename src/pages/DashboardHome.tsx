@@ -11,6 +11,7 @@ import HeroSection from "@/components/HeroSection";
 import SEO from "@/components/SEO";
 import TrendScoreWidget from "@/components/TrendScoreWidget";
 import CJProductSearch from "@/components/CJProductSearch";
+import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -255,6 +256,7 @@ export default function DashboardHome() {
           </div>
         </motion.div>
 
+        <BamirFooter />
       </div>
     </motion.div>
   );

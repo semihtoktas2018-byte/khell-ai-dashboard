@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 interface ProfileRow {
   id: string;
@@ -129,9 +130,7 @@ export default function UsersAdmin() {
         </div>
       </motion.div>
 
-      <p className="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">
-        A BAMIR ONLINE STORE'S PRODUCTION
-      </p>
+      <BamirFooter />
     </div>
   );
 }

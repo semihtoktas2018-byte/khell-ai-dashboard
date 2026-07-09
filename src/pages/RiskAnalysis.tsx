@@ -4,6 +4,7 @@ import { analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { Shield, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -96,6 +97,7 @@ export default function RiskAnalysis() {
             ))}
           </div>
         </motion.div>
+        <BamirFooter />
       </div>
     </div>
   );

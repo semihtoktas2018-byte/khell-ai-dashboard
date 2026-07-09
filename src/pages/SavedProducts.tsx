@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
+import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -164,6 +165,7 @@ export default function SavedProducts() {
           ))}
         </div>
       )}
+      <BamirFooter />
     </div>
   );
 }
