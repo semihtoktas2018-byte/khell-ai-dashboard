@@ -69,24 +69,24 @@ const changelog = [
 ];
 
 const navKeys = [
-  { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard, emoji: "📊" },
-  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer", emoji: "🧮" },
-  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning", emoji: "📈" },
-  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending", emoji: "🔥" },
-  { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award, emoji: "🏆" },
-  { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck, emoji: "🚚" },
-  { labelKey: "nav.cjLink", path: "https://cjdropshipping.com", icon: Truck, emoji: "📦", external: true },
-  { labelKey: "nav.ebayLink", path: "https://www.ebay.com", icon: ShoppingBag, emoji: "🛒", external: true },
-  { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield, emoji: "⚠️" },
-  { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText, emoji: "📄" },
-  { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain, emoji: "🧠" },
-  { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video, emoji: "🎬" },
-  { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark, emoji: "🔖" },
-  { labelKey: "nav.orderLog", path: "/dashboard/order-log", icon: Wallet, emoji: "💰" },
-  { labelKey: "nav.storeSpy", path: "/dashboard/store-spy", icon: Store, emoji: "🕵️" },
-  { labelKey: "nav.ebay", path: "/dashboard/ebay", icon: ShoppingBag, emoji: "🛍️" },
-  { labelKey: "nav.adSpy", path: "/dashboard/ad-spy", icon: Megaphone, emoji: "📢" },
-  { labelKey: "nav.priceTracker", path: "/dashboard/price-tracker", icon: Tag, emoji: "🏷️" },
+  { labelKey: "nav.dashboard", path: "/dashboard", icon: LayoutDashboard, emoji: "📊", color: "#2563eb", badge: "LIVE" },
+  { labelKey: "nav.analyzer", path: "/dashboard/analyzer", icon: Calculator, tourId: "nav-analyzer", emoji: "🧮", color: "#7c3aed", badge: "AI" },
+  { labelKey: "nav.winning", path: "/dashboard/winning", icon: TrendingUp, tourId: "nav-winning", emoji: "📈", color: "#059669", badge: "HOT" },
+  { labelKey: "nav.trending", path: "/dashboard/trending", icon: Flame, tourId: "nav-trending", emoji: "🔥", color: "#ea580c", badge: "TREND" },
+  { labelKey: "nav.bestsellers", path: "/dashboard/best-sellers", icon: Award, emoji: "🏆", color: "#ca8a04", badge: "BEST" },
+  { labelKey: "nav.suppliers", path: "/dashboard/suppliers", icon: Truck, emoji: "🚚", color: "#0d9488", badge: "VERIFIED" },
+  { labelKey: "nav.cjLink", path: "https://cjdropshipping.com", icon: Truck, emoji: "📦", external: true, color: "#c2410c", badge: "CJ" },
+  { labelKey: "nav.ebayLink", path: "https://www.ebay.com", icon: ShoppingBag, emoji: "🛒", external: true, color: "#0369a1", badge: "EBAY" },
+  { labelKey: "nav.risk", path: "/dashboard/risk", icon: Shield, emoji: "⚠️", color: "#7c3aed", badge: "SAFE" },
+  { labelKey: "nav.pageGen", path: "/dashboard/product-page-generator", icon: FileText, emoji: "📄", color: "#2563eb", badge: "SEO" },
+  { labelKey: "nav.salesDecision", path: "/dashboard/sales-decision", icon: Brain, emoji: "🧠", color: "#4f46e5", badge: "SMART" },
+  { labelKey: "nav.contentEngine", path: "/dashboard/content-engine", icon: Video, emoji: "🎬", color: "#4338ca", badge: "AI" },
+  { labelKey: "nav.saved", path: "/dashboard/saved", icon: Bookmark, emoji: "🔖", color: "#475569", badge: "SAVE" },
+  { labelKey: "nav.orderLog", path: "/dashboard/order-log", icon: Wallet, emoji: "💰", color: "#ca8a04", badge: "PROFIT" },
+  { labelKey: "nav.storeSpy", path: "/dashboard/store-spy", icon: Store, emoji: "🕵️", color: "#7c3aed", badge: "SPY" },
+  { labelKey: "nav.ebay", path: "/dashboard/ebay", icon: ShoppingBag, emoji: "🛍️", color: "#0369a1", badge: "EBAY" },
+  { labelKey: "nav.adSpy", path: "/dashboard/ad-spy", icon: Megaphone, emoji: "📢", color: "#e11d48", badge: "ADS" },
+  { labelKey: "nav.priceTracker", path: "/dashboard/price-tracker", icon: Tag, emoji: "🏷️", color: "#0d9488", badge: "LIVE" },
 ];
 
 function useChangelog() {
@@ -146,10 +146,25 @@ export default function DashboardLayout() {
             return (
               <button key={item.path} onClick={() => { if (item.external) { window.open(item.path, "_blank", "noopener,noreferrer"); } else { navigate(item.path); setMobileOpen(false); } }}
                 data-tour={item.tourId}
-                className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
+                className={`flex items-center justify-between gap-2 w-full rounded-lg px-2 py-2 text-sm font-medium transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}
               >
-                <span className="w-4 shrink-0 text-center text-[15px] leading-none">{item.emoji}</span>
-                {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
+                <span className="flex items-center gap-2.5 min-w-0">
+                  <span
+                    className="h-7 w-7 shrink-0 rounded-lg flex items-center justify-center text-[13px] leading-none"
+                    style={{ background: item.color, boxShadow: active ? `0 0 10px ${item.color}80` : "none" }}
+                  >
+                    {item.emoji}
+                  </span>
+                  {!collapsed && <span className="whitespace-nowrap truncate">{t(item.labelKey)}</span>}
+                </span>
+                {!collapsed && (
+                  <span
+                    className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: `${item.color}20`, border: `1px solid ${item.color}50`, color: item.color }}
+                  >
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}
