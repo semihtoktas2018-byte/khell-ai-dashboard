@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { formatCurrency } from "@/config/khell";
 
 type Locale = "tr" | "en" | "fr";
 
@@ -1396,16 +1397,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const t = (key: string): string => translations[locale][key] ?? translations["en"][key] ?? key;
   const currencySymbol = locale === "tr" ? "₺" : locale === "fr" ? "€" : "$";
 
-  const currency = (val: number): string => {
-    if (locale === "tr") {
-      const tryVal = val * usdToTry;
-      return `₺${tryVal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-    if (locale === "fr") {
-      return `${val.toFixed(2)} €`;
-    }
-    return `$${val.toFixed(2)}`;
-  };
+  // Kullanıcı hangi para biriminde giriyorsa (₺, €, $) sonuç aynı birimde gösterilir.
+  // Gizli kur çevrimi YOK — mantık artık src/config/khell.ts içinde.
+  const currency = (val: number): string => formatCurrency(val, locale);
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t, currency, currencySymbol, country, usdToTry }}>
