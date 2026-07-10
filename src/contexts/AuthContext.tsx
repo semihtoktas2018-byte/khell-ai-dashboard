@@ -21,6 +21,16 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 const AuthContext = createContext<AuthContextType | null>(null);
+
+// GA4'e dönüşüm olayı gönder (sessiz — analytics yoksa hata vermez)
+function track(event: string, params?: Record<string, unknown>) {
+  try {
+    (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", event, params ?? {});
+  } catch {
+    // ignore
+  }
+}
+
 function buildAppUser(su: SupabaseUser, plan: Plan): AppUser {
   const email = su.email ?? "";
   const name = (su.user_metadata as { name?: string } | null)?.name || email.split("@")[0] || "User";
@@ -64,6 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => { loadPlan(newSession.user); }, 0);
         if (_event === "SIGNED_IN") {
           setTimeout(() => { recordLogin(newSession.user); }, 0);
+          // Her başarılı oturum açılışını GA4'e login olarak bildir
+          track("login", { method: newSession.user.app_metadata?.provider ?? "email" });
         }
       } else {
         setUser(null);
@@ -94,9 +106,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
+    // Yeni kayıt -> GA4 dönüşüm olayı
+    track("sign_up", { method: "email" });
     return true;
   }, []);
   const loginWithGoogle = useCallback(async (): Promise<void> => {
+    // Google akışı yönlendirme yaptığı için "başlatıldı" sinyalini burada gönderiyoruz
+    track("sign_up", { method: "google" });
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/dashboard` },
