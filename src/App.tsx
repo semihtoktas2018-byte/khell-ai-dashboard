@@ -20,6 +20,8 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import KazananUrunRehberi from "./pages/KazananUrunRehberi";
 import DropshippingNedir from "./pages/DropshippingNedir";
+import DropshippingKarliMi from "./pages/DropshippingKarliMi";
+import TrendUrunler2026 from "./pages/TrendUrunler2026";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
 import ProductAnalyzer from "./pages/ProductAnalyzer";
@@ -100,6 +102,8 @@ const App = () => {
                         <Route path="/refund" element={<RefundPolicy />} />
                         <Route path="/rehber/kazanan-urun-nasil-bulunur" element={<KazananUrunRehberi />} />
                         <Route path="/rehber/dropshipping-nedir-nasil-yapilir" element={<DropshippingNedir />} />
+                        <Route path="/rehber/dropshipping-karli-mi" element={<DropshippingKarliMi />} />
+                        <Route path="/rehber/2026-trend-dropshipping-urunleri" element={<TrendUrunler2026 />} />
                         <Route path="/dashboard" element={<DashboardLayout />}>
                           <Route index element={<DashboardHome />} />
                           <Route path="analyzer" element={<ProductAnalyzer />} />
