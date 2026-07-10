@@ -314,7 +314,7 @@ export default function WinningProducts() {
   const navigate = useNavigate();
   const { locale, currency } = useLocale();
   const { isPro } = useAnalysisHistory();
-  const { user } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
   const c = COPY[locale] || COPY.en;
   const proPriceLabel = locale === "tr" ? "249₺/ay" : locale === "fr" ? "29€/ay" : "$29/mo";
   const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
@@ -425,8 +425,9 @@ export default function WinningProducts() {
     .filter((p) => p._margin >= marginFilters[marginFilter].min)
     .filter((p) => !showNewOnly || newPids.has(p.pid));
 
-  const visibleItems = isPro ? allFiltered : allFiltered.slice(0, FREE_LIMIT);
-  const lockedItems = isPro ? [] : allFiltered.slice(FREE_LIMIT);
+  const effectiveLimit = user ? 3 : FREE_LIMIT; // girişsiz 1, girişli 3, Pro tümü
+  const visibleItems = isPro ? allFiltered : allFiltered.slice(0, effectiveLimit);
+  const lockedItems = isPro ? [] : allFiltered.slice(effectiveLimit);
 
   return (
     <div className="space-y-6">
@@ -520,7 +521,23 @@ export default function WinningProducts() {
             ))}
           </div>
 
-          {!isPro && lockedItems.length > 0 && (
+          {/* Girişsiz kullanıcı: Google ile giriş yap, +2 ürün aç */}
+          {!isPro && lockedItems.length > 0 && !user && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="rounded-xl p-6 text-center cursor-pointer"
+              style={{ background: "linear-gradient(135deg, hsl(199 89% 55% / 0.12), hsl(142 71% 45% / 0.08))", border: "1px solid hsl(199 89% 55% / 0.3)" }}
+              onClick={() => loginWithGoogle()}>
+              <Crown className="h-10 w-10 text-sky-400 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-white mb-1">{locale === "tr" ? "+2 ürünü ücretsiz aç 🔓" : "Unlock +2 products free 🔓"}</h3>
+              <p className="text-xs text-muted-foreground mb-4">{locale === "tr" ? "Google ile 10 saniyede üye ol, 2 ürünü daha ücretsiz gör." : "Sign up with Google in 10s and see 2 more products free."}</p>
+              <button className="inline-flex items-center gap-2 px-8 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, hsl(199 89% 48%), hsl(142 71% 42%))", boxShadow: "0 4px 20px hsl(199 89% 48% / 0.3)" }}>
+                {locale === "tr" ? "Google ile Giriş Yap" : "Sign in with Google"}
+              </button>
+            </motion.div>
+          )}
+
+          {/* Girişli ama Pro değil: Pro'ya yönlendir */}
+          {!isPro && lockedItems.length > 0 && user && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="rounded-xl p-6 text-center cursor-pointer"
               style={{ background: "linear-gradient(135deg, hsl(38 92% 50% / 0.1), hsl(24 95% 53% / 0.08))", border: "1px solid hsl(38 92% 50% / 0.3)" }}
