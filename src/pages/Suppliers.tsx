@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Star, CheckCircle, Clock, Zap, Shield, TrendingUp, Package, ExternalLink, Award, AlertTriangle, Loader2, Lock } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import BamirFooter from "@/components/BamirFooter";
@@ -111,7 +112,13 @@ const STATS = [
 export default function Suppliers() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const { isPro } = useAnalysisHistory();
+  const [showPaywall, setShowPaywall] = useState(false);
+  const COMPARE_USE_KEY = "khell_supplier_compare_used";
+  const FREE_COMPARE_LIMIT = 1; // 1 ücretsiz karşılaştırma, sonrası Pro
+  const getCompareUsed = () => parseInt(localStorage.getItem(COMPARE_USE_KEY) || "0", 10);
+  const shopierLink = locale === "tr" ? "https://www.shopier.com/bamironlinestore/46009500" : "https://www.shopier.com/bamironlinestore/48494025";
 
   const [productQuery, setProductQuery] = useState("");
   const [comparing, setComparing] = useState(false);
@@ -122,6 +129,10 @@ export default function Suppliers() {
   const handleCompare = async () => {
     const name = productQuery.trim();
     if (!name || comparing) return;
+    if (!isPro && getCompareUsed() >= FREE_COMPARE_LIMIT) {
+      setShowPaywall(true);
+      return;
+    }
     setComparing(true);
     setCompareError(false);
     setCompareResult(null);
@@ -140,6 +151,7 @@ export default function Suppliers() {
         maxPrice: Math.max(...prices),
         items: list,
       });
+      if (!isPro) localStorage.setItem(COMPARE_USE_KEY, String(getCompareUsed() + 1));
     } catch {
       setCompareError(true);
     } finally {
@@ -411,6 +423,26 @@ export default function Suppliers() {
           <Zap className="h-4 w-4" /> Ürün Analiz Et
         </a>
       </motion.div>
+      <AnimatePresence>
+        {showPaywall && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="w-full max-w-md mx-4 rounded-2xl border border-amber-500/30 bg-card p-8 shadow-2xl text-center">
+              <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-amber-500/15 flex items-center justify-center">
+                <Lock className="h-7 w-7 text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-black text-foreground mb-2">Tedarikçi Karşılaştırma PRO'da</h2>
+              <p className="text-sm text-muted-foreground mb-6">Ücretsiz karşılaştırma hakkını kullandın. Sınırsız tedarikçi ve fiyat karşılaştırması için PRO'ya geç.</p>
+              <div className="text-left mb-6 space-y-3">
+                <div className="flex items-center gap-3"><span className="text-emerald-400 text-base">✔</span><span className="text-sm text-foreground">Sınırsız ürün-tedarikçi karşılaştırması</span></div>
+                <div className="flex items-center gap-3"><span className="text-emerald-400 text-base">✔</span><span className="text-sm text-foreground">CJ + AliExpress canlı fiyat farkı</span></div>
+                <div className="flex items-center gap-3"><span className="text-emerald-400 text-base">✔</span><span className="text-sm text-foreground">Tüm kazanan ve trend ürünlerin kilidi</span></div>
+              </div>
+              <a href={shopierLink} target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-base py-3.5 transition-all shadow-lg shadow-amber-500/25">Pro'ya Geç</a>
+              <button onClick={() => setShowPaywall(false)} className="text-xs text-muted-foreground hover:underline mt-4">Şimdi değil</button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <BamirFooter />
     </div>
   );
