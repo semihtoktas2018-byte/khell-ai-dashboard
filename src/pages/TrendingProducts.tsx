@@ -387,7 +387,7 @@ export default function TrendingProducts() {
               <motion.div key={`locked-${p.pid || i}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: (FREE_LIMIT + i) * 0.03 } }}
                 className="rounded-xl overflow-hidden flex flex-col relative cursor-pointer"
                 style={{ background: "linear-gradient(160deg, hsl(222 47% 9% / 0.7), hsl(222 47% 6% / 0.85))", border: "1px solid hsl(217 32% 22% / 0.7)" }}
-                onClick={() => setShowPaywall(true)}>
+                onClick={() => (user ? setShowPaywall(true) : loginWithGoogle())}>
                 <div className="aspect-square bg-background overflow-hidden" style={{ filter: "blur(8px)" }}>
                   {p.productImage?.split(",")[0] ? <img src={p.productImage.split(",")[0]} alt="" loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted" />}
                 </div>
@@ -395,10 +395,10 @@ export default function TrendingProducts() {
                   <div className="h-3 bg-muted rounded w-3/4" /><div className="h-3 bg-muted rounded w-1/2" /><div className="h-7 bg-primary/20 rounded" />
                 </div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl" style={{ background: "hsl(222 47% 6% / 0.75)", backdropFilter: "blur(2px)" }}>
-                  <Crown className="h-8 w-8 text-amber-400 mb-2" />
-                  <p className="text-xs font-bold text-white mb-1">{c.proFeature}</p>
-                  <p className="text-[10px] text-muted-foreground text-center px-4">{c.seeProduct}</p>
-                  <button className="mt-3 px-4 py-1.5 rounded-lg text-[11px] font-bold text-white" style={{ background: "linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))" }}>{c.goPro}</button>
+                  <Crown className={`h-8 w-8 mb-2 ${user ? "text-amber-400" : "text-sky-400"}`} />
+                  <p className="text-xs font-bold text-white mb-1">{user ? c.proFeature : (locale === "tr" ? "Google ile Aç" : "Unlock with Google")}</p>
+                  <p className="text-[10px] text-muted-foreground text-center px-4">{user ? c.seeProduct : (locale === "tr" ? "Bu ürünü görmek için Google ile giriş yap" : "Sign in with Google to see it")}</p>
+                  <button className="mt-3 px-4 py-1.5 rounded-lg text-[11px] font-bold text-white" style={{ background: user ? "linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))" : "linear-gradient(135deg, hsl(199 89% 48%), hsl(142 71% 42%))" }}>{user ? c.goPro : (locale === "tr" ? "Google ile Giriş Yap" : "Sign in with Google")}</button>
                 </div>
               </motion.div>
             ))}
