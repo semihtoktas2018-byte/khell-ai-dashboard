@@ -75,11 +75,12 @@ const CURRENCY_SYMBOL: Record<MarketplaceConfig["currency"], string> = {
 
 function calculate(costUSD: number, salePriceUSD: number, exchangeRate: number, mp: MarketplaceConfig): MarketplaceResult {
   // TL bazlı pazar yerleri kur ile çevrilir, diğerleri direkt USD tutarını kendi para birimi kabul eder (yaklaşık).
-  const rate = mp.currency === "TL" ? exchangeRate : 1;
+  // Kullanıcı zaten yerel para biriminde giriyor; ülkenin pazar yerleri de aynı birimde. Kur çevrimi YOK.
+  const rate = 1;
   const cost = costUSD * rate;
   const grossRevenue = salePriceUSD * rate;
   const commissionAmt = grossRevenue * (mp.commission / 100);
-  const vatAmt = grossRevenue * (mp.vat / 100);
+  const vatAmt = grossRevenue * (mp.vat / (100 + mp.vat)); // KDV dahil fiyattan gerçek KDV payı
   const netProfit = grossRevenue - commissionAmt - vatAmt - cost - mp.cargo;
   const netMargin = grossRevenue > 0 ? Math.round((netProfit / grossRevenue) * 100) : 0;
   const verdict: MarketplaceResult["verdict"] = netMargin >= 20 ? "iyi" : netMargin >= 5 ? "orta" : "kötü";
@@ -158,13 +159,13 @@ export default function MarketplaceCalculator({
                       {r.vat > 0 && (
                         <span>{isTr ? "KDV" : "VAT"} %{r.vat}: <span className="text-red-400">-{sym}{r.vatAmt.toFixed(2)}</span></span>
                       )}
-                      <span>{isTr ? "Maliyet:" : "Cost:"} <span className="text-red-400">-{sym}{(r.currency === "TL" ? costUSD * exchangeRate : costUSD).toFixed(2)}</span></span>
+                      <span>{isTr ? "Maliyet:" : "Cost:"} <span className="text-red-400">-{sym}{costUSD.toFixed(2)}</span></span>
                     </div>
                   </div>
                 );
               })}
               <p className="text-muted-foreground text-center pt-0.5">
-                {isTr ? `Kur: 1$ = ₺${exchangeRate} · Ülke: ${countryCode}` : `Rate: $1 = ₺${exchangeRate} · Country: ${countryCode}`}
+                {isTr ? `KDV dahil fiyata göre · Ülke: ${countryCode}` : `Based on VAT-inclusive price · Country: ${countryCode}`}
               </p>
             </>
           )}
