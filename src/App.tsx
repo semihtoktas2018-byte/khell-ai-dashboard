@@ -18,6 +18,7 @@ import AuthPage from "./pages/AuthPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import KazananUrunRehberi from "./pages/KazananUrunRehberi";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
 import ProductAnalyzer from "./pages/ProductAnalyzer";
@@ -96,6 +97,7 @@ const App = () => {
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsOfService />} />
                         <Route path="/refund" element={<RefundPolicy />} />
+                        <Route path="/rehber/kazanan-urun-nasil-bulunur" element={<KazananUrunRehberi />} />
                         <Route path="/dashboard" element={<DashboardLayout />}>
                           <Route index element={<DashboardHome />} />
                           <Route path="analyzer" element={<ProductAnalyzer />} />
