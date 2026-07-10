@@ -44,7 +44,8 @@ export default function MoneyLayer({ module, score, dailyEstimate = 0 }: Props) 
       : "from-red-500/20 to-red-500/5 border-red-500/40 text-red-400";
 
   // Earnings — fall back to a sane projection from score if no input
-  const daily = dailyEstimate > 0 ? dailyEstimate : Math.round(score * (b === "high" ? 18 : b === "mid" ? 9 : 4));
+  // Girdi yoksa uydurma kazanç gösterme (dürüstlük kuralı) — gerçek veri gelene kadar 0.
+  const daily = dailyEstimate > 0 ? dailyEstimate : 0;
   const weekly = daily * 7;
   const monthly = daily * 30;
 
