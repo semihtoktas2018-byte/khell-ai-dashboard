@@ -14,7 +14,7 @@ import AdDaysTracker from "@/components/AdDaysTracker";
 import BamirFooter from "@/components/BamirFooter";
 
 const REFRESH_INTERVAL = 5 * 60 * 1000;
-const FREE_LIMIT = 4;
+const FREE_LIMIT = 1; // Ücretsiz 1 ürün göster, gerisi Pro
 const FREE_TRACK_LIMIT = 2;
 
 interface CJProduct {
