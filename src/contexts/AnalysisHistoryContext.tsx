@@ -16,6 +16,12 @@ export interface AnalysisRecord {
   createdAt: string;
 }
 
+// Neden bloklandığını analyzer'a söyleyen tip:
+// "register" -> anonim kullanıcı hakkını bitirdi, ücretsiz kayıt kapısı göster
+// "upgrade"  -> kayıtlı ücretsiz kullanıcı günlük hakkını bitirdi, Pro paywall göster
+// null       -> hak var, blok yok
+export type BlockReason = "register" | "upgrade" | null;
+
 interface AnalysisHistoryContextType {
   history: AnalysisRecord[];
   addAnalysis: (record: Omit<AnalysisRecord, "id" | "createdAt">) => void;
@@ -24,12 +30,17 @@ interface AnalysisHistoryContextType {
   canAnalyze: boolean;
   dailyLimit: number;
   isPro: boolean;
+  isAuthenticated: boolean;
+  blockReason: BlockReason;
   activatePro: (code: string) => boolean;
 }
 
 const STORAGE_KEY = "khell_analysis_history";
 const USAGE_KEY = "khell_daily_usage"; // geçmişten ayrı, "Geçmişi Temizle" bunu etkilemez
-const DAILY_LIMIT = 3;
+
+// Merdiven: önce değer ver, sonra ilişki kur, en son para iste.
+const ANON_LIMIT = 2; // giriş yapmadan bedava analiz
+const FREE_LIMIT = 5; // kayıtlı ücretsiz üyenin günlük hakkı
 
 function getTodayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -69,11 +80,17 @@ const AnalysisHistoryContext = createContext<AnalysisHistoryContextType | null>(
 
 export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AnalysisRecord[]>(loadHistory);
-  const { isPro } = useAuth();
+  const { isPro, isAuthenticated } = useAuth();
   const [usage, setUsage] = useState(loadUsage);
 
   const todayCount = usage.count;
-  const canAnalyze = isPro || todayCount < DAILY_LIMIT;
+
+  // Aktif katmana göre günlük limit
+  const dailyLimit = isPro ? Infinity : isAuthenticated ? FREE_LIMIT : ANON_LIMIT;
+  const canAnalyze = isPro || todayCount < dailyLimit;
+
+  // Blok sebebini belirle: anonim -> kayıt kapısı, kayıtlı -> Pro paywall
+  const blockReason: BlockReason = canAnalyze ? null : isAuthenticated ? "upgrade" : "register";
 
   const addAnalysis = useCallback((record: Omit<AnalysisRecord, "id" | "createdAt">) => {
     const newRecord: AnalysisRecord = {
@@ -107,7 +124,18 @@ export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
 
   return (
     <AnalysisHistoryContext.Provider
-      value={{ history, addAnalysis, clearHistory, todayCount, canAnalyze, dailyLimit: DAILY_LIMIT, isPro, activatePro }}
+      value={{
+        history,
+        addAnalysis,
+        clearHistory,
+        todayCount,
+        canAnalyze,
+        dailyLimit,
+        isPro,
+        isAuthenticated,
+        blockReason,
+        activatePro,
+      }}
     >
       {children}
     </AnalysisHistoryContext.Provider>
