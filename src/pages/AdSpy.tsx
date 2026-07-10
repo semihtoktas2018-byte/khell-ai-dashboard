@@ -26,10 +26,14 @@ const EU_UK_COUNTRIES = [
   { code: "DE", label: "Almanya 🇩🇪" },
 ];
 
+// Token gerektirmeyen, her ülkede çalışan resmi Meta Ad Library linki
+const metaAllCountriesUrl = (q: string) =>
+  `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(q)}`;
+
 const OTHER_PLATFORMS = [
   {
     name: "Meta Ad Library (tüm ülkeler)",
-    build: (q: string) => `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(q)}`,
+    build: metaAllCountriesUrl,
   },
   {
     name: "TikTok Creative Center",
@@ -40,6 +44,21 @@ const OTHER_PLATFORMS = [
     build: (q: string) => `https://adstransparency.google.com/?query=${encodeURIComponent(q)}`,
   },
 ];
+
+// Facebook'un ham token/oturum hatalarını kullanıcıya göstermeyip
+// dostça yönlendirmeye çevirmek için tespit fonksiyonu.
+function isApiUnavailable(msg: string) {
+  const m = msg.toLowerCase();
+  return (
+    m.includes("access token") ||
+    m.includes("session has expired") ||
+    m.includes("validating") ||
+    m.includes("oauth") ||
+    m.includes("expired") ||
+    m.includes("(#") ||
+    m.includes("token")
+  );
+}
 
 export default function AdSpy() {
   const { locale } = useLocale();
@@ -60,6 +79,7 @@ export default function AdSpy() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
+  const [apiUnavailable, setApiUnavailable] = useState(false);
 
   const [adText, setAdText] = useState("");
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -76,6 +96,7 @@ export default function AdSpy() {
     if (!keyword.trim() || selectedCountries.length === 0) return;
     setLoading(true);
     setError(null);
+    setApiUnavailable(false);
     setAds(null);
     setNeedsSetup(false);
     try {
@@ -83,16 +104,21 @@ export default function AdSpy() {
         body: { searchTerms: keyword.trim(), countries: selectedCountries },
       });
       if (fnError) throw fnError;
-      if (data?.needsSetup) {
+      const rawErr: string | undefined = data?.error ? String(data.error) : undefined;
+      if (rawErr && isApiUnavailable(rawErr)) {
+        // Token/oturum sorunu — ham mesajı gösterme, dostça yönlendir
+        setApiUnavailable(true);
+      } else if (data?.needsSetup) {
         setNeedsSetup(true);
-        setError(data.error);
-      } else if (data?.error) {
-        setError(data.error);
+        setError(rawErr ?? null);
+      } else if (rawErr) {
+        setError(rawErr);
       } else {
         setAds((data?.data as FbAd[]) || []);
       }
     } catch (e: any) {
-      setError(isTr ? "Reklamlar çekilemedi. Tekrar dene." : "Could not fetch ads. Try again.");
+      // Ağ/fonksiyon hatası da olsa kullanıcı çalışan yola gitsin
+      setApiUnavailable(true);
     } finally {
       setLoading(false);
     }
@@ -219,7 +245,35 @@ export default function AdSpy() {
           ))}
         </div>
 
-        {error && (
+        {/* Token/oturum sorunu — ham hatayı gösterme, çalışan yola yönlendir */}
+        {apiUnavailable && (
+          <div className="mt-3 rounded-xl px-4 py-3.5" style={{ background: "hsl(217 91% 60% / 0.08)", border: "1px solid hsl(217 91% 60% / 0.3)" }}>
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  {isTr ? "Canlı Meta araması şu an bakımda" : "Live Meta search is temporarily unavailable"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isTr
+                    ? "Aramanı yine de yapabilirsin — resmi Meta Reklam Kütüphanesi'ni tüm ülkelerde, aradığın kelimeyle hazır açalım."
+                    : "You can still search — we'll open Meta's official Ad Library across all countries with your keyword pre-filled."}
+                </p>
+                <a
+                  href={metaAllCountriesUrl(keyword || "")}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all"
+                  style={{ background: "hsl(330 81% 60%)", boxShadow: "0 0 20px hsl(330 81% 60% / 0.3)" }}
+                >
+                  {isTr ? "Meta Reklam Kütüphanesi'nde Ara" : "Search in Meta Ad Library"} <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && !apiUnavailable && (
           <div className="mt-3 flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
             <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
             <span>
@@ -228,15 +282,15 @@ export default function AdSpy() {
                 <>
                   {" "}
                   {isTr
-                    ? "— Bu özellik için Facebook Developer hesabından Ad Library API erişimi alıp token'ı Supabase'e eklememiz gerekiyor, istersen adımları çıkarayım."
-                    : "— This feature needs a Facebook Developer Ad Library API token added to Supabase."}
+                    ? "— Aşağıdaki 'Diğer Pazarlar' bölümünden aramanı hemen yapabilirsin."
+                    : "— Use the 'Other Markets' quick links below to search right away."}
                 </>
               )}
             </span>
           </div>
         )}
 
-        {ads && ads.length === 0 && !error && (
+        {ads && ads.length === 0 && !error && !apiUnavailable && (
           <p className="mt-3 text-xs text-muted-foreground">{isTr ? "Sonuç bulunamadı, farklı bir kelime dene." : "No results, try a different keyword."}</p>
         )}
 
