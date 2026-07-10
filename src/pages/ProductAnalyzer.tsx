@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
-import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, MessageCircle } from "lucide-react";
+import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, MessageCircle, Sparkles, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
 import BackButton from "@/components/BackButton";
@@ -33,12 +33,13 @@ const defaultInput: AnalyzerInput = {
   monthly_orders_estimate: 0,
 };
 
-const socialProofMessages = [
-  "Ali just found a winning product 🔥",
-  "John upgraded to PRO 🚀",
-  "Sarah analyzed 12 products today ✅",
-  "Mehmet found a $2k/mo product 💰",
-  "Emma just unlocked PRO access 🔓",
+// Dürüst, döngüsel ipuçları — sahte kullanıcı/aktivite YOK.
+const rotatingTips: { tr: string; en: string }[] = [
+  { tr: "İpucu: Kâr marjı %30 üstü ürünler ölçeklemeye daha uygun 📈", en: "Tip: Products with 30%+ margin scale more safely 📈" },
+  { tr: "İpucu: Talebi önce TikTok'ta organik test et ✅", en: "Tip: Validate demand with an organic TikTok test first ✅" },
+  { tr: "İpucu: Kargo + reklam giderini ~%15 kısmak marjı ciddi yükseltir 💡", en: "Tip: Trimming shipping + ads ~15% lifts margin a lot 💡" },
+  { tr: "İpucu: Yüksek skorlu ürünü düşük günlük bütçeyle test ederek başla 🚀", en: "Tip: Start high-score products with a small daily test budget 🚀" },
+  { tr: "İpucu: Rakip fiyatını ürün adıyla anlık kontrol edebilirsin 🔎", en: "Tip: Check competitor pricing live by product name 🔎" },
 ];
 
 interface AliProduct {
@@ -88,19 +89,21 @@ export default function ProductAnalyzer() {
   const [showResult, setShowResult] = useState(false);
   const [productName, setProductName] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showRegisterGate, setShowRegisterGate] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [expandTrigger, setExpandTrigger] = useState(0);
-  const [socialProofIndex, setSocialProofIndex] = useState(0);
-  const [showSocialProof, setShowSocialProof] = useState(false);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [showTip, setShowTip] = useState(false);
   const [aliData, setAliData] = useState<AliProduct | null>(null);
   const [aliLoading, setAliLoading] = useState(false);
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
-  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro } = useAnalysisHistory();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, blockReason } = useAnalysisHistory();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale, country, usdToTry } = useLocale();
   const isTr = locale === "tr";
+  const isFr = locale === "fr";
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
   const fields: { key: keyof AnalyzerInput; labelKey: string; suffix?: boolean; placeholder: string }[] = [
@@ -125,14 +128,14 @@ export default function ProductAnalyzer() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSocialProofIndex((i) => (i + 1) % socialProofMessages.length);
-      setShowSocialProof(true);
-      setTimeout(() => setShowSocialProof(false), 3500);
-    }, 6000);
+      setTipIndex((i) => (i + 1) % rotatingTips.length);
+      setShowTip(true);
+      setTimeout(() => setShowTip(false), 4000);
+    }, 7000);
     const initial = setTimeout(() => {
-      setShowSocialProof(true);
-      setTimeout(() => setShowSocialProof(false), 3500);
-    }, 2000);
+      setShowTip(true);
+      setTimeout(() => setShowTip(false), 4000);
+    }, 2500);
     return () => { clearInterval(interval); clearTimeout(initial); };
   }, []);
 
@@ -170,7 +173,13 @@ export default function ProductAnalyzer() {
       return;
     }
     if (!canAnalyze) {
-      setShowPaywall(true);
+      // Anonim kullanıcı -> önce ücretsiz kayıt kapısı; kayıtlı ücretsiz -> Pro paywall
+      if (blockReason === "register") {
+        setShowRegisterGate(true);
+        try { (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "register_gate_shown", { source: "analyzer" }); } catch { /* ignore */ }
+      } else {
+        setShowPaywall(true);
+      }
       setShowResult(false);
       return;
     }
@@ -584,6 +593,46 @@ export default function ProductAnalyzer() {
         )}
       </AnimatePresence>
 
+      {/* ÜCRETSİZ KAYIT KAPISI — anonim kullanıcı hakkını bitirince çıkar */}
+      <AnimatePresence>
+        {showRegisterGate && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="w-full max-w-md mx-4 rounded-2xl border border-primary/30 bg-[hsl(var(--card))] p-8 shadow-2xl text-center">
+              <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-primary/15 flex items-center justify-center">
+                <UserPlus className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-black text-foreground mb-2">
+                {isTr ? "Ücretsiz devam et" : isFr ? "Continuez gratuitement" : "Keep going — it's free"}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                {isTr
+                  ? "Ücretsiz analizlerini kullandın. Ücretsiz hesap aç: günde 5 analiz, geçmişini kaydet ve kaldığın yerden devam et."
+                  : isFr
+                  ? "Vous avez utilisé vos analyses gratuites. Créez un compte gratuit : 5 analyses/jour, historique sauvegardé et reprise là où vous en étiez."
+                  : "You've used your free analyses. Create a free account: 5 analyses/day, saved history, and pick up where you left off."}
+              </p>
+              <div className="text-left mb-6 space-y-3">
+                <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Günde 5 analiz" : isFr ? "5 analyses par jour" : "5 analyses per day"}</span></div>
+                <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Analiz geçmişin kayıtlı kalır" : isFr ? "Historique d'analyses sauvegardé" : "Your analysis history is saved"}</span></div>
+                <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Kart yok, saniyeler içinde" : isFr ? "Sans carte, en quelques secondes" : "No card, takes seconds"}</span></div>
+              </div>
+              <button
+                onClick={() => { try { (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "register_gate_cta", { source: "analyzer" }); } catch { /* ignore */ } navigate("/auth"); }}
+                className="block w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground font-bold text-base py-3.5 transition-all shadow-lg shadow-primary/25"
+              >
+                {isTr ? "Ücretsiz Hesap Aç" : isFr ? "Créer un compte gratuit" : "Create Free Account"}
+              </button>
+              <button onClick={() => navigate("/auth")} className="text-xs text-primary hover:underline mt-4 block w-full">
+                {isTr ? "Zaten üyeyim — giriş yap" : isFr ? "Déjà inscrit — se connecter" : "Already have an account — log in"}
+              </button>
+              <button onClick={() => setShowRegisterGate(false)} className="text-xs text-muted-foreground hover:underline mt-2">
+                {isTr ? "Daha sonra" : isFr ? "Plus tard" : "Later"}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showPaywall && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md">
@@ -653,11 +702,14 @@ export default function ProductAnalyzer() {
         </motion.div>
       )}
 
+      {/* Dürüst ipucu baloncuğu — sahte kullanıcı/aktivite yok */}
       <AnimatePresence>
-        {showSocialProof && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="fixed bottom-6 left-6 z-50 rounded-lg bg-[hsl(var(--card))] border border-border px-4 py-2.5 shadow-xl">
-            <p className="text-xs font-medium text-foreground">{socialProofMessages[socialProofIndex]}</p>
-            <p className="text-[10px] text-muted-foreground">just now</p>
+        {showTip && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="fixed bottom-6 left-6 z-50 max-w-[280px] rounded-lg bg-[hsl(var(--card))] border border-border px-4 py-2.5 shadow-xl">
+            <div className="flex items-start gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-foreground leading-snug">{rotatingTips[tipIndex][isTr ? "tr" : "en"]}</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
