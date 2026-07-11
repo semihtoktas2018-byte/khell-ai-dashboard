@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocale } from "@/contexts/LocaleContext";
 import SEO from "@/components/SEO";
@@ -159,6 +160,33 @@ const FEAT_ICONS = [Search, BarChart3, DollarSign, Package, FileText, Rocket];
 const SHOPIER_TR = "https://www.shopier.com/bamironlinestore/46009500";
 const SHOPIER_INTL = "https://www.shopier.com/bamironlinestore/48494025";
 
+// Sayıyı 0'dan hedefe kadar sayarak gösterir (görünüme girince bir kez çalışır)
+function CountUp({ to, duration = 1.4, format }: { to: number; duration?: number; format: (n: number) => string }) {
+  const [val, setVal] = useState(0);
+  const ran = useRef(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !ran.current) {
+        ran.current = true;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min((now - start) / (duration * 1000), 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setVal(Math.round(to * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [to, duration]);
+  return <span ref={ref}>{format(val)}</span>;
+}
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const { locale, setLocale } = useLocale();
@@ -231,21 +259,35 @@ export default function LandingPage() {
 
           {/* DASHBOARD PREVIEW (örnek analiz — dürüst) */}
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.15 }}
-            className="rounded-2xl p-4" style={{ background: `linear-gradient(160deg,${ink2},#080c17)`, border: "1px solid rgba(148,163,184,.14)", boxShadow: "0 30px 80px rgba(0,0,0,.5)" }}>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <div className="flex items-center gap-2 text-xs font-bold" style={{ color: "#94a3b8" }}><Zap className="h-3.5 w-3.5" style={{ color: purple }} /> KHELL AI</div>
+            className="relative rounded-2xl p-4 overflow-hidden" style={{ background: `linear-gradient(160deg,${ink2},#080c17)`, border: "1px solid rgba(148,163,184,.14)", boxShadow: "0 30px 80px rgba(0,0,0,.5)" }}>
+
+            {/* Arka planda yavaşça dönen ışık halesi */}
+            <motion.div aria-hidden className="absolute -inset-24 pointer-events-none"
+              style={{ background: `conic-gradient(from 0deg, ${purple}22, transparent 30%, transparent 70%, ${purple}18)` }}
+              animate={{ rotate: 360 }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }} />
+            {/* Üstten kayan parıltı */}
+            <motion.div aria-hidden className="absolute inset-y-0 w-1/3 pointer-events-none"
+              style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent)" }}
+              animate={{ x: ["-40%", "220%"] }} transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }} />
+
+            <div className="relative flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-2 text-xs font-bold" style={{ color: "#94a3b8" }}>
+                <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.6, repeat: Infinity }} className="h-1.5 w-1.5 rounded-full inline-block" style={{ background: "#34d399" }} />
+                <Zap className="h-3.5 w-3.5" style={{ color: purple }} /> KHELL AI
+              </div>
               <div className="text-[10px]" style={{ color: "#64748b" }}>{c.demoNote}</div>
             </div>
-            <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+
+            <div className="relative grid grid-cols-3 gap-2.5 mb-2.5">
               <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(139,92,246,.35)" }} transition={{ duration: 0.2 }}
                 className="rounded-xl p-3 cursor-default" style={{ background: "rgba(139,92,246,.08)", border: "1px solid rgba(139,92,246,.2)" }}>
                 <div className="text-[9px] tracking-wide" style={{ color: "#94a3b8" }}>{c.demoScore}</div>
-                <div className="text-2xl font-black" style={{ color: "#c4b5fd" }}>73<span className="text-xs" style={{ color: "#64748b" }}>/100</span></div>
+                <div className="text-2xl font-black" style={{ color: "#c4b5fd" }}><CountUp to={73} format={(n) => String(n)} /><span className="text-xs" style={{ color: "#64748b" }}>/100</span></div>
               </motion.div>
               <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(52,211,153,.3)" }} transition={{ duration: 0.2 }}
                 className="rounded-xl p-3 cursor-default" style={{ background: "rgba(52,211,153,.06)", border: "1px solid rgba(52,211,153,.2)" }}>
                 <div className="text-[9px] tracking-wide" style={{ color: "#94a3b8" }}>{c.demoProfit}</div>
-                <div className="text-xl font-black" style={{ color: "#34d399" }}>₺140.000</div>
+                <div className="text-xl font-black" style={{ color: "#34d399" }}>₺<CountUp to={140000} format={(n) => n.toLocaleString("tr-TR")} /></div>
               </motion.div>
               <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(148,163,184,.25)" }} transition={{ duration: 0.2 }}
                 className="rounded-xl p-3 cursor-default" style={{ background: "rgba(148,163,184,.06)", border: "1px solid rgba(148,163,184,.14)" }}>
@@ -253,13 +295,18 @@ export default function LandingPage() {
                 <div className="text-base font-black" style={{ color: "#34d399" }}>{c.demoLow}</div>
               </motion.div>
             </div>
-            <div className="rounded-xl p-4" style={{ background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.1)" }}>
+
+            <div className="relative rounded-xl p-4" style={{ background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.1)" }}>
               <div className="text-[10px] mb-2" style={{ color: "#94a3b8" }}>{c.demoProfit}</div>
               <svg viewBox="0 0 320 90" className="w-full" style={{ height: 90, overflow: "visible" }}>
                 <defs>
                   <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={purple} stopOpacity="0.35" />
                     <stop offset="100%" stopColor={purple} stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="chartStroke" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#a78bfa" />
+                    <stop offset="100%" stopColor="#f0abfc" />
                   </linearGradient>
                   <filter id="dotGlow" x="-200%" y="-200%" width="500%" height="500%">
                     <feGaussianBlur stdDeviation="4" result="blur" />
@@ -268,14 +315,17 @@ export default function LandingPage() {
                 </defs>
                 <motion.polygon fill="url(#chartFill)" points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10 320,90 0,90"
                   initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.6 }} />
-                <motion.polyline fill="none" stroke={purple} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                <motion.polyline fill="none" stroke="url(#chartStroke)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                   points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10"
                   initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }} />
+                {/* Çoklu, kademeli nabız halkaları */}
+                {[0, 0.6, 1.2].map((delay) => (
+                  <motion.circle key={delay} cx="320" cy="10" r="4" fill="none" stroke="#f0abfc" strokeWidth="1.5"
+                    animate={{ r: [4, 14], opacity: [0.6, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 1.6 + delay }} />
+                ))}
                 <motion.circle cx="320" cy="10" r="4" fill={purple} filter="url(#dotGlow)"
                   initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: 1.5, duration: 0.3 }}
                   style={{ transformOrigin: "320px 10px" }} />
-                <motion.circle cx="320" cy="10" r="4" fill="none" stroke={purple} strokeWidth="1.5"
-                  animate={{ r: [4, 12, 4], opacity: [0.7, 0, 0.7] }} transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1.8 }} />
               </svg>
               <div className="flex justify-between text-[9px] mt-1" style={{ color: "#64748b" }}>
                 <span>Oca</span><span>Şub</span><span>Mar</span><span>Nis</span><span>May</span><span>Haz</span>
