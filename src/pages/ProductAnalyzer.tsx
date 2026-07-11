@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { analyzeProduct, analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { useSavedProducts } from "@/contexts/SavedProductsContext";
 import { useAnalysisHistory } from "@/contexts/AnalysisHistoryContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, MessageCircle, Sparkles, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -100,6 +101,7 @@ export default function ProductAnalyzer() {
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
   const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, blockReason } = useAnalysisHistory();
+  const { loginWithGoogle } = useAuth();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale, country, usdToTry } = useLocale();
   const isTr = locale === "tr";
@@ -606,24 +608,28 @@ export default function ProductAnalyzer() {
               </h2>
               <p className="text-sm text-muted-foreground mb-6">
                 {isTr
-                  ? "Ücretsiz analizlerini kullandın. Ücretsiz hesap aç: günde 5 analiz, geçmişini kaydet ve kaldığın yerden devam et."
+                  ? "Ücretsiz analizini kullandın. Google ile 10 saniyede giriş yap, 2 analiz daha aç ve geçmişini kaydet."
                   : isFr
-                  ? "Vous avez utilisé vos analyses gratuites. Créez un compte gratuit : 5 analyses/jour, historique sauvegardé et reprise là où vous en étiez."
-                  : "You've used your free analyses. Create a free account: 5 analyses/day, saved history, and pick up where you left off."}
+                  ? "Vous avez utilisé votre analyse gratuite. Connectez-vous avec Google en 10 s, débloquez 2 analyses de plus."
+                  : "You've used your free analysis. Sign in with Google in 10s to unlock 2 more analyses and save your history."}
               </p>
               <div className="text-left mb-6 space-y-3">
-                <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Günde 5 analiz" : isFr ? "5 analyses par jour" : "5 analyses per day"}</span></div>
+                <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "2 analiz daha (günde 3)" : isFr ? "2 analyses de plus (3/jour)" : "2 more analyses (3/day)"}</span></div>
                 <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Analiz geçmişin kayıtlı kalır" : isFr ? "Historique d'analyses sauvegardé" : "Your analysis history is saved"}</span></div>
                 <div className="flex items-center gap-3"><span className="text-winning text-base">✔</span><span className="text-sm text-foreground">{isTr ? "Kart yok, saniyeler içinde" : isFr ? "Sans carte, en quelques secondes" : "No card, takes seconds"}</span></div>
               </div>
               <button
-                onClick={() => { try { (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "register_gate_cta", { source: "analyzer" }); } catch { /* ignore */ } navigate("/auth"); }}
-                className="block w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground font-bold text-base py-3.5 transition-all shadow-lg shadow-primary/25"
+                onClick={() => { try { (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "register_gate_google", { source: "analyzer" }); } catch { /* ignore */ } loginWithGoogle(); }}
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-white hover:bg-gray-100 text-gray-800 font-bold text-base py-3.5 transition-all shadow-lg"
               >
-                {isTr ? "Ücretsiz Hesap Aç" : isFr ? "Créer un compte gratuit" : "Create Free Account"}
+                <span className="text-lg font-black" style={{ color: "#4285F4" }}>G</span>
+                {isTr ? "Google ile Ücretsiz Devam Et" : isFr ? "Continuer avec Google" : "Continue with Google"}
               </button>
-              <button onClick={() => navigate("/auth")} className="text-xs text-primary hover:underline mt-4 block w-full">
-                {isTr ? "Zaten üyeyim — giriş yap" : isFr ? "Déjà inscrit — se connecter" : "Already have an account — log in"}
+              <button
+                onClick={() => { try { (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "register_gate_cta", { source: "analyzer" }); } catch { /* ignore */ } navigate("/auth"); }}
+                className="text-xs text-primary hover:underline mt-4 block w-full"
+              >
+                {isTr ? "E-posta ile hesap aç / giriş yap" : isFr ? "S'inscrire / se connecter par e-mail" : "Sign up / log in with email"}
               </button>
               <button onClick={() => setShowRegisterGate(false)} className="text-xs text-muted-foreground hover:underline mt-2">
                 {isTr ? "Daha sonra" : isFr ? "Plus tard" : "Later"}
