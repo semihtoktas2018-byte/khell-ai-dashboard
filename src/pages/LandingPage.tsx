@@ -237,25 +237,45 @@ export default function LandingPage() {
               <div className="text-[10px]" style={{ color: "#64748b" }}>{c.demoNote}</div>
             </div>
             <div className="grid grid-cols-3 gap-2.5 mb-2.5">
-              <div className="rounded-xl p-3" style={{ background: "rgba(139,92,246,.08)", border: "1px solid rgba(139,92,246,.2)" }}>
+              <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(139,92,246,.35)" }} transition={{ duration: 0.2 }}
+                className="rounded-xl p-3 cursor-default" style={{ background: "rgba(139,92,246,.08)", border: "1px solid rgba(139,92,246,.2)" }}>
                 <div className="text-[9px] tracking-wide" style={{ color: "#94a3b8" }}>{c.demoScore}</div>
                 <div className="text-2xl font-black" style={{ color: "#c4b5fd" }}>73<span className="text-xs" style={{ color: "#64748b" }}>/100</span></div>
-              </div>
-              <div className="rounded-xl p-3" style={{ background: "rgba(52,211,153,.06)", border: "1px solid rgba(52,211,153,.2)" }}>
+              </motion.div>
+              <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(52,211,153,.3)" }} transition={{ duration: 0.2 }}
+                className="rounded-xl p-3 cursor-default" style={{ background: "rgba(52,211,153,.06)", border: "1px solid rgba(52,211,153,.2)" }}>
                 <div className="text-[9px] tracking-wide" style={{ color: "#94a3b8" }}>{c.demoProfit}</div>
                 <div className="text-xl font-black" style={{ color: "#34d399" }}>₺140.000</div>
-              </div>
-              <div className="rounded-xl p-3" style={{ background: "rgba(148,163,184,.06)", border: "1px solid rgba(148,163,184,.14)" }}>
+              </motion.div>
+              <motion.div whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(148,163,184,.25)" }} transition={{ duration: 0.2 }}
+                className="rounded-xl p-3 cursor-default" style={{ background: "rgba(148,163,184,.06)", border: "1px solid rgba(148,163,184,.14)" }}>
                 <div className="text-[9px] tracking-wide" style={{ color: "#94a3b8" }}>{c.demoComp}</div>
                 <div className="text-base font-black" style={{ color: "#34d399" }}>{c.demoLow}</div>
-              </div>
+              </motion.div>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(148,163,184,.05)", border: "1px solid rgba(148,163,184,.1)" }}>
               <div className="text-[10px] mb-2" style={{ color: "#94a3b8" }}>{c.demoProfit}</div>
-              <svg viewBox="0 0 320 90" className="w-full" style={{ height: 90 }}>
-                <polyline fill="none" stroke={purple} strokeWidth="2.5" points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10" />
-                <polygon fill="rgba(139,92,246,.12)" points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10 320,90 0,90" />
-                <circle cx="320" cy="10" r="4" fill={purple} />
+              <svg viewBox="0 0 320 90" className="w-full" style={{ height: 90, overflow: "visible" }}>
+                <defs>
+                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={purple} stopOpacity="0.35" />
+                    <stop offset="100%" stopColor={purple} stopOpacity="0" />
+                  </linearGradient>
+                  <filter id="dotGlow" x="-200%" y="-200%" width="500%" height="500%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                <motion.polygon fill="url(#chartFill)" points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10 320,90 0,90"
+                  initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.6 }} />
+                <motion.polyline fill="none" stroke={purple} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  points="0,80 45,70 90,74 135,55 180,48 225,30 270,26 320,10"
+                  initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }} />
+                <motion.circle cx="320" cy="10" r="4" fill={purple} filter="url(#dotGlow)"
+                  initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ delay: 1.5, duration: 0.3 }}
+                  style={{ transformOrigin: "320px 10px" }} />
+                <motion.circle cx="320" cy="10" r="4" fill="none" stroke={purple} strokeWidth="1.5"
+                  animate={{ r: [4, 12, 4], opacity: [0.7, 0, 0.7] }} transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1.8 }} />
               </svg>
               <div className="flex justify-between text-[9px] mt-1" style={{ color: "#64748b" }}>
                 <span>Oca</span><span>Şub</span><span>Mar</span><span>Nis</span><span>May</span><span>Haz</span>
