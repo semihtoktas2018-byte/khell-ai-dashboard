@@ -27,7 +27,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
             animate={{ scale: 3.2, opacity: 0 }}
             transition={{ duration: 1.1, delay: 0.15 + i * 0.15, ease: "easeOut" }}
             className="absolute inset-0 rounded-2xl"
-            style={{ border: "2px solid hsl(217 91% 65%)" }}
+            style={{ border: "2px solid hsl(258 90% 70%)" }}
           />
         ))}
 
@@ -37,8 +37,8 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
           transition={{ type: "spring", stiffness: 260, damping: 14, delay: 0.05 }}
           className="relative h-16 w-16 rounded-2xl flex items-center justify-center"
           style={{
-            background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(199 89% 55%))",
-            boxShadow: "0 0 50px hsl(217 91% 60% / 0.6)",
+            background: "linear-gradient(135deg, hsl(262 83% 58%), hsl(258 90% 68%))",
+            boxShadow: "0 0 50px hsl(258 90% 66% / 0.6)",
           }}
         >
           <Zap className="h-8 w-8 text-white" />
@@ -51,7 +51,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         transition={{ delay: 0.35, duration: 0.5 }}
         className="text-3xl font-extrabold tracking-tight"
         style={{
-          background: "linear-gradient(90deg, hsl(217 91% 65%), hsl(199 89% 65%), hsl(142 71% 55%))",
+          background: "linear-gradient(90deg, hsl(262 83% 62%), hsl(258 90% 74%), hsl(255 92% 82%))",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
         }}
@@ -81,7 +81,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
           animate={{ x: "200%" }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear", delay: 1.2 }}
           className="h-full w-1/2"
-          style={{ background: "linear-gradient(90deg, transparent, hsl(217 91% 65%), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, hsl(258 90% 72%), transparent)" }}
         />
       </motion.div>
     </motion.div>
