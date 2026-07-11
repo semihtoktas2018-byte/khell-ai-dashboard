@@ -100,7 +100,7 @@ export default function ProductAnalyzer() {
   const hasAutoAnalyzed = useRef(false);
   const pendingAutoShow = useRef(false);
   const { saveProduct, isProductSaved } = useSavedProducts();
-  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, blockReason } = useAnalysisHistory();
+  const { addAnalysis, history, todayCount, canAnalyze, dailyLimit, clearHistory, isPro, isAuthenticated, blockReason } = useAnalysisHistory();
   const { loginWithGoogle } = useAuth();
   const { toast } = useToast();
   const { t, currency, currencySymbol, locale, country, usdToTry } = useLocale();
@@ -297,9 +297,11 @@ export default function ProductAnalyzer() {
             </button>
           </div>
 
-          <p className={`text-xs font-medium mt-2 text-center ${isPro ? "text-winning" : remaining > 0 ? "text-muted-foreground" : "text-destructive"}`}>
+          <p className={`text-xs font-medium mt-2 text-center ${isPro ? "text-winning" : (!isAuthenticated || remaining > 0) ? "text-muted-foreground" : "text-destructive"}`}>
             {isPro
               ? (isTr ? "PRO ✓ Sınırsız analiz" : "PRO ✓ Unlimited analyses")
+              : !isAuthenticated
+              ? (isTr ? "3 ücretsiz analiz" : isFr ? "3 analyses gratuites" : "3 free analyses")
               : remaining > 0
               ? `${remaining} ${t("analyzer.remaining")}`
               : t("analyzer.limitReached")}
