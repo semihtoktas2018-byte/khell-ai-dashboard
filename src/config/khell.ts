@@ -38,11 +38,11 @@ export function currencySymbolFor(locale: AppLocale): string {
 // ------------------------------------------------------------
 //  2) ÜCRETSİZ KULLANIM LİMİTLERİ  (abone hunisi)
 // ------------------------------------------------------------
-//  Anonim ziyaretçi kaç analiz yapabilsin? (sonra "ücretsiz kaydol" kapısı)
-export const ANON_LIMIT = 2;
+//  Anonim ziyaretçi kaç analiz yapabilsin? (sonra "Google ile giriş" kapısı)
+export const ANON_LIMIT = 1;
 
 //  Kayıtlı ücretsiz üye günde kaç analiz yapabilsin? (sonra Pro paywall)
-export const FREE_DAILY_LIMIT = 5;
+export const FREE_DAILY_LIMIT = 3;
 
 
 // ------------------------------------------------------------
