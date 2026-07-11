@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ANON_LIMIT, FREE_DAILY_LIMIT } from "@/config/khell";
 
 export interface AnalysisRecord {
   id: string;
@@ -38,9 +39,8 @@ interface AnalysisHistoryContextType {
 const STORAGE_KEY = "khell_analysis_history";
 const USAGE_KEY = "khell_daily_usage"; // geçmişten ayrı, "Geçmişi Temizle" bunu etkilemez
 
+// Limitler artık src/config/khell.ts içinden gelir (ANON_LIMIT, FREE_DAILY_LIMIT).
 // Merdiven: önce değer ver, sonra ilişki kur, en son para iste.
-const ANON_LIMIT = 2; // giriş yapmadan bedava analiz
-const FREE_LIMIT = 5; // kayıtlı ücretsiz üyenin günlük hakkı
 
 function getTodayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -86,7 +86,7 @@ export function AnalysisHistoryProvider({ children }: { children: ReactNode }) {
   const todayCount = usage.count;
 
   // Aktif katmana göre günlük limit
-  const dailyLimit = isPro ? Infinity : isAuthenticated ? FREE_LIMIT : ANON_LIMIT;
+  const dailyLimit = isPro ? Infinity : isAuthenticated ? FREE_DAILY_LIMIT : ANON_LIMIT;
   const canAnalyze = isPro || todayCount < dailyLimit;
 
   // Blok sebebini belirle: anonim -> kayıt kapısı, kayıtlı -> Pro paywall
