@@ -9,15 +9,17 @@ const guides = [
 
 export default function BamirFooter() {
   return (
-    <div className="flex flex-col items-center gap-3 py-4">
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+    <div className="flex flex-col items-center gap-4 py-5">
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
         {guides.map((g) => (
           <Link
             key={g.to}
             to={g.to}
-            className="text-[11px] text-muted-foreground hover:text-primary transition-colors"
+            className="group relative text-sm font-semibold tracking-tight bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent transition-all duration-300 hover:from-sky-300 hover:via-cyan-200 hover:to-emerald-300"
+            style={{ textShadow: "0 0 18px rgba(56, 189, 248, 0.35)" }}
           >
             {g.label}
+            <span className="absolute -bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400 transition-all duration-300 group-hover:w-full" />
           </Link>
         ))}
       </div>
