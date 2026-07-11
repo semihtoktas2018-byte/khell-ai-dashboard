@@ -258,7 +258,8 @@ export default function ProductAnalyzer() {
         />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="space-y-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -307,6 +308,40 @@ export default function ProductAnalyzer() {
               : t("analyzer.limitReached")}
           </p>
         </motion.div>
+      {/* SMART ANALYSIS PANEL */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
+            {isTr ? "🚀 Akıllı Analiz Paneli" : "🚀 Smart Analysis Panel"}
+          </span>
+          <motion.button
+            onClick={() => setExpandTrigger((v) => v + 1)}
+            animate={{ opacity: [1, 0.4, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity }}
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40 hover:bg-pink-500/30 cursor-pointer"
+          >
+            {isTr ? "✨ Hepsini Aç" : "✨ Expand All"}
+          </motion.button>
+        </div>
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          {isTr
+            ? "Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör."
+            : "Enter product name and cost/price — see trend, competition, profit and commission calculations instantly."}
+        </p>
+        <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
+        <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
+        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={usdToTry} expandTrigger={expandTrigger} isTr={isTr} countryCode={country} />
+        <ProfitSimulator
+          profitPerUnit={result.gross_profit}
+          revenuePerUnit={input.selling_price}
+          costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
+          currency={currency}
+          initialOrders={input.monthly_orders_estimate || 50}
+          expandTrigger={expandTrigger}
+          isTr={isTr}
+        />
+      </div>
+        </div>
         <AnimatePresence mode="wait">
           {showResult && input.selling_price > 0 && (
             <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={transition} className="space-y-4">
@@ -495,40 +530,6 @@ export default function ProductAnalyzer() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* SMART ANALYSIS PANEL */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-pink-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
-            {isTr ? "🚀 Akıllı Analiz Paneli" : "🚀 Smart Analysis Panel"}
-          </span>
-          <motion.button
-            onClick={() => setExpandTrigger((v) => v + 1)}
-            animate={{ opacity: [1, 0.4, 1] }}
-            transition={{ duration: 1.6, repeat: Infinity }}
-            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40 hover:bg-pink-500/30 cursor-pointer"
-          >
-            {isTr ? "✨ Hepsini Aç" : "✨ Expand All"}
-          </motion.button>
-        </div>
-        <p className="text-[11px] text-muted-foreground -mt-1">
-          {isTr
-            ? "Ürün adını yaz, maliyet/fiyat gir — trend, rekabet, kâr ve komisyon hesaplarını anlık gör."
-            : "Enter product name and cost/price — see trend, competition, profit and commission calculations instantly."}
-        </p>
-        <TrendScore productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
-        <CompetitorAnalysis productName={productName} googleApiKey={GOOGLE_API_KEY} googleCx={GOOGLE_CX} expandTrigger={expandTrigger} isTr={isTr} />
-        <MarketplaceCalculator costUSD={input.product_cost} salePriceUSD={input.selling_price} exchangeRate={usdToTry} expandTrigger={expandTrigger} isTr={isTr} countryCode={country} />
-        <ProfitSimulator
-          profitPerUnit={result.gross_profit}
-          revenuePerUnit={input.selling_price}
-          costPerUnit={input.product_cost + input.shipping_cost + input.ads_cost}
-          currency={currency}
-          initialOrders={input.monthly_orders_estimate || 50}
-          expandTrigger={expandTrigger}
-          isTr={isTr}
-        />
       </div>
 
       <AnimatePresence>
