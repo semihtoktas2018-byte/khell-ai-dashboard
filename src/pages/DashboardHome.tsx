@@ -12,6 +12,7 @@ import SEO from "@/components/SEO";
 import TrendScoreWidget from "@/components/TrendScoreWidget";
 import CJProductSearch from "@/components/CJProductSearch";
 import BamirFooter from "@/components/BamirFooter";
+import DailyWinner from "@/components/DailyWinner";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -86,6 +87,10 @@ export default function DashboardHome() {
 
       <motion.div variants={fadeUp}>
         <HeroSection onStart={scrollToModules} />
+      </motion.div>
+
+      <motion.div variants={fadeUp}>
+        <DailyWinner />
       </motion.div>
 
       <motion.div variants={fadeUp}>
