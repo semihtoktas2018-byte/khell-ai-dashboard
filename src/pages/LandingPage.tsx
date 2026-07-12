@@ -155,7 +155,15 @@ const GUIDES = [
   { to: "/rehber/2026-trend-dropshipping-urunleri", tr: "2026 Trend Ürünler", en: "2026 Trending Products", fr: "Produits Tendance 2026" },
 ];
 
-const MARKETPLACES = ["eBay", "Amazon", "AliExpress", "Trendyol", "Hepsiburada", "N11", "Etsy"];
+const MARKETPLACE_STYLES: Record<string, { font: string; color: string; weight?: string; tracking?: string; caseStyle?: string }> = {
+  eBay: { font: "'Segoe UI', Arial, sans-serif", color: "#3665F3", weight: "800", tracking: "-0.5px" },
+  Amazon: { font: "Arial, sans-serif", color: "#e8eef7", weight: "700", caseStyle: "lowercase" },
+  AliExpress: { font: "Arial, sans-serif", color: "#FF4747", weight: "800" },
+  Trendyol: { font: "'Segoe UI', Arial, sans-serif", color: "#FF6000", weight: "800" },
+  Hepsiburada: { font: "Arial, sans-serif", color: "#FF6000", weight: "700" },
+  N11: { font: "Arial, sans-serif", color: "#FF6600", weight: "900" },
+  Etsy: { font: "Georgia, 'Times New Roman', serif", color: "#F1641E", weight: "700", caseStyle: "lowercase" },
+};
 const FEAT_ICONS = [Search, BarChart3, DollarSign, Package, FileText, Rocket];
 
 const SHOPIER_TR = "https://www.shopier.com/bamironlinestore/46009500";
@@ -216,7 +224,13 @@ export default function LandingPage() {
             KHELL AI
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm" style={{ color: "#94a3b8" }}>
-            {c.nav.map((n: string) => <span key={n} className="cursor-pointer hover:text-white transition-colors">{n}</span>)}
+            {c.nav.map((n: string, i: number) => {
+              const sectionIds = ["ozellikler", "fiyatlar", "rehberler"];
+              return (
+                <span key={n} onClick={() => document.getElementById(sectionIds[i])?.scrollIntoView({ behavior: "smooth" })}
+                  className="cursor-pointer hover:text-white transition-colors">{n}</span>
+              );
+            })}
           </div>
           <div className="flex items-center gap-2.5">
             <div className="hidden sm:flex items-center gap-1 rounded-lg px-1 py-1" style={{ border: "1px solid rgba(148,163,184,.15)" }}>
@@ -315,13 +329,22 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-[11px] font-bold tracking-[2px] mb-5" style={{ color: "#64748b" }}>{c.logosTitle.toUpperCase()}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {MARKETPLACES.map((m) => <span key={m} className="text-lg font-bold" style={{ color: "#94a3b8", opacity: 0.7 }}>{m}</span>)}
+            {Object.keys(MARKETPLACE_STYLES).map((m) => {
+              const st = MARKETPLACE_STYLES[m];
+              return (
+                <span key={m} className="text-xl transition-transform hover:scale-110" style={{
+                  fontFamily: st.font, color: st.color, fontWeight: st.weight || 700,
+                  letterSpacing: st.tracking, textTransform: (st.caseStyle as any) || "none",
+                  opacity: 0.9, cursor: "default",
+                }}>{m}</span>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* FEATURES (white) */}
-      <section className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
+      <section id="ozellikler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: purpleD }}>{c.featEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2" style={{ color: "#0f172a" }}>{c.featTitle}</h2>
@@ -364,7 +387,7 @@ export default function LandingPage() {
       </section>
 
       {/* GUIDES (uydurma yorum yerine — gerçek rehberler) */}
-      <section className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
+      <section id="rehberler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: purpleD }}>{c.guidesEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2" style={{ color: "#0f172a" }}>{c.guidesTitle}</h2>
@@ -381,7 +404,7 @@ export default function LandingPage() {
       </section>
 
       {/* PRICING */}
-      <section className="py-16" style={{ background: ink }}>
+      <section id="fiyatlar" className="py-16" style={{ background: ink }}>
         <div className="mx-auto max-w-3xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: "#c4b5fd" }}>{c.priceEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2 text-white">{c.priceTitle}</h2>
