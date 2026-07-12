@@ -68,6 +68,7 @@ export default function AnimatedChart() {
           r="7"
           fill="#A855F7"
           filter="url(#glow)"
+          initial={{ cx: 40, cy: 180 }}
           animate={{
             cx: [40,100,160,220,280,340,400,460],
             cy: [180,165,170,145,135,105,100,80],
