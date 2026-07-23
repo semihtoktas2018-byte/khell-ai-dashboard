@@ -69,3 +69,47 @@ export function shopierLinkFor(locale: AppLocale): string {
 // ------------------------------------------------------------
 export const BRAND_SIGNATURE = "A BAMIR ONLINE STORE'S PRODUCTION";
 export const SITE_URL = "https://khellai.com";
+
+
+// ------------------------------------------------------------
+//  5) PAYLAŞILAN KUR ÇEVRİM YARDIMCISI
+// ------------------------------------------------------------
+//  CJ / eBay gibi dış kaynaklardan gelen DOLAR bazlı gerçek verileri
+//  kullanıcının diline göre doğru para birimine çevirir.
+//
+//  ÖNEMLİ AYRIM (bkz. dürüstlük kuralı):
+//  - Bu fonksiyon SADECE dış API'den gelen dolar değerlerini çevirir.
+//  - Kullanıcının KENDİ girdiği yerel para birimini ASLA bu fonksiyona verme
+//    (o zaten formatCurrency ile olduğu gibi gösterilir, çevrim YAPILMAZ).
+//
+//  TR için: gerçek USD->TRY kuru (usdToTry) ile çevrilir.
+//  EN/FR için: elimizde gerçek USD->EUR kuru olmadığı için değeri OLDUĞU GİBİ
+//  dolar ($) olarak gösteririz — yanlış bir €/£ etiketi yapıştırmayız.
+//  Bu, "her görünen rakamın gerçek bir kaynağı olmalı" kuralının gereğidir.
+//
+//  Kullanım: her modül (ProductAnalyzer, ProfitCalculator,
+//  MarketplaceCalculator, WinningProducts, RiskAnalysis vb.) bu TEK
+//  fonksiyonu çağırır; kur mantığı tek yerden yönetilir.
+export interface ConvertedValue {
+  value: number;   // çevrilmiş sayısal değer (yuvarlanmış)
+  symbol: string;  // gösterilecek para birimi sembolü
+}
+
+export function convertUsdForLocale(
+  usdValue: number | null | undefined,
+  locale: AppLocale,
+  usdToTry?: number | null
+): ConvertedValue {
+  // Negatif veya bozuk API verisine karşı güvenlik: 0'ın altına inmez.
+  const rawUsd = Number.isFinite(usdValue as number) ? (usdValue as number) : 0;
+  const safeUsd = Math.max(rawUsd, 0);
+
+  if (locale === "tr") {
+    const rate = Number.isFinite(usdToTry as number) && (usdToTry as number) > 0 ? (usdToTry as number) : 34;
+    const converted = Math.round(safeUsd * rate * 100) / 100;
+    return { value: converted, symbol: "₺" };
+  }
+
+  // en/fr: gerçek çevrim kuru yok — dürüstçe dolar olarak göster
+  return { value: Math.round(safeUsd * 100) / 100, symbol: "$" };
+}
