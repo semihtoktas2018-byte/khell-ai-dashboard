@@ -192,6 +192,7 @@ const GUIDES = [
 ];
 
 const MARKETPLACE_STYLES: Record<string, { font: string; color: string; weight?: string; tracking?: string; caseStyle?: string }> = {
+  "CJ Dropshipping": { font: "Arial, sans-serif", color: "#FF5722", weight: "800" },
   eBay: { font: "'Segoe UI', Arial, sans-serif", color: "#3665F3", weight: "800", tracking: "-0.5px" },
   Amazon: { font: "Arial, sans-serif", color: "#e8eef7", weight: "700", caseStyle: "lowercase" },
   AliExpress: { font: "Arial, sans-serif", color: "#FF4747", weight: "800" },
@@ -200,7 +201,7 @@ const MARKETPLACE_STYLES: Record<string, { font: string; color: string; weight?:
   N11: { font: "Arial, sans-serif", color: "#FF6600", weight: "900" },
   Etsy: { font: "Georgia, 'Times New Roman', serif", color: "#F1641E", weight: "700", caseStyle: "lowercase" },
 };
-const LIVE_MARKETPLACES = ["eBay"];
+const LIVE_MARKETPLACES = ["CJ Dropshipping", "eBay"];
 const FEAT_ICONS = [Search, BarChart3, DollarSign, Package, FileText, Rocket];
 
 const SHOPIER_TR = "https://www.shopier.com/bamironlinestore/46009500";
@@ -441,7 +442,7 @@ export default function LandingPage() {
         </header>
       </div>
 
-      <section id="pazaryerleri" className="py-10" style={{ background: "#0c1120", borderTop: "1px solid rgba(148,163,184,.08)", borderBottom: "1px solid rgba(148,163,184,.08)" }}>
+      <section id="pazaryerleri" className="py-10" style={{ background: "#0c1120", borderTop: "1px solid rgba(148,163,184,.08)", borderBottom: "1px solid rgba(148,163,184,.08)", scrollMarginTop: 90 }}>
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-[11px] font-bold tracking-[2px] mb-5" style={{ color: "#64748b" }}>{c.logosTitle.toUpperCase()}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
@@ -469,7 +470,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="ozellikler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
+      <section id="ozellikler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b", scrollMarginTop: 84 }}>
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: purpleD }}>{c.featEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2" style={{ color: "#0f172a" }}>{c.featTitle}</h2>
@@ -511,7 +512,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="rehberler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
+      <section id="rehberler" className="py-16" style={{ background: "#f8fafc", color: "#1e293b", scrollMarginTop: 84 }}>
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: purpleD }}>{c.guidesEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2" style={{ color: "#0f172a" }}>{c.guidesTitle}</h2>
@@ -534,7 +535,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="fiyatlar" className="py-16" style={{ background: ink }}>
+      <section id="fiyatlar" className="py-16" style={{ background: ink, scrollMarginTop: 84 }}>
         <div className="mx-auto max-w-3xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: "#c4b5fd" }}>{c.priceEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-2 text-white">{c.priceTitle}</h2>
@@ -562,7 +563,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="sss" className="py-16" style={{ background: "#f8fafc", color: "#1e293b" }}>
+      <section id="sss" className="py-16" style={{ background: "#f8fafc", color: "#1e293b", scrollMarginTop: 84 }}>
         <div className="mx-auto max-w-3xl px-6">
           <p className="text-center text-xs font-bold tracking-[3px] mb-2" style={{ color: purpleD }}>{c.sssEyebrow.toUpperCase()}</p>
           <h2 className="text-center text-3xl font-extrabold mb-10" style={{ color: "#0f172a" }}>{c.sssTitle}</h2>
