@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { analyzeRisk, type AnalyzerInput } from "@/lib/analyzer";
 import { Shield, CheckCircle, AlertTriangle, XCircle, RefreshCw, Package, Sparkles, Check } from "lucide-react";
@@ -188,6 +188,34 @@ export default function RiskAnalysis() {
       monthly_orders_estimate: cand.ordersSignal ? (cand.source === "cj" ? "live-cj" : "live-ebay") : "estimated",
     });
   };
+
+  // Locale veya kur (usdToTry) degistiginde, secili aday varsa onun ORIJINAL USD
+  // degerinden rakamlari yeniden hesapla. Boylece sadece sembol degil, rakam da guncellenir.
+  // Manuel girilmis alanlara (fieldTags[key] === null) dokunulmaz, double conversion olusmaz
+  // cunku kaynak her zaman cand.costUSD / cand.saleUSD'dir, mevcut customInput degeri degil.
+  useEffect(() => {
+    if (selectedCandidate === null) return;
+    const cand = candidates[selectedCandidate];
+    if (!cand) return;
+
+    const costConv = convertUsdForLocale(cand.costUSD, locale, usdToTry);
+    const saleConv = convertUsdForLocale(cand.saleUSD, locale, usdToTry);
+    const shippingUSD = cand.costUSD * 0.25;
+    const adsUSD = cand.saleUSD * 0.2;
+    const shippingConv = convertUsdForLocale(shippingUSD, locale, usdToTry);
+    const adsConv = convertUsdForLocale(adsUSD, locale, usdToTry);
+
+    setCustomInput((prev) => ({
+      ...prev,
+      ...(fieldTags.product_cost !== null ? { product_cost: costConv.value } : {}),
+      ...(fieldTags.selling_price !== null ? { selling_price: saleConv.value } : {}),
+      ...(fieldTags.shipping_cost !== null ? { shipping_cost: shippingConv.value } : {}),
+      ...(fieldTags.ads_cost !== null ? { ads_cost: adsConv.value } : {}),
+    }));
+    // Sadece locale/usdToTry degisiminde tetiklensin — fieldTags/candidates degisimi
+    // zaten applyCandidate() tarafindan ayrica yonetiliyor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, usdToTry]);
 
   const fieldLabels: { key: FieldKey; label: string }[] = [
     { key: "selling_price", label: `${t("risk.sellingPrice")} (${currencySymbol})` },
