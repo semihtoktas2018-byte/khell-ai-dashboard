@@ -97,6 +97,7 @@ export default function StoreSpy() {
       productName: p.name,
       selling_price: String(sellingPrice),
       product_cost: String(suggestedCost),
+      currencySource: "local", // bu değerler zaten locale'e göre çevrildi, ProductAnalyzer tekrar çevirmesin
     });
     toast({
       title: isTr ? "Ürün aktarıldı" : "Product imported",
