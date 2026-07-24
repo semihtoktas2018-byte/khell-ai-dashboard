@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Save, AlertTriangle, CheckCircle, XCircle, Shield, DollarSign, TrendingUp, Lock, History, Trash2, MessageCircle, Sparkles, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
+import { convertUsdForLocale } from "@/config/khell";
 import BackButton from "@/components/BackButton";
 import MoneyLayer from "@/components/MoneyLayer";
 import AISuggestions, { type Suggestion } from "@/components/AISuggestions";
@@ -144,14 +145,22 @@ export default function ProductAnalyzer() {
   useEffect(() => {
     if (hasAutoAnalyzed.current) return;
     const name = searchParams.get("productName") || searchParams.get("name");
-    const sp = parseFloat(searchParams.get("selling_price") || searchParams.get("price") || "0") || 0;
-    const pc = parseFloat(searchParams.get("product_cost") || searchParams.get("cost") || "0") || 0;
+    const rawSp = parseFloat(searchParams.get("selling_price") || searchParams.get("price") || "0") || 0;
+    const rawPc = parseFloat(searchParams.get("product_cost") || searchParams.get("cost") || "0") || 0;
+    // currencySource=local -> deger zaten kaynak sayfada (StoreSpy/EbayResearch) locale'e gore cevrildi, tekrar cevirme.
+    // currencySource=usd veya parametre hic yoksa (TrendingProducts/BestSellers/WinningProducts/DailyWinner/
+    // ViralProducts/CJProductSearch) -> deger ham USD kabul edilir, locale'e gore cevrilir. Geriye uyumlu varsayilan budur.
+    const currencySource = searchParams.get("currencySource");
+    const isAlreadyLocal = currencySource === "local";
+    const sp = isAlreadyLocal ? rawSp : convertUsdForLocale(rawSp, locale, usdToTry).value;
+    const pc = isAlreadyLocal ? rawPc : convertUsdForLocale(rawPc, locale, usdToTry).value;
     if (sp > 0) {
       hasAutoAnalyzed.current = true;
       pendingAutoShow.current = true;
       if (name) setProductName(name);
       setInput({ ...defaultInput, selling_price: sp, product_cost: pc });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
