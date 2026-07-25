@@ -175,7 +175,7 @@ export default function ProductAnalyzer() {
   const remaining = dailyLimit - todayCount;
 
   const handleChange = (key: keyof AnalyzerInput, val: string) => {
-    setInput((prev) => ({ ...prev, [key]: parseFloat(val) || 0 }));
+    setInput((prev) => ({ ...prev, [key]: Math.max(0, parseFloat(val) || 0) }));
   };
 
   const handleAnalyze = () => {
@@ -289,6 +289,7 @@ export default function ProductAnalyzer() {
                 <div className="relative">
                   <input
                     type="number"
+                    min={0}
                     value={input[f.key] || ""}
                     onChange={(e) => handleChange(f.key, e.target.value)}
                     placeholder={f.placeholder}
