@@ -43,6 +43,7 @@ export default function SalesDecisionEngine() {
   const [form, setForm] = useState<DecisionInput>({
     product_name: "", product_price: 0, cost_price: 0,
     target_country: "Turkey", product_category: "Furniture", product_link: "", description: "",
+    shipping_cost: 0, ads_cost: 0,
   });
   const [result, setResult] = useState<DecisionOutput | null>(null);
   const [copied, setCopied] = useState(false);
@@ -137,6 +138,12 @@ export default function SalesDecisionEngine() {
                 <Input type="number" value={form.product_price || ""} onChange={e => setForm(p => ({ ...p, product_price: +e.target.value }))} placeholder="299" /></div>
               <div><label className="text-xs text-muted-foreground mb-1 block">{t("sde.cost")} ({currencySymbol})</label>
                 <Input type="number" value={form.cost_price || ""} onChange={e => setForm(p => ({ ...p, cost_price: +e.target.value }))} placeholder="85" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-xs text-muted-foreground mb-1 block">Kargo ({currencySymbol})</label>
+                <Input type="number" value={form.shipping_cost || ""} onChange={e => setForm(p => ({ ...p, shipping_cost: +e.target.value }))} placeholder="0" /></div>
+              <div><label className="text-xs text-muted-foreground mb-1 block">Reklam ({currencySymbol})</label>
+                <Input type="number" value={form.ads_cost || ""} onChange={e => setForm(p => ({ ...p, ads_cost: +e.target.value }))} placeholder="0" /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs text-muted-foreground mb-1 block">{t("sde.targetCountry")}</label>

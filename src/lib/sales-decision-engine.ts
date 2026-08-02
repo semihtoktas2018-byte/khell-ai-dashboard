@@ -8,6 +8,8 @@ export interface DecisionInput {
   product_category: string;
   product_link?: string;
   description?: string;
+  shipping_cost?: number;
+  ads_cost?: number;
 }
 
 export interface DecisionOutput {
@@ -42,7 +44,9 @@ export function runDecisionEngine(input: DecisionInput): DecisionOutput {
   const country = target_country.toLowerCase();
   const name = product_name.toLowerCase();
 
-  const margin = product_price > 0 ? ((product_price - cost_price) / product_price) * 100 : 0;
+  const shipping = input.shipping_cost ?? 0;
+  const ads = input.ads_cost ?? 0;
+  const margin = product_price > 0 ? ((product_price - cost_price - shipping - ads) / product_price) * 100 : 0;
   const marginScore = norm(margin, 0, 60);
 
   const triggers: string[] = [];
