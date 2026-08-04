@@ -21,8 +21,9 @@ function competitionToScore(level: "Low" | "Medium" | "High"): number {
   return level === "Low" ? 90 : level === "Medium" ? 55 : 20;
 }
 
-function generateEngagement(trendScore: number): number {
-  return Math.min(100, Math.round(trendScore * (0.8 + Math.random() * 0.4)));
+function generateEngagement(trendScore: number, competitionLevel: "Low" | "Medium" | "High"): number {
+  const multiplier = competitionLevel === "Low" ? 1.1 : competitionLevel === "Medium" ? 1.0 : 0.9;
+  return Math.min(100, Math.round(trendScore * multiplier));
 }
 
 function calcHunterScore(trend: number, engagement: number, margin: number, compScore: number): number {
@@ -32,7 +33,7 @@ function calcHunterScore(trend: number, engagement: number, margin: number, comp
 function processProducts(products: ReturnType<typeof fetchTikTokTrends>): HunterCandidate[] {
   return products.map((p) => {
     const margin = ((p.estimatedSellingPrice - p.estimatedCost) / p.estimatedSellingPrice) * 100;
-    const engagement = generateEngagement(p.trendScore);
+    const engagement = generateEngagement(p.trendScore, p.competitionLevel);
     const compScore = competitionToScore(p.competitionLevel);
     const marginScore = Math.min(100, margin * 1.5);
     const hunterScore = calcHunterScore(p.trendScore, engagement, marginScore, compScore);
