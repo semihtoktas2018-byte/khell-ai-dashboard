@@ -65,6 +65,16 @@ function getDisplayName(p: CJProduct): string {
   return "CJ Product";
 }
 
+// CJ API basarisiz oldugunda gosterilecek ornek urunler - Best Sellers / Trending
+// Products'taki fallback deseniyle ayni mantik: kullanici bos ekran gormesin.
+const MOCK: CJProduct[] = Array.from({ length: 12 }).map((_, i) => ({
+  pid: `mock-${i}`,
+  productName: ["Wireless Bluetooth Earbuds Pro","LED Strip Light RGB 5M","Mini Portable Blender USB","Smart Watch Fitness Tracker","Magnetic Phone Car Mount","Pet Hair Remover Roller","Posture Corrector Back Brace","Silicone Kitchen Utensil Set","Foldable Laptop Stand","Massage Gun Deep Tissue","Electric Lint Remover","Solar LED Garden Lights"][i],
+  productNameEn: ["Wireless Bluetooth Earbuds Pro","LED Strip Light RGB 5M","Mini Portable Blender USB","Smart Watch Fitness Tracker","Magnetic Phone Car Mount","Pet Hair Remover Roller","Posture Corrector Back Brace","Silicone Kitchen Utensil Set","Foldable Laptop Stand","Massage Gun Deep Tissue","Electric Lint Remover","Solar LED Garden Lights"][i],
+  productImage: `https://picsum.photos/seed/winning${i}/400/400`,
+  sellPrice: (5 + i * 1.3).toFixed(2),
+}));
+
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 const SEARCH_TERMS = [
@@ -99,6 +109,7 @@ const COPY = {
     title: "Kazanan Ürünler",
     subtitle: "CJ'den en çok sipariş alan, yüksek kârlı ürünler",
     liveData: "CANLI VERİ",
+    mockBadge: "ÖRNEK VERİ",
     newOnly: "Sadece Yeniler",
     seeNew: "Yeni Ürünleri Gör",
     sessionNote: (n: number) => `Sadece bu oturumda ilk kez görünen yeni ürünler — ${n} yeni ürün bulundu`,
@@ -107,6 +118,7 @@ const COPY = {
     found: "ürün bulundu",
     proUnlocks: (n: number) => `${n} ürün PRO ile açılır`,
     apiError: "API hatası",
+    mockNote: "örnek veri gösteriliyor.",
     emptyNew: "Bu oturumda henüz yeni ürün yok.",
     emptyFilter: "Bu filtreye uygun ürün bulunamadı.",
     proFeature: "PRO Özellik",
@@ -138,6 +150,7 @@ const COPY = {
     title: "Winning Products",
     subtitle: "High-margin, best-selling products from CJ",
     liveData: "LIVE DATA",
+    mockBadge: "SAMPLE DATA",
     newOnly: "New Only",
     seeNew: "See New Products",
     sessionNote: (n: number) => `New products seen for the first time this session — ${n} found`,
@@ -146,6 +159,7 @@ const COPY = {
     found: "products found",
     proUnlocks: (n: number) => `${n} products unlock with PRO`,
     apiError: "API error",
+    mockNote: "showing sample data.",
     emptyNew: "No new products this session yet.",
     emptyFilter: "No products match this filter.",
     proFeature: "PRO Feature",
@@ -177,6 +191,7 @@ const COPY = {
     title: "Produits gagnants",
     subtitle: "Produits les plus vendus et à forte marge de CJ",
     liveData: "DONNÉES EN DIRECT",
+    mockBadge: "DONNÉES D'EXEMPLE",
     newOnly: "Nouveaux seulement",
     seeNew: "Voir les nouveaux produits",
     sessionNote: (n: number) => `Nouveaux produits vus pour la première fois cette session — ${n} trouvés`,
@@ -185,6 +200,7 @@ const COPY = {
     found: "produits trouvés",
     proUnlocks: (n: number) => `${n} produits débloqués avec PRO`,
     apiError: "Erreur API",
+    mockNote: "affichage de données d'exemple.",
     emptyNew: "Aucun nouveau produit cette session pour l'instant.",
     emptyFilter: "Aucun produit ne correspond à ce filtre.",
     proFeature: "Fonction PRO",
@@ -393,6 +409,7 @@ export default function WinningProducts() {
         })
         .filter((p) => p._cost > 0)
         .sort((a, b) => b._margin - a._margin);
+      if (withMargin.length === 0) throw new Error("CJ API'den ürün alınamadı");
       setItems(withMargin as any);
       const pids = withMargin.map((p: any) => p.pid);
       setNewPids(getNewPids("winning", pids));
@@ -402,7 +419,18 @@ export default function WinningProducts() {
       translateProducts(names).then(setTranslations).catch(() => {});
       setCountdown(REFRESH_INTERVAL / 1000);
     } catch (e: any) {
+      // CJ API başarısız olursa Best Sellers / Trending Products'taki gibi
+      // kullanıcıyı boş ekranla bırakmak yerine örnek ürünler gösteriyoruz.
       setError(e?.message || "Hata");
+      const mockWithMargin = MOCK.map((p) => {
+        const cost = parseFloat(p.sellPrice || "0") || 0;
+        const estSale = cost * getMarkupMultiplier(cost);
+        const margin = cost > 0 ? Math.round(((estSale - cost) / estSale) * 100) : 0;
+        return { ...p, _cost: cost, _sale: estSale, _margin: margin };
+      });
+      setItems(mockWithMargin);
+      const names = mockWithMargin.map((p) => getDisplayName(p));
+      translateProducts(names).then(setTranslations).catch(() => {});
     } finally {
       setLoading(false);
     }
@@ -444,7 +472,7 @@ export default function WinningProducts() {
               <motion.span animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity }}
                 className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
                 style={{ background: "linear-gradient(135deg, hsl(142 71% 45% / 0.18), hsl(142 71% 45% / 0.08))", color: "hsl(142 71% 50%)", border: "1px solid hsl(142 71% 45% / 0.35)", boxShadow: "0 2px 12px hsl(142 71% 45% / 0.15)" }}>
-                <Radio className="h-2.5 w-2.5" /> {c.liveData}
+                <Radio className="h-2.5 w-2.5" /> {error ? c.mockBadge : c.liveData}
               </motion.span>
             </h1>
             <p className="text-xs text-muted-foreground">{c.subtitle}</p>
@@ -485,7 +513,7 @@ export default function WinningProducts() {
         </p>
       )}
 
-      {error && <div className="rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs px-3 py-2">{c.apiError}: {error}</div>}
+      {error && <div className="rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs px-3 py-2">{c.apiError}: {error} — {c.mockNote}</div>}
 
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
