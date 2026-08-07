@@ -24,7 +24,7 @@ import BamirFooter from "@/components/BamirFooter";
 
 const transition = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyB3uPGfhBverKVgAcMuq1mlDEuyxIHpJcQ";
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyB3•••••••••••••••••••••••••••••••";
 const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || "93c44c1933cf646eb";
 
 const defaultInput: AnalyzerInput = {
@@ -118,8 +118,8 @@ export default function ProductAnalyzer() {
   ];
 
   function getScoreLabel(score: number) {
-    if (score >= 80) return { text: "Scaling Opportunity 🚀", color: "text-winning" };
-    if (score >= 60) return { text: "Testable Product ⚠️", color: "text-risky" };
+    if (score >= 80) return { text: isTr ? "Ölçeklenebilir Fırsat 🚀" : "Scaling Opportunity 🚀", color: "text-winning" };
+    if (score >= 60) return { text: isTr ? "Test Edilebilir Ürün ⚠️" : "Testable Product ⚠️", color: "text-risky" };
     return { text: t("analyzer.notRec") + " ❌", color: "text-destructive" };
   }
 
@@ -240,6 +240,8 @@ export default function ProductAnalyzer() {
   const monthlyData = buildMonthlyProjection(result.monthly_profit);
   const demand = getDemandLevel(input.monthly_orders_estimate);
   const competition = getCompetitionLevel(result.profit_margin);
+  const demandLabel = isTr ? ({ HIGH: "YÜKSEK", MEDIUM: "ORTA", LOW: "DÜŞÜK" }[demand] ?? demand) : demand;
+  const competitionLabel = isTr ? ({ LOW: "DÜŞÜK", MEDIUM: "ORTA", HIGH: "YÜKSEK" }[competition] ?? competition) : competition;
   const scoreLabel = getScoreLabel(result.decision_score);
 
   return (
@@ -438,27 +440,27 @@ export default function ProductAnalyzer() {
               )}
 
               <div className="rounded-xl p-5 border border-border bg-[hsl(var(--card))] shadow-lg">
-                <h4 className="text-sm font-bold text-foreground mb-4">🔥 WINNING PRODUCT ANALYSIS</h4>
+                <h4 className="text-sm font-bold text-foreground mb-4">{isTr ? "🔥 KAZANAN ÜRÜN ANALİZİ" : "🔥 WINNING PRODUCT ANALYSIS"}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-accent/40 p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Profit / Sale</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{isTr ? "Kâr / Satış" : "Profit / Sale"}</p>
                     <p className={`text-lg font-bold font-mono ${result.gross_profit > 0 ? "text-winning" : "text-destructive"}`}>{currency(result.gross_profit)}</p>
                   </div>
                   <div className="rounded-lg bg-accent/40 p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Margin</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{isTr ? "Marj" : "Margin"}</p>
                     <p className={`text-lg font-bold font-mono ${result.profit_margin >= 30 ? "text-winning" : result.profit_margin >= 15 ? "text-risky" : "text-destructive"}`}>{result.profit_margin.toFixed(1)}%</p>
                   </div>
                   <div className="rounded-lg bg-accent/40 p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Demand</p>
-                    <p className={`text-lg font-bold ${demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"}`}>{demand}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{isTr ? "Talep" : "Demand"}</p>
+                    <p className={`text-lg font-bold ${demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"}`}>{demandLabel}</p>
                   </div>
                   <div className="rounded-lg bg-accent/40 p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Competition</p>
-                    <p className={`text-lg font-bold ${competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"}`}>{competition}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{isTr ? "Rekabet" : "Competition"}</p>
+                    <p className={`text-lg font-bold ${competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"}`}>{competitionLabel}</p>
                   </div>
                 </div>
                 <div className="mt-4 rounded-lg bg-accent/20 p-3 text-center">
-                  <p className="text-xs font-bold font-mono text-muted-foreground mb-1">SCORE</p>
+                  <p className="text-xs font-bold font-mono text-muted-foreground mb-1">{isTr ? "SKOR" : "SCORE"}</p>
                   <p className={`text-2xl font-black font-mono ${scoreLabel.color}`}>{result.decision_score}/100</p>
                 </div>
                 <div className={`mt-3 text-center text-sm font-semibold ${scoreLabel.color}`}>
@@ -467,10 +469,10 @@ export default function ProductAnalyzer() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label="Profit / Sale" value={currency(result.gross_profit)} positive={result.gross_profit > 0} />
-                <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label="Margin %" value={`${result.profit_margin.toFixed(1)}%`} positive={result.profit_margin > 0} />
-                <StatCard label="Demand" value={demand} className={demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"} />
-                <StatCard label="Competition" value={competition} className={competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"} />
+                <StatCard icon={<DollarSign className="h-3.5 w-3.5" />} label={isTr ? "Kâr / Satış" : "Profit / Sale"} value={currency(result.gross_profit)} positive={result.gross_profit > 0} />
+                <StatCard icon={<TrendingUp className="h-3.5 w-3.5" />} label={isTr ? "Marj %" : "Margin %"} value={`${result.profit_margin.toFixed(1)}%`} positive={result.profit_margin > 0} />
+                <StatCard label={isTr ? "Talep" : "Demand"} value={demandLabel} className={demand === "HIGH" ? "text-winning" : demand === "MEDIUM" ? "text-risky" : "text-destructive"} />
+                <StatCard label={isTr ? "Rekabet" : "Competition"} value={competitionLabel} className={competition === "LOW" ? "text-winning" : competition === "MEDIUM" ? "text-risky" : "text-destructive"} />
               </div>
 
               <div className="flex flex-wrap gap-2">
