@@ -74,6 +74,7 @@ const COPY = {
     seeProduct: "Bu ürünü görmek için Pro'ya geç",
     goPro: "Pro'ya Geç",
     liveData: "CANLI VERİ",
+    mockBadge: "ÖRNEK VERİ",
     lastUpdate: "Son güncelleme",
     autoRefresh: "5 dk'da bir otomatik yenilenir",
     proUnlocks: (n: number) => `${n} ürün PRO ile açılır`,
@@ -106,6 +107,7 @@ const COPY = {
     seeProduct: "Upgrade to Pro to see this product",
     goPro: "Go Pro",
     liveData: "LIVE DATA",
+    mockBadge: "SAMPLE DATA",
     lastUpdate: "Last updated",
     autoRefresh: "auto-refreshes every 30 min",
     proUnlocks: (n: number) => `${n} products unlock with PRO`,
@@ -138,6 +140,7 @@ const COPY = {
     seeProduct: "Passez à Pro pour voir ce produit",
     goPro: "Passer au Pro",
     liveData: "DONNÉES EN DIRECT",
+    mockBadge: "DONNÉES D'EXEMPLE",
     lastUpdate: "Dernière mise à jour",
     autoRefresh: "actualisation auto toutes les 30 min",
     proUnlocks: (n: number) => `${n} produits débloqués avec PRO`,
@@ -285,7 +288,7 @@ export default function BestSellers() {
           <motion.span animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity }}
             className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md"
             style={{ background: "linear-gradient(135deg, hsl(24 95% 53% / 0.18), hsl(24 95% 53% / 0.08))", color: "hsl(24 95% 58%)", border: "1px solid hsl(24 95% 53% / 0.35)", boxShadow: "0 2px 12px hsl(24 95% 53% / 0.15)" }}>
-            <Radio className="h-2.5 w-2.5" /> {c.liveData}
+            <Radio className="h-2.5 w-2.5" /> {error ? c.mockBadge : c.liveData}
           </motion.span>
           <button onClick={fetchBestSellers} disabled={loading} className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border border-border bg-card hover:bg-accent text-muted-foreground transition-colors">
             <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
