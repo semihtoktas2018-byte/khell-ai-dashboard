@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   generateProductPage,
   generateProductPageAI,
+  suggestSalesAngle,
   type ProductPageInput,
   type ProductPageContent,
   type SalesAngle,
@@ -67,6 +68,13 @@ export default function ProductPageGenerator() {
     { value: "budget", key: "ppg.budget", icon: "💰" },
   ];
 
+  // Marj her zaman girilmiyor (ör. manuel form) — canlı öneri için fiyat/maliyetten türet.
+  const liveMargin = input.margin > 0 ? input.margin : (input.sellingPrice > 0 ? ((input.sellingPrice - input.cost) / input.sellingPrice) * 100 : 0);
+  const angleSuggestion = useMemo(
+    () => suggestSalesAngle({ trendScore: input.trendScore, margin: liveMargin, riskLevel: input.riskLevel, sellingPrice: input.sellingPrice, cost: input.cost }, locale),
+    [input.trendScore, liveMargin, input.riskLevel, input.sellingPrice, input.cost, locale]
+  );
+
   useEffect(() => {
     if (hasAutoFilled.current) return;
     const name = searchParams.get("name");
@@ -78,10 +86,13 @@ export default function ProductPageGenerator() {
       const trendScore = parseFloat(searchParams.get("trendScore") || "0");
       const category = searchParams.get("category") || "Tech";
       const riskLevel = searchParams.get("riskLevel") || "Orta";
-      const filled: ProductPageInput = { name, category, sellingPrice: sp, cost, margin, trendScore, riskLevel, salesAngle: "trend" };
+      const effectiveMargin = margin > 0 ? margin : (sp > 0 ? ((sp - cost) / sp) * 100 : 0);
+      const suggested = suggestSalesAngle({ trendScore, margin: effectiveMargin, riskLevel, sellingPrice: sp, cost }, locale)?.angle || "trend";
+      const filled: ProductPageInput = { name, category, sellingPrice: sp, cost, margin, trendScore, riskLevel, salesAngle: suggested };
       setInput(filled);
       setContent(generateProductPage(filled));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleGenerateAI = async () => {
@@ -133,15 +144,17 @@ export default function ProductPageGenerator() {
       `KİME UYGUN:\n${content.targetAudience}`,
       `NEDEN ŞİMDİ:\n${content.whyNow}`,
       `CTA:\n${content.ctaText}`,
-      `ACİLİYET:\n${content.urgency.join("\n")}`,
-      `MÜŞTERİ YORUMU:\n"${content.trustReview.text}" — ${content.trustReview.name} (${content.trustReview.rating}/5)`,
+      content.urgency.length > 0 ? `ACİLİYET:\n${content.urgency.join("\n")}` : null,
+      content.trustReview
+        ? `MÜŞTERİ YORUMU:\n"${content.trustReview.text}" — ${content.trustReview.name}${content.trustReview.rating != null ? ` (${content.trustReview.rating}/5)` : ""}`
+        : null,
       `TIKTOK HOOKS:\n${content.tiktokHooks.map((h, i) => `${i + 1}. ${h}`).join("\n")}`,
       `FACEBOOK HOOKS:\n${content.facebookHooks.map((h, i) => `${i + 1}. ${h}`).join("\n")}`,
       `SHOPIFY BAŞLIK:\n${content.shopifyTitle}`,
       `SEO TITLE:\n${content.seoTitle}`,
       `META DESCRIPTION:\n${content.metaDescription}`,
       `SHOPIFY HTML:\n${content.shopifyBody}`,
-    ].join("\n\n---\n\n");
+    ].filter((x): x is string => x !== null).join("\n\n---\n\n");
     navigator.clipboard.writeText(all);
     toast({ title: "Tümü Kopyalandı", description: "Tüm içerik panoya kopyalandı" });
   };
@@ -248,8 +261,59 @@ export default function ProductPageGenerator() {
                       ? "border-primary bg-primary/10 text-primary shadow-sm"
                       : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50"}`}>
                     <span>{a.icon}</span>{t(a.key)}
+                    {angleSuggestion?.angle === a.value && <span title={t("ppg.aiSuggestion")}>✨</span>}
                   </button>
                 ))}
+              </div>
+              {angleSuggestion && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+                  <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span className="text-foreground">
+                    <strong>{t("ppg.aiSuggestion")}:</strong>{" "}
+                    {salesAnglesI18n.find(a => a.value === angleSuggestion.angle)?.icon}{" "}
+                    {t(salesAnglesI18n.find(a => a.value === angleSuggestion.angle)!.key)} — {angleSuggestion.reason}
+                  </span>
+                  {input.salesAngle !== angleSuggestion.angle && (
+                    <button
+                      onClick={() => setInput(p => ({ ...p, salesAngle: angleSuggestion.angle }))}
+                      className="ml-auto shrink-0 text-primary font-semibold hover:underline"
+                    >
+                      {t("ppg.applySuggestion")}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Real Trust Data (optional) — never auto-generated; left blank means omitted from output */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.trustSection")}</label>
+              <p className="text-[11px] text-muted-foreground mb-2">{t("ppg.trustSectionDesc")}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.reviewText")}</label>
+                  <Input value={input.reviewText || ""} onChange={(e) => setInput(p => ({ ...p, reviewText: e.target.value || undefined }))} placeholder={t("ppg.reviewTextPlaceholder")} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.reviewerName")}</label>
+                  <Input value={input.reviewerName || ""} onChange={(e) => setInput(p => ({ ...p, reviewerName: e.target.value || undefined }))} placeholder={t("ppg.reviewerNamePlaceholder")} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.rating")}</label>
+                  <Input type="number" min={0} max={5} step={0.1} value={input.rating ?? ""} onChange={(e) => setInput(p => ({ ...p, rating: e.target.value ? parseFloat(e.target.value) : undefined }))} placeholder={t("ppg.ratingPlaceholder")} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.reviewCount")}</label>
+                  <Input type="number" min={0} value={input.reviewCount ?? ""} onChange={(e) => setInput(p => ({ ...p, reviewCount: e.target.value ? parseInt(e.target.value, 10) : undefined }))} placeholder={t("ppg.reviewCountPlaceholder")} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.soldCount")}</label>
+                  <Input type="number" min={0} value={input.soldCount ?? ""} onChange={(e) => setInput(p => ({ ...p, soldCount: e.target.value ? parseInt(e.target.value, 10) : undefined }))} placeholder={t("ppg.soldCountPlaceholder")} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t("ppg.stockCount")}</label>
+                  <Input type="number" min={0} value={input.stockCount ?? ""} onChange={(e) => setInput(p => ({ ...p, stockCount: e.target.value ? parseInt(e.target.value, 10) : undefined }))} placeholder={t("ppg.stockCountPlaceholder")} />
+                </div>
               </div>
             </div>
 
@@ -365,56 +429,71 @@ export default function ProductPageGenerator() {
               </CardContent>
             </Card>
 
-            {/* Urgency */}
-            <Card className="border-destructive/30">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" />Aciliyet Bloğu</CardTitle>
-                  <CopyBtn text={content.urgency.join("\n")} field="urgency" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {content.urgency.map((u, i) => (
-                    <div key={i} className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-2.5 text-sm font-medium text-foreground">{u}</div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Urgency — only rendered when the user supplied real stock/sold data */}
+            {content.urgency.length > 0 && (
+              <Card className="border-destructive/30">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" />Aciliyet Bloğu</CardTitle>
+                    <CopyBtn text={content.urgency.join("\n")} field="urgency" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {content.urgency.map((u, i) => (
+                      <div key={i} className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-2.5 text-sm font-medium text-foreground">{u}</div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Trust */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2"><Star className="h-4 w-4 text-yellow-400" />Güven Bloğu</CardTitle>
-                  <CopyBtn text={`"${content.trustReview.text}" — ${content.trustReview.name} (${content.trustReview.rating}/5)\n\n${content.trustStats.rating}/5 puan | ${content.trustStats.reviewCount} değerlendirme | ${content.trustStats.soldCount}+ satış`} field="trust" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    {renderStars(content.trustReview.rating)}
-                    <span className="text-xs text-muted-foreground">{content.trustReview.rating}/5</span>
-                  </div>
-                  <p className="text-sm text-foreground italic">"{content.trustReview.text}"</p>
-                  <p className="text-xs text-muted-foreground font-medium">— {content.trustReview.name}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center bg-muted/30 rounded-lg py-3">
-                    <p className="text-lg font-bold text-foreground">{content.trustStats.rating}</p>
-                    <p className="text-xs text-muted-foreground">Puan</p>
-                  </div>
-                  <div className="text-center bg-muted/30 rounded-lg py-3">
-                    <p className="text-lg font-bold text-foreground">{content.trustStats.reviewCount}</p>
-                    <p className="text-xs text-muted-foreground">Değerlendirme</p>
-                  </div>
-                  <div className="text-center bg-muted/30 rounded-lg py-3">
-                    <p className="text-lg font-bold text-foreground">{content.trustStats.soldCount}+</p>
-                    <p className="text-xs text-muted-foreground">Satış</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Trust — only rendered when the user supplied a real review and/or real stats */}
+            {(content.trustReview || content.trustStats) && (() => {
+              const statTiles = [
+                content.trustStats?.rating != null ? { label: "Puan", value: `${content.trustStats.rating}` } : null,
+                content.trustStats?.reviewCount != null ? { label: "Değerlendirme", value: `${content.trustStats.reviewCount}` } : null,
+                content.trustStats?.soldCount != null ? { label: "Satış", value: `${content.trustStats.soldCount}+` } : null,
+              ].filter((x): x is { label: string; value: string } => x !== null);
+              const copyParts = [
+                content.trustReview ? `"${content.trustReview.text}" — ${content.trustReview.name}${content.trustReview.rating != null ? ` (${content.trustReview.rating}/5)` : ""}` : null,
+                statTiles.length > 0 ? statTiles.map(s => `${s.value} ${s.label}`).join(" | ") : null,
+              ].filter((x): x is string => x !== null).join("\n\n");
+              return (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2"><Star className="h-4 w-4 text-yellow-400" />Güven Bloğu</CardTitle>
+                      <CopyBtn text={copyParts} field="trust" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {content.trustReview && (
+                      <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                        {content.trustReview.rating != null && (
+                          <div className="flex items-center gap-2">
+                            {renderStars(content.trustReview.rating)}
+                            <span className="text-xs text-muted-foreground">{content.trustReview.rating}/5</span>
+                          </div>
+                        )}
+                        <p className="text-sm text-foreground italic">"{content.trustReview.text}"</p>
+                        <p className="text-xs text-muted-foreground font-medium">— {content.trustReview.name}</p>
+                      </div>
+                    )}
+                    {statTiles.length > 0 && (
+                      <div className={`grid gap-3 ${statTiles.length === 3 ? "grid-cols-3" : statTiles.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+                        {statTiles.map((s, i) => (
+                          <div key={i} className="text-center bg-muted/30 rounded-lg py-3">
+                            <p className="text-lg font-bold text-foreground">{s.value}</p>
+                            <p className="text-xs text-muted-foreground">{s.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Ad Hooks */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
