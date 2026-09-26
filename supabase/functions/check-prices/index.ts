@@ -11,6 +11,25 @@ const CJ_API_KEY = Deno.env.get('CJ_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+const CHECK_PRICES_SECRET = Deno.env.get('CHECK_PRICES_SECRET');
+
+// Sabit zamanlı karşılaştırma (zamanlama saldırısına karşı).
+function safeEqual(a: string, b: string): boolean {
+  const ea = new TextEncoder().encode(a);
+  const eb = new TextEncoder().encode(b);
+  if (ea.length !== eb.length) return false;
+  let diff = 0;
+  for (let i = 0; i < ea.length; i++) diff |= ea[i] ^ eb[i];
+  return diff === 0;
+}
+
+function isAuthorized(req: Request): boolean {
+  const cronSecret = req.headers.get('x-cron-secret') ?? '';
+  if (CHECK_PRICES_SECRET && cronSecret && safeEqual(cronSecret, CHECK_PRICES_SECRET)) return true;
+  const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+  return !!SUPABASE_SERVICE_ROLE_KEY && !!bearer && safeEqual(bearer, SUPABASE_SERVICE_ROLE_KEY);
+}
+
 let cachedToken: { token: string; exp: number } | null = null;
 
 async function getAccessToken(): Promise<string> {
@@ -41,6 +60,15 @@ async function getCurrentPrice(pid: string, token: string): Promise<number | nul
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Sadece zamanlayıcı/yönetici çağırabilir: x-cron-secret = CHECK_PRICES_SECRET
+  // ya da Authorization: Bearer <service_role key>. Secret tanımlı değilse de kapalı kalır.
+  if (!isAuthorized(req)) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
